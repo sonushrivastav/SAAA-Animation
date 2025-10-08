@@ -183,7 +183,6 @@ export default function TubeEffect() {
                 }
                 scene.remove(o);
             });
-            composer.dispose();
             renderer.dispose();
         };
     }, []);

@@ -8,7 +8,7 @@ export default function Home() {
             {/* <LogoModel /> */}
             <Navbar />
 
-            <div className="h-[300vh]"></div>
+            <div className="h-[1000vh]"></div>
             {/* <HeroSection /> */}
             {/* <CubeScroll /> */}
             {/* <Particle /> */}
