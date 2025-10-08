@@ -73,9 +73,8 @@ function createCurves(curveSpread = 1.5, yCurve = 1, zCurve = 1) {
 function FlowingParticles() {
   const groupRef = useRef();
   const lastScrollY = useRef(0);
-  const scrollVelocity = useRef(0);
-  const flowDirection = useRef(1); // 1 = forward, -1 = reverse
-  const flowMultiplier = useRef(1);
+    const flowMultiplierAnim = useRef({ value: 1 });
+  const directionAnim = useRef({ value: 1 });
 
   const { particleSize, flowSpeed, curveSpread, yCurve, zCurve } = useControls({
     particleSize: { value: 0.28, min: 0.1, max: 0.5, step: 0.005 },
@@ -90,64 +89,64 @@ function FlowingParticles() {
     [curveSpread, yCurve, zCurve]
   );
 
-  const countPerCurve = 150;
+  const countPerCurve =   50;
   const totalParticles = curves.length * countPerCurve;
 
+  // initial positions (will be updated each frame)
   const positions = useMemo(() => {
     const arr = new Float32Array(totalParticles * 3);
+    // use getPointAt with evenly spaced u along arc length to get stable initial layout
+    let i3 = 0;
     for (let i = 0; i < totalParticles; i++) {
       const curveIndex = Math.floor(i / countPerCurve);
-      const t = (i % countPerCurve) / countPerCurve;
-      const pos = curves[curveIndex].getPoint(t);
-      arr.set([pos.x, pos.y, pos.z], i * 3);
+      const idxInCurve = i % countPerCurve;
+      // u in [0,1], evenly spaced using countPerCurve-1 to include endpoint
+      const u = idxInCurve / Math.max(1, countPerCurve - 1);
+      const pos = curves[curveIndex].getPointAt(u);
+      arr[i3++] = pos.x;
+      arr[i3++] = pos.y;
+      arr[i3++] = pos.z;
     }
     return arr;
   }, [curves, totalParticles, countPerCurve]);
 
   const speeds = useMemo(
-    () =>
-      new Float32Array(totalParticles).map(() =>  0.02 + 0.01),
+    () => new Float32Array(totalParticles).map(() => 0.02 + 0.01),
     [totalParticles]
   );
 
+  // offsets: initial normalized positions along curve (even distribution)
   const offsets = useMemo(() => {
-  const arr = new Float32Array(totalParticles);
-  for (let i = 0; i < totalParticles; i++) {
-    const t = (i % countPerCurve) / countPerCurve; 
-    arr[i] = t ;
-  }
-  return arr;
-}, [totalParticles, countPerCurve]);
+    const o = new Float32Array(totalParticles);
+    for (let i = 0; i < totalParticles; i++) {
+      const idxInCurve = (i % countPerCurve );
+      o[i] = idxInCurve / Math.max(1, countPerCurve );
+    }
+    return o;
+  }, [totalParticles, countPerCurve]);
 
-
+  // Smooth scroll-based animation
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      const delta = currentScrollY - lastScrollY.current ;
-      console.log("delta ",delta)
+      const delta = currentScrollY - lastScrollY.current;
       lastScrollY.current = currentScrollY;
 
-      // Detect direction
-      if (delta > 0) flowDirection.current = 1; // scrolling down
-      else if (delta < 0) flowDirection.current = -1; // scrolling up
+      if (delta > 0) {
+        gsap.killTweensOf(directionAnim.current);
+        gsap.to(directionAnim.current, { value: 1, duration: 0.18, ease: "power2.out" });
+      } else if (delta < 0) {
+        gsap.killTweensOf(directionAnim.current);
+        gsap.to(directionAnim.current, { value: -1, duration: 0.18, ease: "power2.out" });
+      }
 
-      // Scale based on velocity
-      const speedFactor = Math.min(Math.abs(delta ) / 1000,45);
-      console.log(speedFactor);
-      
-      console.log() // cap max speed factor
-      gsap.to(flowMultiplier, {
-        current:  1 + speedFactor,
-        duration: 0.3,
-        overwrite: true,
-        ease: "power2.out",
-        onUpdate: () => (flowMultiplier.current = flowMultiplier.current  ),
-        onComplete: () =>
-          gsap.to(flowMultiplier, {
-            current: 1,
-            duration: 0.9,
-            ease: "power1.out",
-          }),
+      const speedFactor = Math.min(Math.abs(delta) / 200, 2);
+      gsap.killTweensOf(flowMultiplierAnim.current);
+      gsap.to(flowMultiplierAnim.current, {
+        value: 1 + speedFactor,
+        duration: 0.28,
+        ease: "power3.out",
+        onComplete: () => gsap.to(flowMultiplierAnim.current, { value: 1, duration: 0.3, ease: "power1.out" }),
       });
     };
 
@@ -155,27 +154,28 @@ function FlowingParticles() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useFrame((state, delta) => {
+  useFrame((state) => {
+    if (!groupRef.current) return;
+
     const positionsArray = groupRef.current.geometry.attributes.position.array;
     const time = state.clock.elapsedTime;
+    const dir = directionAnim.current.value;
+    const fm = flowMultiplierAnim.current.value;
 
+    // update positions along each curve using getPointAt(u) for uniform distribution along arc length
+    let idx = 0;
     for (let i = 0; i < totalParticles; i++) {
       const curveIndex = Math.floor(i / countPerCurve);
       const speed = speeds[i];
-      const t =
-        (offsets[i] +
-          time *
-            speed *
-            flowSpeed *
-            flowDirection.current *
-            flowMultiplier.current *
-          1.22) %
-        1;
+      // compute u in [0,1] (arc-length normalized)
+      let u = (offsets[i] + time * speed * flowSpeed * dir * fm * 1.22) % 1;
+      if (u < 0) u += 1;
 
-      const pos = curves[curveIndex].getPoint((t + 1) % 1);
-      positionsArray[i * 3] = pos.x;
-      positionsArray[i * 3 + 1] = pos.y;
-      positionsArray[i * 3 + 2] = pos.z;
+      // use getPointAt for even spacing along arc-length
+      const pos = curves[curveIndex].getPointAt(u);
+      positionsArray[idx++] = pos.x;
+      positionsArray[idx++] = pos.y;
+      positionsArray[idx++] = pos.z;
     }
 
     groupRef.current.geometry.attributes.position.needsUpdate = true;
@@ -211,7 +211,7 @@ export default function FlowingCurvedParticles() {
       ref={containerRef}
       className="w-full h-full fixed inset-0 top-0 left-0 "
     >
-      <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
+      <Canvas camera={{ position: [0, 0, 5], fov: 5 }}>
         <ambientLight intensity={0.4} />
         <directionalLight position={[5, 5, 5]} intensity={1} />
         <LogoModel />
