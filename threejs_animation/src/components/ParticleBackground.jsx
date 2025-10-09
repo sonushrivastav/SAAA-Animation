@@ -36,34 +36,21 @@ function createCircleTexture() {
   return tex;
 }
 
-// Create a few flow lines similar to your sketch
+// Create flow lines
 function createCurves(curveSpread = 1.5, yCurve = 1, zCurve = 1) {
   const curves = [];
-  const numLines = 25; // number of flow lines
+  const numLines = 25;
   const width = 22;
 
   for (let i = 0; i < numLines; i++) {
     const x = THREE.MathUtils.lerp(-width / 2, width / 2, i / (numLines - 1));
-    console.log(x);
-
     const points = [];
 
-    // top straight segment
     points.push(new THREE.Vector3(x * curveSpread, 22 + yCurve, -6 + zCurve));
-
-    // gradually curve downward and outward
-    points.push(
-      new THREE.Vector3(x * 0.8 * curveSpread, 2 + yCurve, -3 + zCurve)
-    );
-    points.push(
-      new THREE.Vector3(x * 1.2 * curveSpread, 0 + yCurve, 0 + zCurve)
-    );
-    points.push(
-      new THREE.Vector3(x * 1.5 * curveSpread, -2 + yCurve, 3 + zCurve)
-    );
-    points.push(
-      new THREE.Vector3(x * 2.0 * curveSpread, -3 + yCurve, 5 + zCurve)
-    );
+    points.push(new THREE.Vector3(x * 0.8 * curveSpread, 2 + yCurve, -3 + zCurve));
+    points.push(new THREE.Vector3(x * 1.2 * curveSpread, 0 + yCurve, 0 + zCurve));
+    points.push(new THREE.Vector3(x * 1.5 * curveSpread, -2 + yCurve, 3 + zCurve));
+    points.push(new THREE.Vector3(x * 2.0 * curveSpread, -3 + yCurve, 5 + zCurve));
 
     curves.push(new THREE.CatmullRomCurve3(points, false, "centripetal", 0.5));
   }
@@ -72,15 +59,26 @@ function createCurves(curveSpread = 1.5, yCurve = 1, zCurve = 1) {
 
 function FlowingParticles() {
   const groupRef = useRef();
-
   const scrollState = useRef({ lastScroll: 0, scrollSpeed: 0 });
 
-  const { particleSize, flowSpeed, curveSpread, yCurve, zCurve } = useControls({
-    particleSize: { value: 0.25, min: 0.1, max: 0.5, step: 0.005 },
-    flowSpeed: { value: 1, min: 0.1, max: 3, step: 0.005 },
-    yCurve: { value: -5.8, min: -10, max: 13, step: 0.005 },
-    zCurve: { value: -2.44, min: -10, max: 13, step: 0.005 },
-    curveSpread: { value: 2.12, min: -10, max: 10, step: 0.005 },
+  const {
+    minSize,
+    maxSize,
+    flowSpeed,
+    curveSpread,
+    yCurve,
+    zCurve,
+    startPoint,
+    endPoint,
+  } = useControls({
+    minSize: { value: 0.30, min: 0.05, max: 0.5, step: 0.01 },
+    maxSize: { value: 0.55, min: 0.2, max: 1.5, step: 0.01 },
+    flowSpeed: { value: 1, min: 0.1, max: 3, step: 0.01 },
+    yCurve: { value: -5.8, min: -10, max: 13, step: 0.01 },
+    zCurve: { value: -2.44, min: -10, max: 13, step: 0.01 },
+    curveSpread: { value: 2.12, min: -10, max: 10, step: 0.01 },
+    startPoint: { value: 0.3, min: 0.0, max: 1.0, step: 0.01 },
+    endPoint: { value: 0.6, min: 0.0, max: 1.0, step: 0.01 },
   });
 
   const curves = useMemo(
@@ -91,15 +89,13 @@ function FlowingParticles() {
   const countPerCurve = 50;
   const totalParticles = curves.length * countPerCurve;
 
-  // initial positions (will be updated each frame)
+  // positions
   const positions = useMemo(() => {
     const arr = new Float32Array(totalParticles * 3);
-    // use getPointAt with evenly spaced u along arc length to get stable initial layout
     let i3 = 0;
     for (let i = 0; i < totalParticles; i++) {
       const curveIndex = Math.floor(i / countPerCurve);
       const idxInCurve = i % countPerCurve;
-      // u in [0,1], evenly spaced using countPerCurve-1 to include endpoint
       const u = idxInCurve / Math.max(1, countPerCurve - 1);
       const pos = curves[curveIndex].getPointAt(u);
       arr[i3++] = pos.x;
@@ -109,12 +105,13 @@ function FlowingParticles() {
     return arr;
   }, [curves, totalParticles, countPerCurve]);
 
+  // speeds
   const speeds = useMemo(
     () => new Float32Array(totalParticles).map(() => 0.02 + 0.01),
     [totalParticles]
   );
 
-  // offsets: initial normalized positions along curve (even distribution)
+  // offsets
   const offsets = useMemo(() => {
     const o = new Float32Array(totalParticles);
     for (let i = 0; i < totalParticles; i++) {
@@ -124,8 +121,13 @@ function FlowingParticles() {
     return o;
   }, [totalParticles, countPerCurve]);
 
-  // Smooth scroll-based animation
-  // 🔽 REPLACED: GSAP logic is replaced with velocity accumulation
+  // sizes per particle (dynamic)
+  const sizes = useMemo(() => new Float32Array(totalParticles).fill(minSize), [
+    totalParticles,
+    minSize,
+  ]);
+
+  // Scroll handling
   useEffect(() => {
     const handleScroll = () => {
       const newScroll = window.scrollY;
@@ -142,8 +144,8 @@ function FlowingParticles() {
     if (!groupRef.current) return;
 
     const positionsArray = groupRef.current.geometry.attributes.position.array;
+    const sizesArray = groupRef.current.geometry.attributes.size.array;
     const currentScrollSpeed = scrollState.current.scrollSpeed;
-
     scrollState.current.scrollSpeed *= 0.9;
 
     let idx = 0;
@@ -151,21 +153,28 @@ function FlowingParticles() {
       const curveIndex = Math.floor(i / countPerCurve);
       const speed = speeds[i];
 
-      offsets[i] +=
-        delta * speed * flowSpeed + currentScrollSpeed * speed * 0.05;
-
+      offsets[i] += delta * speed * flowSpeed + currentScrollSpeed * speed * 0.05;
       let u = offsets[i] % 1.0;
-      if (u < 0) {
-        u += 1.0;
-      }
+      if (u < 0) u += 1.0;
 
       const pos = curves[curveIndex].getPointAt(u);
       positionsArray[idx++] = pos.x;
       positionsArray[idx++] = pos.y;
       positionsArray[idx++] = pos.z;
+
+      // 🔽 Size interpolation logic
+      if (u >= startPoint && u <= endPoint) {
+        const t = (u - startPoint) / (endPoint - startPoint); // 0 → 1
+        sizesArray[i] = THREE.MathUtils.lerp(minSize, maxSize, t);
+      } else if (u > endPoint) {
+        sizesArray[i] = maxSize;
+      } else {
+        sizesArray[i] = minSize;
+      }
     }
 
     groupRef.current.geometry.attributes.position.needsUpdate = true;
+    groupRef.current.geometry.attributes.size.needsUpdate = true;
   });
 
   return (
@@ -177,15 +186,44 @@ function FlowingParticles() {
           array={positions}
           itemSize={3}
         />
+        {/* 🔽 Added size attribute */}
+        <bufferAttribute
+          attach="attributes-size"
+          count={sizes.length}
+          array={sizes}
+          itemSize={1}
+        />
       </bufferGeometry>
-      <pointsMaterial
-        size={particleSize}
-        map={createCircleTexture()}
-        color="#AB76E2"
-        opacity={0.8}
-        transparent
-        blending={THREE.AdditiveBlending}
-      />
+
+      {/* 🔽 Using shaderMaterial to support per-particle size */}
+      <shaderMaterial
+  transparent
+  blending={THREE.AdditiveBlending}
+  uniforms={{
+    pointTexture: { value: createCircleTexture() },
+    color: { value: new THREE.Color("#AB76E2") }, // uniform color
+  }}
+  vertexShader={`
+    attribute float size;
+    uniform vec3 color;
+    varying vec3 vColor;
+    void main() {
+      vColor = color;
+      vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+      gl_PointSize = size * (300.0 / -mvPosition.z); // perspective scale
+      gl_Position = projectionMatrix * mvPosition;
+    }
+  `}
+  fragmentShader={`
+    uniform sampler2D pointTexture;
+    varying vec3 vColor;
+    void main() {
+      gl_FragColor = vec4(vColor, 1.0) * texture2D(pointTexture, gl_PointCoord);
+      if (gl_FragColor.a < 0.1) discard;
+    }
+  `}
+/>
+
     </points>
   );
 }
@@ -199,7 +237,7 @@ export default function FlowingCurvedParticles() {
       className="w-full h-full fixed inset-0 top-0 left-0 "
     >
       <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
-        <ambientLight intensity={0.4} />
+        <ambientLight intensity={0.5} />
         <directionalLight position={[5, 5, 5]} intensity={1} />
         <LogoModel />
         <FlowingParticles />
