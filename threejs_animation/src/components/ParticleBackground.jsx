@@ -72,16 +72,15 @@ function createCurves(curveSpread = 1.5, yCurve = 1, zCurve = 1) {
 
 function FlowingParticles() {
   const groupRef = useRef();
-  const lastScrollY = useRef(0);
-    const flowMultiplierAnim = useRef({ value: 1 });
-  const directionAnim = useRef({ value: 1 });
+
+  const scrollState = useRef({ lastScroll: 0, scrollSpeed: 0 });
 
   const { particleSize, flowSpeed, curveSpread, yCurve, zCurve } = useControls({
-    particleSize: { value: 0.28, min: 0.1, max: 0.5, step: 0.005 },
+    particleSize: { value: 0.25, min: 0.1, max: 0.5, step: 0.005 },
     flowSpeed: { value: 1, min: 0.1, max: 3, step: 0.005 },
-    yCurve: { value: -3.4, min: -10, max: 13, step: 0.005 },
+    yCurve: { value: -5.8, min: -10, max: 13, step: 0.005 },
     zCurve: { value: -2.44, min: -10, max: 13, step: 0.005 },
-    curveSpread: { value: 2.12, min: 0.5, max: 3, step: 0.005 },
+    curveSpread: { value: 2.12, min: -10, max: 10, step: 0.005 },
   });
 
   const curves = useMemo(
@@ -89,7 +88,7 @@ function FlowingParticles() {
     [curveSpread, yCurve, zCurve]
   );
 
-  const countPerCurve =   50;
+  const countPerCurve = 50;
   const totalParticles = curves.length * countPerCurve;
 
   // initial positions (will be updated each frame)
@@ -119,59 +118,47 @@ function FlowingParticles() {
   const offsets = useMemo(() => {
     const o = new Float32Array(totalParticles);
     for (let i = 0; i < totalParticles; i++) {
-      const idxInCurve = (i % countPerCurve );
-      o[i] = idxInCurve / Math.max(1, countPerCurve );
+      const idxInCurve = i % countPerCurve;
+      o[i] = idxInCurve / Math.max(1, countPerCurve);
     }
     return o;
   }, [totalParticles, countPerCurve]);
 
   // Smooth scroll-based animation
+  // 🔽 REPLACED: GSAP logic is replaced with velocity accumulation
   useEffect(() => {
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      const delta = currentScrollY - lastScrollY.current;
-      lastScrollY.current = currentScrollY;
-
-      if (delta > 0) {
-        gsap.killTweensOf(directionAnim.current);
-        gsap.to(directionAnim.current, { value: 1, duration: 0.18, ease: "power2.out" });
-      } else if (delta < 0) {
-        gsap.killTweensOf(directionAnim.current);
-        gsap.to(directionAnim.current, { value: -1, duration: 0.18, ease: "power2.out" });
-      }
-
-      const speedFactor = Math.min(Math.abs(delta) / 200, 2);
-      gsap.killTweensOf(flowMultiplierAnim.current);
-      gsap.to(flowMultiplierAnim.current, {
-        value: 1 + speedFactor,
-        duration: 0.28,
-        ease: "power3.out",
-        onComplete: () => gsap.to(flowMultiplierAnim.current, { value: 1, duration: 0.3, ease: "power1.out" }),
-      });
+      const newScroll = window.scrollY;
+      const velocity = newScroll - scrollState.current.lastScroll;
+      scrollState.current.lastScroll = newScroll;
+      scrollState.current.scrollSpeed += velocity * 0.01;
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     if (!groupRef.current) return;
 
     const positionsArray = groupRef.current.geometry.attributes.position.array;
-    const time = state.clock.elapsedTime;
-    const dir = directionAnim.current.value;
-    const fm = flowMultiplierAnim.current.value;
+    const currentScrollSpeed = scrollState.current.scrollSpeed;
 
-    // update positions along each curve using getPointAt(u) for uniform distribution along arc length
+    scrollState.current.scrollSpeed *= 0.9;
+
     let idx = 0;
     for (let i = 0; i < totalParticles; i++) {
       const curveIndex = Math.floor(i / countPerCurve);
       const speed = speeds[i];
-      // compute u in [0,1] (arc-length normalized)
-      let u = (offsets[i] + time * speed * flowSpeed * dir * fm * 1.22) % 1;
-      if (u < 0) u += 1;
 
-      // use getPointAt for even spacing along arc-length
+      offsets[i] +=
+        delta * speed * flowSpeed + currentScrollSpeed * speed * 0.05;
+
+      let u = offsets[i] % 1.0;
+      if (u < 0) {
+        u += 1.0;
+      }
+
       const pos = curves[curveIndex].getPointAt(u);
       positionsArray[idx++] = pos.x;
       positionsArray[idx++] = pos.y;
@@ -211,7 +198,7 @@ export default function FlowingCurvedParticles() {
       ref={containerRef}
       className="w-full h-full fixed inset-0 top-0 left-0 "
     >
-      <Canvas camera={{ position: [0, 0, 5], fov: 5 }}>
+      <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
         <ambientLight intensity={0.4} />
         <directionalLight position={[5, 5, 5]} intensity={1} />
         <LogoModel />
