@@ -5,7 +5,7 @@ import * as THREE from "three";
 import { useEffect, useMemo, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { LogoModel } from "./LogoModel";
+import Animation from "./LogoModel";
 import { useControls } from "leva";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -57,9 +57,10 @@ function createCurves(curveSpread = 1.5, yCurve = 1, zCurve = 1) {
   return curves;
 }
 
-function FlowingParticles() {
+export default function FlowingParticles({flowAnimation ,materialRef }) {
   const groupRef = useRef();
-  const scrollState = useRef({ lastScroll: 0, scrollSpeed: 0 });
+  console.log('flowAnimation in FlowingParticles:', flowAnimation);
+  // const scrollState = useRef({ lastScroll: 0, scrollSpeed: 0 });
 
   const {
     minSize,
@@ -128,32 +129,34 @@ function FlowingParticles() {
   ]);
 
   // Scroll handling
-  useEffect(() => {
-    const handleScroll = () => {
-      const newScroll = window.scrollY;
-      const velocity = newScroll - scrollState.current.lastScroll;
-      scrollState.current.lastScroll = newScroll;
-      scrollState.current.scrollSpeed += velocity * 0.01;
-    };
+  // useEffect(() => {
+  //   const handleScroll = () => {
+  //     // const newScroll = window.scrollY;
+  //     // const velocity = newScroll - scrollState.current.lastScroll;
+  //     // scrollState.current.lastScroll = newScroll;
+  //     // scrollState.current.scrollSpeed += velocity * 0.01;
+  //   };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  //   window.addEventListener("scroll", handleScroll, { passive: true });
+  //   return () => window.removeEventListener("scroll", handleScroll);
+  // }, []);
 
   useFrame((state, delta) => {
     if (!groupRef.current) return;
 
     const positionsArray = groupRef.current.geometry.attributes.position.array;
     const sizesArray = groupRef.current.geometry.attributes.size.array;
-    const currentScrollSpeed = scrollState.current.scrollSpeed;
-    scrollState.current.scrollSpeed *= 0.9;
+    // const currentScrollSpeed = scrollState.current.scrollSpeed;
+    const currentScrollSpeed = flowAnimation.current.scrollSpeed;
+    // scrollState.current.scrollSpeed *= 0.9;
 
     let idx = 0;
     for (let i = 0; i < totalParticles; i++) {
       const curveIndex = Math.floor(i / countPerCurve);
       const speed = speeds[i];
 
-      offsets[i] += delta * speed * flowSpeed + currentScrollSpeed * speed * 0.05;
+      offsets[i] += delta * speed * flowSpeed + currentScrollSpeed * speed * 0.0
+      5
       let u = offsets[i] % 1.0;
       if (u < 0) u += 1.0;
 
@@ -197,11 +200,13 @@ function FlowingParticles() {
 
       {/* 🔽 Using shaderMaterial to support per-particle size */}
       <shaderMaterial
+       ref={materialRef}
   transparent
   blending={THREE.AdditiveBlending}
   uniforms={{
     pointTexture: { value: createCircleTexture() },
     color: { value: new THREE.Color("#AB76E2") }, // uniform color
+     uOpacity: { value: 1.0 },
   }}
   vertexShader={`
     attribute float size;
@@ -217,9 +222,14 @@ function FlowingParticles() {
   fragmentShader={`
     uniform sampler2D pointTexture;
     varying vec3 vColor;
+                uniform float uOpacity;
+
     void main() {
-      gl_FragColor = vec4(vColor, 1.0) * texture2D(pointTexture, gl_PointCoord);
-      if (gl_FragColor.a < 0.1) discard;
+      vec4 finalColor = vec4(vColor, 1.0) * texture2D(pointTexture, gl_PointCoord);
+                // 5. Multiply the final alpha by the opacity uniform
+                finalColor.a *= uOpacity;
+                if (finalColor.a < 0.01) discard;
+                gl_FragColor = finalColor;
     }
   `}
 />
@@ -228,26 +238,26 @@ function FlowingParticles() {
   );
 }
 
-export default function FlowingCurvedParticles() {
-  const containerRef = useRef();
+// export default function FlowingCurvedParticles() {
+//   const containerRef = useRef();
 
-  return (
-    <div
-      ref={containerRef}
-      className="w-full h-full fixed inset-0 top-0 left-0 "
-    >
-      <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[5, 5, 5]} intensity={1} />
-        <LogoModel />
-        <FlowingParticles />
-      </Canvas>
+//   return (
+//     <div
+//       ref={containerRef}
+//       className="w-full h-full fixed inset-0 top-0 left-0 "
+//     >
+//       <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
+//         <ambientLight intensity={0.5} />
+//         <directionalLight position={[5, 5, 5]} intensity={1} />
+//         <Animation />
+//         <FlowingParticles />
+//       </Canvas>
 
-      <div className="absolute inset-0 flex items-center justify-center">
-        <h1 className="text-cyan-400 text-3xl font-bold tracking-widest">
-          Flowing Energy Field
-        </h1>
-      </div>
-    </div>
-  );
-}
+//       <div className="absolute inset-0 flex items-center justify-center">
+//         <h1 className="text-cyan-400 text-3xl font-bold tracking-widest">
+//           Flowing Energy Field
+//         </h1>
+//       </div>
+//     </div>
+//   );
+// }
