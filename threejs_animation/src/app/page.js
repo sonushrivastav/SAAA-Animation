@@ -9,6 +9,7 @@ import Lenis from "@studio-freight/lenis";
 import Navbar from "../components/Navbar";
 import { MainAnimation } from "../components/MainAnimation";
 import FlowingParticles from "../components/ParticleBackground";
+import StarfieldBackground from "../components/StarfieldBackground";
 
 // Register the GSAP plugin once
 gsap.registerPlugin(ScrollTrigger);
@@ -65,7 +66,7 @@ export default function Home() {
         scrub: 1.5,
         onUpdate: (self) => {
           gsap.to(flowAnimation.current, {
-            scrollSpeed: self.getVelocity() * 0.0005, // Multiplier to control sensitivity
+            scrollSpeed: self.getVelocity() * 0.005, // Multiplier to control sensitivity
             duration: 0.9,
             overwrite: true,
           });
@@ -185,7 +186,9 @@ export default function Home() {
       </div>
       <div className="fixed inset-0 z-20 flex items-center justify-center opacity-0 revealed-content">
         <h1 className="text-6xl text-black">The Final Revealed Content</h1>
+        {/* <StarfieldBackground/> */}
       </div>
+      
     </main>
   );
 }

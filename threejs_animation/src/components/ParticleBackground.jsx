@@ -155,7 +155,7 @@ export default function FlowingParticles({flowAnimation ,materialRef }) {
       const curveIndex = Math.floor(i / countPerCurve);
       const speed = speeds[i];
 
-      offsets[i] += delta * speed * flowSpeed + currentScrollSpeed * speed * 0.0
+      offsets[i] += delta * speed * flowSpeed + currentScrollSpeed * speed * 0.01
       5
       let u = offsets[i] % 1.0;
       if (u < 0) u += 1.0;

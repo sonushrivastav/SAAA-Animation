@@ -118,8 +118,8 @@ const Animation = () => {
         logoGroup.scale.set(1.15, 1.15, 0.15);
 
         // ✅ Set initial position to the left, as per the first image.
-        logoGroup.position.set(-3, 0, 0);
-        logoGroup.rotation.set(-0.2, 0.6, 0);
+        logoGroup.position.set(-3, -0.5, 0);
+        logoGroup.rotation.set(0.1, 0.6, -0.2);
 
         const allMaterials = [];
 

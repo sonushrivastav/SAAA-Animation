@@ -157,7 +157,7 @@ export function MainAnimation({
         ref={logoGroupRef}
         scale={1.15}
         position={[-3, -0.5, 0]}
-        rotation={[-0.2, 0.6, 0]}
+        rotation={[0, 0.6, -0.2]}
       >
         {/* We map over the original configs to recreate the logo */}
         {useMemo(() => {
@@ -218,7 +218,7 @@ export function MainAnimation({
               varying vec3 vColor;
               void main() {
                 // vColor = aColor;
-                                vColor = uColor;
+                vColor = uColor;
 
               vec3 finalPosition = mix(position, aRandom, uProgress);
                 float orbitRadius = 0.3 + fract(aRandom.y) * 0.2;
