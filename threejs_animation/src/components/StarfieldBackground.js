@@ -1,226 +1,227 @@
-"use client";
+'use client';
 
-import gsap from "gsap";
-import { useEffect, useRef ,useMemo} from "react";
-import * as THREE from "three";
+import gsap from 'gsap';
+import { useEffect, useMemo, useRef } from 'react';
+import * as THREE from 'three';
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
+
 // 💡 Add the import for useControls from Leva
-import { Leva,useControls } from "leva";
+import { Leva, useControls } from 'leva';
 
 export default function StarfieldBackground({}) {
-  const canvasRef = useRef(null);
+    const canvasRef = useRef(null);
 
-  // 🌟 LEVA Controls Integration
-  const controls = useControls({
-    // Starfield Controls
-    baseSpeed: {
-      value: 0.5, // Used in the animate loop
-      min: 0.01,
-      max: 5.0,
-      step: 0.01,
-      label: "Base Speed",
-    },
-    spacing: { value: 87, min: 10, max: 200, step: 1, label: "Grid Spacing" }, // New control
-    count: { value: 11, min: 1, max: 50, step: 1, label: "Grid Count" }, // New control
-    sizeScale: {
-      value: 900.0, // Used in uSizeScale uniform
-      min: 100,
-      max: 2000,
-      step: 10,
-      label: "Size Scale",
-    },
-    minOpacity: {
-      value: 0.1,
-      min: 0.0,
-      max: 1.0,
-      step: 0.01,
-      label: "Min Opacity",
-    },
-    maxOpacity: {
-      value: 1.0,
-      min: 0.0,
-      max: 1.0,
-      step: 0.01,
-      label: "Max Opacity",
-    },
-    opacityFalloff: {
-      value: 500.0,
-      min: 10,
-      max: 2000,
-      step: 10,
-      label: "Opacity Falloff",
-    },
-    opacityOffset: {
-      value: 140,
-      min: -1000.0,
-      max: 1000.0,
-      step: 10,
-      label: "Opacity Offset",
-    },
-    // Animation/Distortion Controls
-    maxStretch: {
-      value: 30.0, // Used in scroll listener
-      min: 1.0,
-      max: 100,
-      step: 1,
-      label: "Max Stretch X",
-    },
-    maxShrink: {
-      value: 15.0, // Used in scroll listener
-      min: 1.0,
-      max: 50,
-      step: 1,
-      label: "Max Shrink Y",
-    },
-  });
+    // 🌟 LEVA Controls Integration
+    const controls = useControls({
+        // Starfield Controls
+        baseSpeed: {
+            value: 0.5, // Used in the animate loop
+            min: 0.01,
+            max: 5.0,
+            step: 0.01,
+            label: 'Base Speed',
+        },
+        spacing: { value: 87, min: 10, max: 200, step: 1, label: 'Grid Spacing' }, // New control
+        count: { value: 11, min: 1, max: 50, step: 1, label: 'Grid Count' }, // New control
+        sizeScale: {
+            value: 900.0, // Used in uSizeScale uniform
+            min: 100,
+            max: 2000,
+            step: 10,
+            label: 'Size Scale',
+        },
+        minOpacity: {
+            value: 0.45,
+            min: 0.0,
+            max: 1.0,
+            step: 0.01,
+            label: 'Min Opacity',
+        },
+        maxOpacity: {
+            value: 1.0,
+            min: 0.0,
+            max: 1.0,
+            step: 0.01,
+            label: 'Max Opacity',
+        },
+        opacityFalloff: {
+            value: 500.0,
+            min: 10,
+            max: 2000,
+            step: 10,
+            label: 'Opacity Falloff',
+        },
+        opacityOffset: {
+            value: 140,
+            min: -1000.0,
+            max: 1000.0,
+            step: 10,
+            label: 'Opacity Offset',
+        },
+        // Animation/Distortion Controls
+        maxStretch: {
+            value: 30.0, // Used in scroll listener
+            min: 1.0,
+            max: 100,
+            step: 1,
+            label: 'Max Stretch X',
+        },
+        maxShrink: {
+            value: 15.0, // Used in scroll listener
+            min: 1.0,
+            max: 50,
+            step: 1,
+            label: 'Max Shrink Y',
+        },
+    });
 
-  // ---
+    // ---
 
-  function createCircleTexture() {
-    const size = 128;
-    const canvas = document.createElement("canvas");
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext("2d");
+    function createCircleTexture() {
+        const size = 128;
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
 
-    ctx.clearRect(0, 0, size, size);
-    const cx = size / 2;
-    const cy = size / 2;
-    const coreR = Math.floor(size * 0.2);
+        ctx.clearRect(0, 0, size, size);
+        const cx = size / 2;
+        const cy = size / 2;
+        const coreR = Math.floor(size * 0.2);
 
-    ctx.imageSmoothingEnabled = false;
-    ctx.beginPath();
-    ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
-    ctx.closePath();
-    ctx.fillStyle = "rgba(255,255,255,1)";
-    ctx.fill();
+        ctx.imageSmoothingEnabled = false;
+        ctx.beginPath();
+        ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(255,255,255,1)';
+        ctx.fill();
 
-    const tex = new THREE.CanvasTexture(canvas);
-    tex.minFilter = THREE.LinearFilter;
-    tex.magFilter = THREE.LinearFilter;
-    tex.needsUpdate = true;
-    return tex;
-  }
+        const tex = new THREE.CanvasTexture(canvas);
+        tex.minFilter = THREE.LinearFilter;
+        tex.magFilter = THREE.LinearFilter;
+        tex.needsUpdate = true;
+        return tex;
+    }
 
-  const starData = useMemo(() => {
-    const starPositions = [];
-    const { spacing, count } = controls;
-    const totalDepth = count * 10;
+    const starData = useMemo(() => {
+        const starPositions = [];
+        const { spacing, count } = controls;
+        const totalDepth = count * 10;
 
-    for (let x = -count; x <= count; x++) {
-      for (let y = -count; y <= count; y++) {
-        if (x === 0) continue;
-        for (let zLayer = -count; zLayer <= count; zLayer++) {
-          const jitter = (Math.random() - 0.5) * 30;
-          const z = zLayer * 40 + jitter;
-          starPositions.push(x * spacing, y * spacing, z); // Using spacing control
+        for (let x = -count; x <= count; x++) {
+            for (let y = -count; y <= count; y++) {
+                if (x === 0) continue;
+                for (let zLayer = -count; zLayer <= count; zLayer++) {
+                    const jitter = (Math.random() - 0.5) * 30;
+                    const z = zLayer * 40 + jitter;
+                    starPositions.push(x * spacing, y * spacing, z); // Using spacing control
+                }
+            }
         }
-      }
-    }
 
-    const total = starPositions.length / 3;
-    const sizes = new Float32Array(total);
+        const total = starPositions.length / 3;
+        const sizes = new Float32Array(total);
 
-    let zMin = Infinity,
-      zMax = -Infinity;
-    for (let i = 0; i < total; i++) {
-      const z = starPositions[i * 3 + 2];
-      if (z < zMin) zMin = z;
-      if (z > zMax) zMax = z;
-    }
-    const zRange = zMax - zMin || 1.0;
+        let zMin = Infinity,
+            zMax = -Infinity;
+        for (let i = 0; i < total; i++) {
+            const z = starPositions[i * 3 + 2];
+            if (z < zMin) zMin = z;
+            if (z > zMax) zMax = z;
+        }
+        const zRange = zMax - zMin || 1.0;
 
-    const minBase = 1.0;
-    const maxBase = 14.0;
+        const minBase = 1.0;
+        const maxBase = 14.0;
 
-    for (let i = 0; i < total; i++) {
-      const z = starPositions[i * 3 + 2];
-      const normalized = (z - zMin) / zRange;
-      const biased = Math.pow(normalized, 0.9);
-      const base = minBase + biased * (maxBase - minBase);
-      sizes[i] = base * (0.85 + Math.random() * 0.35);
-    }
+        for (let i = 0; i < total; i++) {
+            const z = starPositions[i * 3 + 2];
+            const normalized = (z - zMin) / zRange;
+            const biased = Math.pow(normalized, 0.9);
+            const base = minBase + biased * (maxBase - minBase);
+            sizes[i] = base * (0.85 + Math.random() * 0.35);
+        }
 
-    return { starPositions, sizes, totalDepth };
-  }, [controls.spacing, controls.count]);
+        return { starPositions, sizes, totalDepth };
+    }, [controls.spacing, controls.count]);
 
-  useEffect(() => {
-    // We use the destructured values from the controls
-    const { baseSpeed, spacing, count, sizeScale, maxStretch, maxShrink } =
-      controls;
+    useEffect(() => {
+        // We use the destructured values from the controls
+        const { baseSpeed, spacing, count, sizeScale, maxStretch, maxShrink } = controls;
 
         const { starPositions, sizes, totalDepth } = starData;
 
+        const loader = new THREE.TextureLoader();
+        const star = loader.load('/images/sp2.png');
+        const scene = new THREE.Scene();
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
 
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(5, 10, 5);
+        scene.add(directionalLight);
 
-    const loader = new THREE.TextureLoader();
-    const star = loader.load("/images/sp2.png");
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(
-      75,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      1000
-    );
-    camera.position.z = 0;
+        new RGBELoader().load('/images/studio_small_03_1k.hdr', hdrMap => {
+            hdrMap.mapping = THREE.EquirectangularReflectionMapping;
+            scene.environment = hdrMap;
+        });
+        const camera = new THREE.PerspectiveCamera(
+            75,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            1000
+        );
+        camera.position.z = 150;
 
-    const renderer = new THREE.WebGLRenderer({
-      canvas: canvasRef.current,
-      antialias: true,
-      alpha: true,
-    });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
+        const renderer = new THREE.WebGLRenderer({
+            canvas: canvasRef.current,
+            antialias: true,
+            alpha: true,
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
 
-    
+        // const colors = new Float32Array(total * 3);
+        // const color = new THREE.Color();
 
-    // const colors = new Float32Array(total * 3);
-    // const color = new THREE.Color();
+        // for (let i = 0; i < total; i++) {
+        //   // ✨ Generate a random color for each star
+        //   color.setHSL(Math.random(), 0.7, 0.6);
 
-    // for (let i = 0; i < total; i++) {
-    //   // ✨ Generate a random color for each star
-    //   color.setHSL(Math.random(), 0.7, 0.6);
+        //   // ✨ Store the R, G, B components in the array
+        //   colors[i * 3] = color.r;
+        //   colors[i * 3 + 1] = color.g;
+        //   colors[i * 3 + 2] = color.b;
+        // }
 
-    //   // ✨ Store the R, G, B components in the array
-    //   colors[i * 3] = color.r;
-    //   colors[i * 3 + 1] = color.g;
-    //   colors[i * 3 + 2] = color.b;
-    // }
+        // starsGeometry.setAttribute(
+        //   "color",
+        //   new THREE.Float32BufferAttribute(colors, 3)
+        // );
 
-    // starsGeometry.setAttribute(
-    //   "color",
-    //   new THREE.Float32BufferAttribute(colors, 3)
-    // );
+        const starsGeometry = new THREE.BufferGeometry();
+        starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
+        starsGeometry.setAttribute('aSize', new THREE.Float32BufferAttribute(sizes, 1));
 
+        const starTexture = createCircleTexture();
 
-    const starsGeometry = new THREE.BufferGeometry();
-    starsGeometry.setAttribute(
-      "position",
-      new THREE.Float32BufferAttribute(starPositions, 3)
-    );
-    starsGeometry.setAttribute(
-      "aSize",
-      new THREE.Float32BufferAttribute(sizes, 1)
-    );
-
-    const starTexture = createCircleTexture();
-
-    // 💡 Use sizeScale from controls
-    const material = new THREE.ShaderMaterial({
-      uniforms: {
-        uTexture: { value: starTexture },
-        uSizeScale: { value: controls.sizeScale },
-        uStretchX: { value: 1.0 },
-        uShrinkY: { value: 1.0 },
-        uTime: { value: 0 },
-        uSpiralProgress: { value: 0 },
-        uMergeProgress: { value: 0 },
-        uMinOpacity: { value: controls.minOpacity },
-        uMaxOpacity: { value: controls.maxOpacity },
-        uOpacityFalloff: { value: controls.opacityFalloff },
-        uOpacityOffset: { value: controls.opacityOffset },
-        vertexColors: true,
-      },
-      vertexShader: `
+        // 💡 Use sizeScale from controls
+        const material = new THREE.ShaderMaterial({
+            uniforms: {
+                uTexture: { value: starTexture },
+                uSizeScale: { value: controls.sizeScale },
+                uStretchX: { value: 1.0 },
+                uShrinkY: { value: 1.0 },
+                uTime: { value: 0 },
+                uSpiralProgress: { value: 0 },
+                uMergeProgress: { value: 0 },
+                uMinOpacity: { value: controls.minOpacity },
+                uMaxOpacity: { value: controls.maxOpacity },
+                uOpacityFalloff: { value: controls.opacityFalloff },
+                uOpacityOffset: { value: controls.opacityOffset },
+                vertexColors: true,
+            },
+            vertexShader: `
         attribute float aSize;
         attribute float aSpiral;
         attribute vec3 color;
@@ -266,7 +267,7 @@ export default function StarfieldBackground({}) {
           vDepth = depth;
         }
       `,
-      fragmentShader: `
+            fragmentShader: `
         uniform sampler2D uTexture;
         uniform float uStretchX;
         uniform float uShrinkY;
@@ -297,104 +298,127 @@ export default function StarfieldBackground({}) {
           gl_FragColor = tex * vec4(vColor, finalOpacity);
         }
       `,
-      transparent: true,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-    });
+            transparent: true,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+        });
 
+        const stars = new THREE.Points(starsGeometry, material);
+        scene.add(stars);
+        gsap.to(camera.position, {
+            z: 0,
+            duration: 4,
+            ease: 'power2.out',
+            delay: 0.2,
+            onUpdate: () => {
+                camera.updateProjectionMatrix();
+            },
+        });
+        let lastScroll = window.scrollY;
+        let scrollSpeed = 0;
+        let velocity = 0;
+        let targetSpeed = 0;
 
-    const stars = new THREE.Points(starsGeometry, material);
-    scene.add(stars);
+        window.addEventListener('scroll', () => {
+            const newScroll = window.scrollY;
+            velocity = newScroll - lastScroll;
+            lastScroll = newScroll;
+            scrollSpeed += velocity * 0.05;
 
-    let lastScroll = window.scrollY;
-    let scrollSpeed = 0;
-    window.addEventListener("scroll", () => {
-      const newScroll = window.scrollY;
-      const velocity = newScroll - lastScroll;
-      lastScroll = newScroll;
-      scrollSpeed += velocity * 0.05;
+            // 💡 Use maxStretch and maxShrink from controls
+            // const stretchX = 1.0 + Math.min(Math.abs(velocity) * 0.08, maxStretch);
+            // const shrinkY = 1.0 + Math.min(Math.abs(velocity) * 0.05, maxShrink);
 
-      // 💡 Use maxStretch and maxShrink from controls
-      // const stretchX = 1.0 + Math.min(Math.abs(velocity) * 0.08, maxStretch);
-      // const shrinkY = 1.0 + Math.min(Math.abs(velocity) * 0.05, maxShrink);
+            // gsap.to(material.uniforms.uStretchX, {
+            //   value: stretchX,
+            //   duration: 0.5,
+            //   ease: "power2.out",
+            //   onComplete: () => {
+            //     gsap.to(material.uniforms.uStretchX, {
+            //       value: 1.0,
+            //       duration: 0.5,
+            //       ease: "power2.out",
+            //     });
+            //   },
+            // });
 
-      // gsap.to(material.uniforms.uStretchX, {
-      //   value: stretchX,
-      //   duration: 0.5,
-      //   ease: "power2.out",
-      //   onComplete: () => {
-      //     gsap.to(material.uniforms.uStretchX, {
-      //       value: 1.0,
-      //       duration: 0.5,
-      //       ease: "power2.out",
-      //     });
-      //   },
-      // });
+            // gsap.to(material.uniforms.uShrinkY, {
+            //   value: shrinkY,
+            //   duration: 0.5,
+            //   ease: "power2.out",
+            //   onComplete: () => {
+            //     gsap.to(material.uniforms.uShrinkY, {
+            //       value: 1.0,
+            //       duration: 0.5,
+            //       ease: "power2.out",
+            //     });
+            //   },
+            // });
+        });
 
-      // gsap.to(material.uniforms.uShrinkY, {
-      //   value: shrinkY,
-      //   duration: 0.5,
-      //   ease: "power2.out",
-      //   onComplete: () => {
-      //     gsap.to(material.uniforms.uShrinkY, {
-      //       value: 1.0,
-      //       duration: 0.5,
-      //       ease: "power2.out",
-      //     });
-      //   },
-      // });
-    });
+        // 🖱 Mouse parallax
+        const mouse = { x: 0, y: 0 };
+        document.addEventListener('mousemove', e => {
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+        });
 
-    // 🖱 Mouse parallax
-    const mouse = { x: 0, y: 0 };
-    document.addEventListener("mousemove", (e) => {
-      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-    });
+        const animate = () => {
+            material.uniforms.uTime.value = performance.now() / 1000;
 
-    const animate = () => {
-      material.uniforms.uTime.value = performance.now() / 1000;
+            // Smoothly interpolate to target speed for fluid motion
+            scrollSpeed += (targetSpeed - scrollSpeed) * 0.1;
 
-      // 💡 Use baseSpeed from controls
-      const currentSpeed = baseSpeed + scrollSpeed;
+            // Always move forward with baseSpeed, add scroll speed for reverse effect
+            const currentSpeed = baseSpeed + scrollSpeed;
 
-      // Note: totalDepth should be based on the initial count.
-      // stars.position.z = (stars.position.z + currentSpeed) % totalDepth;
-      scrollSpeed *= 0.85;
+            // Move stars backward/forward based on total speed
+            stars.position.z += currentSpeed;
 
-      camera.position.x += (mouse.x * 15 - camera.position.x) * 0.2;
-      camera.position.y += (mouse.y * 15 - camera.position.y) * 0.2;
+            // Seamless infinite loop - bidirectional wrapping
+            const halfDepth = totalDepth / 2;
+            if (stars.position.z > halfDepth) {
+                stars.position.z -= totalDepth;
+            } else if (stars.position.z < -halfDepth) {
+                stars.position.z += totalDepth;
+            }
 
-      renderer.render(scene, camera);
-    };
-    renderer.setAnimationLoop(animate);
+            // Decay scroll speed - returns to 0, leaving only baseSpeed
+            targetSpeed *= 0.85;
 
-    // Resize
-    const onResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    };
-    window.addEventListener("resize", onResize);
+            camera.position.x += (mouse.x * 15 - camera.position.x) * 0.2;
+            camera.position.y += (mouse.y * 15 - camera.position.y) * 0.2;
 
-    return () => {
-      renderer.setAnimationLoop(null); // Use null instead of cancelAnimationFrame(animate) for modern usage
-      window.removeEventListener("scroll", () => {}); // Need to properly remove the scroll listener
-      window.removeEventListener("resize", onResize);
-      renderer.dispose();
-      starTexture.dispose();
-      material.dispose();
-      starsGeometry.dispose();
-    };
-  }, [controls]); // 💡 Dependency array now includes 'controls' to re-run on Leva changes
+            renderer.render(scene, camera);
+        };
+        renderer.setAnimationLoop(animate);
 
-  return (
-    <>
-      <Leva collapsed />
-      <div className="h-[3000vh] "></div>
-      <div className="fixed inset-0 z-0 bg-[linear-gradient(to_bottom,_#352355,_#0F0F0F,_#352355)]">
-        <canvas ref={canvasRef} className="w-full h-full" />
-      </div>
-    </>
-  );
+        // Resize
+        const onResize = () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        };
+        window.addEventListener('resize', onResize);
+
+        return () => {
+            renderer.setAnimationLoop(null); // Use null instead of cancelAnimationFrame(animate) for modern usage
+            window.removeEventListener('scroll', () => {}); // Need to properly remove the scroll listener
+            window.removeEventListener('resize', onResize);
+            renderer.dispose();
+            starTexture.dispose();
+            material.dispose();
+            starsGeometry.dispose();
+        };
+    }, [controls, starData]);
+
+    return (
+        <>
+            <Leva collapsed hidden />
+
+            <div className="fixed inset-0 z-0 bg-[linear-gradient(to_bottom,_#352355,_#0F0F0F,_#352355)]">
+                <canvas ref={canvasRef} className="w-full h-full" />
+            </div>
+        </>
+    );
 }
