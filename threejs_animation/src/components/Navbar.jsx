@@ -15,11 +15,11 @@ const Navbar = () => {
 
     return (
         <>
-            <header className="fixed top-0 left-0 w-full bg-transparent  p-6 z-50">
-                <nav className="max-w-7xl mx-auto flex justify-between items-center">
+            <header className="fixed top-0     w-full bg-transparent  py-6  px-12 z-50 ">
+                <nav className=" border-2 p-2 rounded-2xl bg-black text-white mx-auto flex justify-between items-center">
                     <a href="#" className="text-2xl font-bold z-50">
                         <span className="text-purple-600">SAAA</span>
-                        <span className="text-zinc-800"> consultants</span>
+                        <span className="text-white"> consultants</span>
                     </a>
 
                     <div className="hidden md:flex items-center gap-8">
@@ -27,7 +27,7 @@ const Navbar = () => {
                             <a
                                 key={link.label}
                                 href={link.href}
-                                className="text-zinc-600 hover:text-purple-600 transition-colors duration-300"
+                                className="text-white hover:text-purple-600 transition-colors duration-300"
                             >
                                 {link.label}
                             </a>
@@ -40,7 +40,7 @@ const Navbar = () => {
 
                     <button
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        className="md:hidden text-zinc-800 z-50"
+                        className="md:hidden text-white z-50"
                         aria-label="Toggle menu"
                     >
                         {isMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}

@@ -1,6 +1,5 @@
 'use client';
 
-import gsap from 'gsap';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
@@ -24,7 +23,7 @@ export default function StarfieldBackground({}) {
         spacing: { value: 87, min: 10, max: 200, step: 1, label: 'Grid Spacing' }, // New control
         count: { value: 11, min: 1, max: 50, step: 1, label: 'Grid Count' }, // New control
         sizeScale: {
-            value: 900.0, // Used in uSizeScale uniform
+            value: 700.0, // Used in uSizeScale uniform
             min: 100,
             max: 2000,
             step: 10,
@@ -171,7 +170,7 @@ export default function StarfieldBackground({}) {
             0.1,
             1000
         );
-        camera.position.z = 150;
+        camera.position.z = 5;
 
         const renderer = new THREE.WebGLRenderer({
             canvas: canvasRef.current,
@@ -305,15 +304,15 @@ export default function StarfieldBackground({}) {
 
         const stars = new THREE.Points(starsGeometry, material);
         scene.add(stars);
-        gsap.to(camera.position, {
-            z: 0,
-            duration: 4,
-            ease: 'power2.out',
-            delay: 0.2,
-            onUpdate: () => {
-                camera.updateProjectionMatrix();
-            },
-        });
+        // gsap.to(camera.position, {
+        //     z: 0,
+        //     duration: 4,
+        //     ease: 'power2.out',
+        //     delay: 0.2,
+        //     onUpdate: () => {
+        //         camera.updateProjectionMatrix();
+        //     },
+        // });
         let lastScroll = window.scrollY;
         let scrollSpeed = 0;
         let velocity = 0;
@@ -386,8 +385,10 @@ export default function StarfieldBackground({}) {
             // Decay scroll speed - returns to 0, leaving only baseSpeed
             targetSpeed *= 0.85;
 
-            camera.position.x += (mouse.x * 15 - camera.position.x) * 0.2;
-            camera.position.y += (mouse.y * 15 - camera.position.y) * 0.2;
+            camera.position.x += (mouse.x * 15 - camera.position.x) * 0.03;
+            camera.position.y += (mouse.y * 15 - camera.position.y) * 0.03;
+            // stars.position.x += (mouse.x * 15 - stars.position.x) * 0.03;
+            // stars.position.y += (mouse.y * 15 - stars.position.y) * 0.03;
 
             renderer.render(scene, camera);
         };
@@ -414,7 +415,7 @@ export default function StarfieldBackground({}) {
 
     return (
         <>
-            <Leva collapsed hidden />
+            <Leva hidden />
 
             <div className="fixed inset-0 z-0 bg-[linear-gradient(to_bottom,_#352355,_#0F0F0F,_#352355)]">
                 <canvas ref={canvasRef} className="w-full h-full" />

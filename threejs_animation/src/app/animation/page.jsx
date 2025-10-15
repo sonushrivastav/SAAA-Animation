@@ -9,8 +9,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
-import FlyingTexts from '../../components/FlyingTexts.jsx';
-import Navbar from '../../components/Navbar.jsx';
+import Navbar from '../../components/Navbar';
 import FlowingParticles from '../../components/ParticleBackground';
 import StarfieldBackground from '../../components/StarfieldBackground';
 
@@ -22,6 +21,17 @@ const Animation = () => {
     const [showStarfield, setShowStarfield] = useState(false);
     const flowAnimation = useRef({ scrollSpeed: 0 });
     const flowingParticlesMaterialRef = useRef();
+    // --- Flying Texts Setup ---
+    const flyingTextRef = useRef(null);
+    const texts = [
+        'CONSCIOUSNESS',
+        'DATA STREAM',
+        'ANALYTICS',
+        'INTELLIGENCE',
+        'EVOLUTION',
+        'HUMAN LOOP',
+        'INFINITE DEPTH',
+    ];
 
     // This function remains unchanged
     function createCircleTexture() {
@@ -52,10 +62,12 @@ const Animation = () => {
 
     useEffect(() => {
         const lenis = new Lenis({
-            duration: 1,
+            duration: 1.1,
             easing: t => 1 - Math.pow(1 - t, 3),
             smoothWheel: true,
-            smoothTouch: false,
+            smoothTouch: true,
+            touchMultiplier: 0.9,
+            wheelMultiplier: 0.7,
         });
 
         lenis.on('scroll', ScrollTrigger.update);
@@ -124,7 +136,7 @@ const Animation = () => {
 
                 // ✅ Set initial position to the left, as per the first image.
                 logoGroup.position.set(-3, -0.5, 0);
-                logoGroup.rotation.set(0.1, 0.2, -0.2);
+                logoGroup.rotation.set(-0.1, 0.2, -0.2);
 
                 const allMaterials = [];
 
@@ -182,7 +194,7 @@ const Animation = () => {
             const mergedMeshForSampling = new THREE.Mesh(mergedGeometry);
 
             const sampler = new MeshSurfaceSampler(mergedMeshForSampling).build();
-            const numParticles = 2000;
+            const numParticles = 8000;
 
             const particlesGeometry = new THREE.BufferGeometry();
             const positions = new Float32Array(numParticles * 3);
@@ -202,7 +214,7 @@ const Animation = () => {
                 randoms[i * 3 + 1] = (Math.random() - 0.5) * 10;
                 randoms[i * 3 + 2] = (Math.random() - 0.5) * 10;
 
-                sizes[i] = 8 + Math.random() * 128;
+                sizes[i] = 8 + Math.random() * 64;
                 // const color = new THREE.Color();
                 // color.setHSL(Math.random(), 0.7, 0.6);
                 // colors[i * 3] = color.r;
@@ -299,15 +311,19 @@ const Animation = () => {
         }
 
         function setupScrollAnimation(materials) {
+            // Make sure starfield starts hidden
+            gsap.set('.starfield-layer', { opacity: 0 });
+            gsap.set('.text-wrapper', { opacity: 0, scale: 0.1 });
+
             const tl = gsap.timeline({
                 scrollTrigger: {
                     trigger: '.scroll-container',
                     start: 'top top',
-                    end: 'bottom bottom',
-                    scrub: 1.5, // Smoothed scrub
+                    end: '100% bottom',
+                    scrub: 1.3, // smooth scroll-scrub
                     onUpdate: self => {
                         gsap.to(flowAnimation.current, {
-                            scrollSpeed: self.getVelocity() * 0.005, // Multiplier to control sensitivity
+                            scrollSpeed: self.getVelocity() * 0.005,
                             duration: 0.9,
                             overwrite: true,
                         });
@@ -315,9 +331,7 @@ const Animation = () => {
                 },
             });
 
-            // --- STEP 1 to 2: Logo moves to center, rotates, and text swaps ---
-
-            // Move logo from left to center
+            // --- STEP 1: Move logo to center ---
             tl.to(logoGroup.position, {
                 x: -0.5,
                 y: -2,
@@ -326,7 +340,7 @@ const Animation = () => {
                 ease: 'power1.inOut',
             });
 
-            // Rotate logo into final semi-circle form
+            // --- STEP 2: Rotate logo into place ---
             tl.to(
                 logoGroup.rotation,
                 {
@@ -339,92 +353,32 @@ const Animation = () => {
                 '<'
             );
 
-            // Fade out the initial text
-            tl.to(
-                '.initial-text',
-                {
-                    opacity: 0,
-                    duration: 3.5,
-                    ease: 'power1.inOut',
-                },
-                '<-1'
-            );
+            // --- STEP 3: Fade initial text ---
+            tl.to('.initial-text', { opacity: 0, duration: 3.5, ease: 'power1.inOut' }, '<-1');
+            tl.to('.second-text', { opacity: 1, duration: 2.5, ease: 'power1.inOut' }, '>');
+            tl.to('.second-text', { opacity: 0, duration: 3, ease: 'power1.inOut' }, '>');
 
-            // Fade in the second text
-            tl.to(
-                '.second-text',
-                {
-                    opacity: 1,
-                    duration: 2.5,
-                    ease: 'power1.inOut',
-                },
-                '>'
-            );
-
-            // Fade out the second text before the break
-            tl.to(
-                '.second-text',
-                {
-                    opacity: 0,
-                    duration: 3,
-                    ease: 'power1.inOut',
-                },
-                '>'
-            );
-
-            // Make particles visible just before the original logo fades
-            tl.to(
-                particlesMaterial.uniforms.uVisibility,
-                {
-                    value: 1.0,
-                    duration: 5,
-                },
-                '>1'
-            );
-
-            // Fade out the original logo materials
-            tl.to(
-                materials,
-                {
-                    opacity: 0.0,
-                    duration: 0.5,
-                },
-                '<'
-            );
-
-            // Animate particles exploding outwards
+            // --- STEP 4: Particle explosion ---
+            tl.to(particlesMaterial.uniforms.uVisibility, { value: 1, duration: 5 }, '>1');
+            tl.to(materials, { opacity: 0.0, duration: 0.5 }, '<');
             tl.to(
                 particlesMaterial.uniforms.uProgress,
-                {
-                    value: 1.0,
-                    duration: 20,
-                    ease: 'power1.inOut',
-                },
+                { value: 1, duration: 20, ease: 'power1.inOut' },
                 '>'
             );
-
-            // Zoom camera in during the particle explosion
             tl.to(
                 camera,
                 {
                     fov: 5,
                     duration: 18,
                     ease: 'power1.inOut',
-                    onUpdate: () => {
-                        camera.updateProjectionMatrix();
-                    },
+                    onUpdate: () => camera.updateProjectionMatrix(),
                 },
                 '<'
             );
-
-            // Shrink particles to nothing at the end of the explosion
             tl.to(
                 particlesMaterial.uniforms.uSizeMultiplier,
-                {
-                    value: 0.0,
-                    duration: 1,
-                    ease: 'power2.inOut',
-                },
+                { value: 0, duration: 2.5, ease: 'power2.inOut' },
                 '>-3'
             );
             if (
@@ -434,81 +388,86 @@ const Animation = () => {
                 tl.to(
                     flowingParticlesMaterialRef.current.uniforms.uOpacity,
                     {
-                        value: 0.0,
-                        duration: 2.5,
+                        value: 0,
+                        duration: 1.5,
                         ease: 'power2.inOut',
                     },
-                    '>-3'
+                    '>-4'
                 );
             }
             tl.to(
                 particlesMaterial.uniforms.uVisibility,
-                {
-                    value: 0.0,
-                    duration: 3.5, // Use the same duration as the size for a coordinated fade
-                    ease: 'power2.inOut',
-                },
-                '<' // Start at the same time as the size reduction
+                { value: 0, duration: 0.5, ease: 'power2.inOut' },
+                '<'
             );
 
-            // Reveal the final content section
+            // --- STEP 5: Fade in starfield (always mounted layer, no jump) ---
             tl.to(
-                '.revealed-content',
+                '.starfield-layer',
                 {
                     opacity: 1,
                     duration: 3,
                     ease: 'power2.inOut',
-                    onStart: () => setShowStarfield(true),
-                    onReverseComplete: () => setShowStarfield(false),
                 },
                 '>-4'
             );
-            // tl.to('.inside-text', {
-            //     zIndex: 1,
-            //     opacity: 1,
-            //     duration: 5,
-            //     ease: 'power2.inOut',
-            // });
-            // ✨ --- ADD SNAPPING ---
-            // Snap during initial phase (rotation and text swap)
-            // ScrollTrigger.create({
-            //     trigger: '.scroll-container',
-            //     start: 'top top',
-            //     end: '30%', // covers first part of scroll (logo rotation)
-            //     snap: {
-            //         snapTo: (progress, self) => {
-            //             const velocity = self.getVelocity(); // positive if scrolling down
-            //             if (velocity < 0) {
-            //                 // scrolling down → snap forward
-            //                 return 0.33;
-            //             } else {
-            //                 // scrolling up → snap backward
-            //                 return 0.0;
-            //             }
-            //         }, // snap at 1/3 of the scroll progress (adjust as needed)
-            //         duration: { min: 0.1, max: 1.0 },
-            //         ease: 'power1.inOut',
-            //     },
-            // });
 
-            // // Snap again near the end (revealed content)
-            // ScrollTrigger.create({
-            //     trigger: '.scroll-container',
-            //     start: '60%', // when nearing the end
-            //     end: '75%',
-            //     snap: {
-            //         snapTo: (progress, self) => {
-            //             const velocity = self.getVelocity();
-            //             if (velocity > 0) {
-            //                 return 1.0; // snap forward (to starfield)
-            //             } else {
-            //                 return 0.6; // snap backward (to particle scene)
-            //             }
-            //         }, // snap to the very end
-            //         duration: { min: 0.1, max: 1.0 },
-            //         ease: 'power1.inOut',
-            //     },
-            // });
+            // --- STEP 6: Flying text animation (merged) ---
+            const flyingTexts = document.querySelectorAll('.text-wrapper');
+            const textDuration = 5; // seconds each text animates
+            const overlap = 0.30; // 30% overlap
+
+            flyingTexts.forEach((el, i) => {
+                const startTime = i === 0 ? '>' : `>-=${textDuration * overlap}`; // start next text 30% before previous ends
+
+                tl.fromTo(
+                    el,
+                    { opacity: 0, scale: 0.1, y: 0, z: 0, x: 0 },
+                    {
+                        opacity: 0,
+                        scale: 1.1,
+                        ease: 'power2.inOut',
+                        duration: textDuration,
+                        onUpdate: function () {
+                            const p = this.progress();
+                            const fade = Math.pow(Math.sin(p * Math.PI), 2.2);
+                            let yShift = p > 0.5 ? (p - 0.5) * -1000 : 0;
+                            // let zShift = p > 0.5 ? (p - 0.5) * 600 : 500;
+                            // let xShift = p > 0.5 ? (p - 0.5) * 600 : 0;
+                            // if (i % 2 === 0) {
+                            //     xShift *= -1;
+                            //     yShift *= -1;
+                            // }
+                            gsap.set(el, { opacity: fade,  });
+                        },
+                    },
+                    startTime
+                );
+            });
+
+            tl.to(
+                '.starfield-layer',
+                {
+                    opacity: 0,
+                    duration: 3,
+                    ease: 'power2.inOut',
+                },
+                '>-1'
+            ); // starts as the last text fades out
+
+            tl.to(
+                '.next-section',
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 3,
+                    ease: 'power2.inOut',
+                },
+                '<'
+            ); // start at the same time
+
+            // Optional: add a little more scroll to settle the final state
+            tl.to({}, { duration: 2 });
         }
 
         let mouseX = 0;
@@ -535,6 +494,105 @@ const Animation = () => {
             // Dispose of Three.js resources if component unmounts
         };
     }, []);
+
+    // ---------- Flying text timeline that initializes when starfield is shown ----------
+    // useEffect(() => {
+    //     if (!showStarfield) return;
+
+    //     const initDelay = 100;
+    //     let initTimeout = setTimeout(() => {
+    //         const container = flyingTextRef.current;
+    //         if (!container) return;
+
+    //         const flyingTexts = Array.from(container.children);
+    //         // gsap.set(flyingTexts, { opacity: 0, scale: 0.1 });
+
+    //         const tlTexts = gsap.timeline({
+    //             scrollTrigger: {
+    //                 id: 'flyingTextTrigger',
+    //                 trigger: '.scroll-container',
+    //                 start: '50% top', // starts right after main animation
+    //                 end: 'bottom bottom', // lasts until end of scroll
+    //                 scrub: 1.5,
+    //                 anticipatePin: 1,
+    //             },
+    //         });
+
+    //         const num = flyingTexts.length || 1;
+    //         const portion = 1 / num;
+
+    //         flyingTexts.forEach((el, i) => {
+    //             const overlap = portion * 0.3;
+    //             const start = i * (portion - overlap);
+
+    //             // Target the wrapper div (not the h1)
+    //             tlTexts.fromTo(
+    //                 el,
+    //                 { opacity: 0, scale: 0.1, y: 0 },
+    //                 {
+    //                     opacity: 0,
+    //                     scale: 1.1,
+    //                     ease: 'power2.inOut',
+    //                     duration: portion,
+    //                     onUpdate: function () {
+    //                         const p = this.progress();
+    //                         const fade = Math.pow(Math.sin(p * Math.PI), 2.2);
+    //                         const yShift = p > 0.5 ? (p - 0.5) * -600 : 0;
+    //                         gsap.set(el, { opacity: fade, y: yShift });
+    //                     },
+    //                 },
+    //                 start
+    //             );
+
+    //             // ✅ Trigger transition when last (7th) text starts fading out
+    //             // if (i === flyingTexts.length - 1) {
+    //             //     tlTexts.add(() => {
+    //             //         // 1️⃣ Fade out the starfield
+    //             //         gsap.to('.revealed-content', {
+    //             //             opacity: 0,
+    //             //             duration: 2,
+    //             //             ease: 'power2.inOut',
+    //             //         });
+
+    //             //         2️⃣ Reveal the new section
+    //             //         gsap.to('.next-section', {
+    //             //             opacity: 1,
+    //             //             y: 0,
+    //             //             duration: 2.5,
+    //             //             ease: 'power2.inOut',
+
+    //             //         });
+    //             //     }, start + portion * 0.5); // starts when last text begins to fade/translate
+    //             // }
+    //         });
+
+    //         ScrollTrigger.refresh();
+
+    //         const cleanup = () => {
+    //             try {
+    //                 tlTexts.kill();
+    //                 const st = ScrollTrigger.getById('flyingTextTrigger');
+    //                 if (st) st.kill();
+    //             } catch (e) {
+    //                 console.warn('cleanup flying texts', e);
+    //             }
+    //         };
+
+    //         container.__cleanupFlyingTexts = cleanup;
+    //     }, initDelay);
+
+    //     return () => {
+    //         clearTimeout(initTimeout);
+    //         const c = flyingTextRef.current;
+    //         if (c && c.__cleanupFlyingTexts) {
+    //             c.__cleanupFlyingTexts();
+    //             delete c.__cleanupFlyingTexts;
+    //         } else {
+    //             const st = ScrollTrigger.getById('flyingTextTrigger');
+    //             if (st) st.kill();
+    //         }
+    //     };
+    // }, [showStarfield]);
 
     return (
         <main className="relative bg-white  font-sans text-black">
@@ -575,15 +633,24 @@ const Animation = () => {
                 </h1>
             </div>
 
-            <div className="scroll-container h-[1200vh]"></div>
+            <div className="scroll-container h-[1800vh]"></div>
 
-            <div className="h-screen revealed-content fixed inset-0 flex items-center justify-center text-center z-0 opacity-0 isolate">
-                {showStarfield && (
-                    <>
-                        <StarfieldBackground />
-                        <FlyingTexts />
-                    </>
-                )}
+            <div className="starfield-layer fixed inset-0 z-30 opacity-0 pointer-events-none">
+                <StarfieldBackground />
+                <div
+                    ref={flyingTextRef}
+                    className="fixed inset-0 flex items-center justify-center text-center pointer-events-none z-50"
+                >
+                    {texts.map((t, i) => (
+                        <div key={i} className="absolute text-wrapper">
+                            <h1 className="text-8xl font-bold text-white">{t}</h1>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div className="next-section fixed inset-0 flex items-center justify-center opacity-0  z-10">
+                <h2 className="text-5xl font-bold text-black">Welcome to the Next Phase 🚀</h2>
             </div>
         </main>
     );

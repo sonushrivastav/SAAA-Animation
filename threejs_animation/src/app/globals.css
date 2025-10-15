@@ -9,8 +9,11 @@
 }
 
 :root {
-    
 }
+/* h1 {
+    -webkit-font-smoothing: antialiased;
+    transform-style: preserve-3d;
+} */
 
 @theme inline {
     --color-background: var(--background);
