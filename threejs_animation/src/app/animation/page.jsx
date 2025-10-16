@@ -320,7 +320,15 @@ const Animation = () => {
                     trigger: '.scroll-container',
                     start: 'top top',
                     end: '100% bottom',
-                    scrub: 1.3, // smooth scroll-scrub
+                    scrub: 1.2, // smooth scroll-scrub
+                    snap: {
+                        snapTo: 'labelsDirectional',
+                        duration: 0, // instant transition to snap point
+                        delay: 0, // start snapping immediately when scroll stops
+                        ease: 'none',
+                        inertia: false,
+                    },
+
                     onUpdate: self => {
                         gsap.to(flowAnimation.current, {
                             scrollSpeed: self.getVelocity() * 0.005,
@@ -332,6 +340,7 @@ const Animation = () => {
             });
 
             // --- STEP 1: Move logo to center ---
+            tl.addLabel('initial');
             tl.to(logoGroup.position, {
                 x: -0.5,
                 y: -2,
@@ -355,12 +364,16 @@ const Animation = () => {
 
             // --- STEP 3: Fade initial text ---
             tl.to('.initial-text', { opacity: 0, duration: 3.5, ease: 'power1.inOut' }, '<-1');
-            tl.to('.second-text', { opacity: 1, duration: 2.5, ease: 'power1.inOut' }, '>');
+
+            tl.to('.second-text', { opacity: 1, duration: 2.5, ease: 'power1.inOut' }, '>+1');
+            tl.addLabel('rotation');
             tl.to('.second-text', { opacity: 0, duration: 3, ease: 'power1.inOut' }, '>');
 
             // --- STEP 4: Particle explosion ---
+
             tl.to(particlesMaterial.uniforms.uVisibility, { value: 1, duration: 5 }, '>1');
             tl.to(materials, { opacity: 0.0, duration: 0.5 }, '<');
+            tl.addLabel('particleConversion');
             tl.to(
                 particlesMaterial.uniforms.uProgress,
                 { value: 1, duration: 20, ease: 'power1.inOut' },
@@ -376,6 +389,7 @@ const Animation = () => {
                 },
                 '<'
             );
+            // tl.addLabel('beforeParticleFade', '>-5.5');
             tl.to(
                 particlesMaterial.uniforms.uSizeMultiplier,
                 { value: 0, duration: 2.5, ease: 'power2.inOut' },
@@ -400,7 +414,7 @@ const Animation = () => {
                 { value: 0, duration: 0.5, ease: 'power2.inOut' },
                 '<'
             );
-
+            tl.addLabel('starfieldFadeIn', '>-1');
             // --- STEP 5: Fade in starfield (always mounted layer, no jump) ---
             tl.to(
                 '.starfield-layer',
@@ -411,18 +425,27 @@ const Animation = () => {
                 },
                 '>-4'
             );
+            // tl.addLabel('flyingText');
 
             // --- STEP 6: Flying text animation (merged) ---
+
             const flyingTexts = document.querySelectorAll('.text-wrapper');
-            const textDuration = 5; // seconds each text animates
-            const overlap = 0.30; // 30% overlap
+            const textDuration = 8; // seconds each text animates
+            const overlap = 0.3; // 30% overlap
 
             flyingTexts.forEach((el, i) => {
-                const startTime = i === 0 ? '>' : `>-=${textDuration * overlap}`; // start next text 30% before previous ends
+                // same relative start used for the tween
+                const startTime = i === 0 ? '>' : `>-=${textDuration * overlap + 0.5}`;
+                console.log(startTime);
 
+                // give each text a unique label at the start of its animation
+                const labelName = `flyingText-${i}`;
+                tl.addLabel(labelName, startTime);
+
+                // schedule the tween using the labelName (keeps things explicit)
                 tl.fromTo(
                     el,
-                    { opacity: 0, scale: 0.1, y: 0, z: 0, x: 0 },
+                    { opacity: 0, scale: 0.1 },
                     {
                         opacity: 0,
                         scale: 1.1,
@@ -431,17 +454,10 @@ const Animation = () => {
                         onUpdate: function () {
                             const p = this.progress();
                             const fade = Math.pow(Math.sin(p * Math.PI), 2.2);
-                            let yShift = p > 0.5 ? (p - 0.5) * -1000 : 0;
-                            // let zShift = p > 0.5 ? (p - 0.5) * 600 : 500;
-                            // let xShift = p > 0.5 ? (p - 0.5) * 600 : 0;
-                            // if (i % 2 === 0) {
-                            //     xShift *= -1;
-                            //     yShift *= -1;
-                            // }
-                            gsap.set(el, { opacity: fade,  });
+                            gsap.set(el, { opacity: fade });
                         },
                     },
-                    startTime
+                    labelName
                 );
             });
 
@@ -454,13 +470,22 @@ const Animation = () => {
                 },
                 '>-1'
             ); // starts as the last text fades out
-
+            tl.addLabel('starfieldFadeOut');
             tl.to(
                 '.next-section',
                 {
                     opacity: 1,
                     y: 0,
                     duration: 3,
+                    ease: 'power2.inOut',
+                },
+                '<'
+            );
+            tl.to(
+                flowingParticlesMaterialRef.current.uniforms.uOpacity,
+                {
+                    value: 1,
+                    duration: 1.5,
                     ease: 'power2.inOut',
                 },
                 '<'
@@ -597,7 +622,7 @@ const Animation = () => {
     return (
         <main className="relative bg-white  font-sans text-black">
             <Navbar />
-            <div className="fixed inset-0 z-0">
+            <div className="fixed inset-0 z-10">
                 <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
                     <FlowingParticles
                         flowAnimation={flowAnimation}

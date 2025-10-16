@@ -16,7 +16,7 @@ const Navbar = () => {
     return (
         <>
             <header className="fixed top-0     w-full bg-transparent  py-6  px-12 z-50 ">
-                <nav className=" border-2 p-2 rounded-2xl bg-black text-white mx-auto flex justify-between items-center">
+                <nav className=" border-2 py-2 px-6 rounded-full bg-slate-900 text-white mx-auto flex justify-between items-center">
                     <a href="#" className="text-2xl font-bold z-50">
                         <span className="text-purple-600">SAAA</span>
                         <span className="text-white"> consultants</span>

@@ -23,14 +23,14 @@ export default function StarfieldBackground({}) {
         spacing: { value: 87, min: 10, max: 200, step: 1, label: 'Grid Spacing' }, // New control
         count: { value: 11, min: 1, max: 50, step: 1, label: 'Grid Count' }, // New control
         sizeScale: {
-            value: 700.0, // Used in uSizeScale uniform
+            value: 500.0, // Used in uSizeScale uniform
             min: 100,
             max: 2000,
             step: 10,
             label: 'Size Scale',
         },
         minOpacity: {
-            value: 0.45,
+            value: 0.85,
             min: 0.0,
             max: 1.0,
             step: 0.01,
@@ -76,31 +76,42 @@ export default function StarfieldBackground({}) {
 
     // ---
 
-    function createCircleTexture() {
-        const size = 128;
-        const canvas = document.createElement('canvas');
-        canvas.width = size;
-        canvas.height = size;
-        const ctx = canvas.getContext('2d');
+ function createCircleTexture() {
+     const size = 128;
+     const canvas = document.createElement('canvas');
+     canvas.width = size;
+     canvas.height = size;
+     const ctx = canvas.getContext('2d');
 
-        ctx.clearRect(0, 0, size, size);
-        const cx = size / 2;
-        const cy = size / 2;
-        const coreR = Math.floor(size * 0.2);
+     const cx = size / 2;
+     const cy = size / 2;
+     const coreR = Math.floor(size * 0.18); // smaller core for glow effect
+     const outerR = Math.floor(size * 0.5); // glow radius
 
-        ctx.imageSmoothingEnabled = false;
-        ctx.beginPath();
-        ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
-        ctx.closePath();
-        ctx.fillStyle = 'rgba(255,255,255,1)';
-        ctx.fill();
+     ctx.clearRect(0, 0, size, size);
+     ctx.imageSmoothingEnabled = true; // smooth gradient
 
-        const tex = new THREE.CanvasTexture(canvas);
-        tex.minFilter = THREE.LinearFilter;
-        tex.magFilter = THREE.LinearFilter;
-        tex.needsUpdate = true;
-        return tex;
-    }
+     // Create radial gradient
+     const gradient = ctx.createRadialGradient(cx, cy, coreR, cx, cy, outerR);
+     gradient.addColorStop(0, 'rgba(255,255,255,1)'); // core bright white
+     gradient.addColorStop(0.2, 'rgba(255,255,255,0.8)');
+     gradient.addColorStop(0.4, 'rgba(255,255,255,0.5)');
+     gradient.addColorStop(1, 'rgba(255,255,255,0)'); // fade out to transparent
+
+     ctx.fillStyle = gradient;
+     ctx.beginPath();
+     ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
+     ctx.fill();
+
+     // Create Three.js texture
+     const tex = new THREE.CanvasTexture(canvas);
+     tex.minFilter = THREE.LinearFilter;
+     tex.magFilter = THREE.LinearFilter;
+     tex.needsUpdate = true;
+
+     return tex;
+ }
+
 
     const starData = useMemo(() => {
         const starPositions = [];
