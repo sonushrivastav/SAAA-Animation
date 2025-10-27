@@ -9,9 +9,12 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
+import Footer from '../../components/Footer';
 import Navbar from '../../components/Navbar';
 import FlowingParticles from '../../components/ParticleBackground';
+import ScrollServiceLogo from '../../components/ScrollServiceLogo';
 import StarfieldBackground from '../../components/StarfieldBackground';
+import StatsSection from '../../components/Stats';
 
 // ✅ It's good practice to register the plugin once
 gsap.registerPlugin(ScrollTrigger);
@@ -19,18 +22,51 @@ gsap.registerPlugin(ScrollTrigger);
 const Animation = () => {
     const canvasRef = useRef(null);
     const [showStarfield, setShowStarfield] = useState(false);
+    const scrollLogoRef = useRef(null);
+
+    const [activeServiceIndex, setActiveServiceIndex] = useState(0);
+
     const flowAnimation = useRef({ scrollSpeed: 0 });
     const flowingParticlesMaterialRef = useRef();
     // --- Flying Texts Setup ---
     const flyingTextRef = useRef(null);
-    const texts = [
-        'CONSCIOUSNESS',
-        'DATA STREAM',
-        'ANALYTICS',
-        'INTELLIGENCE',
-        'EVOLUTION',
-        'HUMAN LOOP',
-        'INFINITE DEPTH',
+    const texts = ['Text 1', 'Text 2', 'Text 3', 'Text 4', 'Text 5', 'Text 6', 'Text 7'];
+    const SERVICE_DATA = [
+        {
+            title: 'Service 1',
+            subtext: 'Brand establishment and digital identity creation.',
+            className: 'text-purple-600',
+        },
+        {
+            title: 'Service 2',
+            subtext: 'Comprehensive digital marketing strategies.',
+            className: 'text-red-500',
+        },
+        {
+            title: 'Service 3',
+            subtext: 'Creative execution and dynamic content development.',
+            className: 'text-yellow-500',
+        },
+        {
+            title: 'Service 4',
+            subtext: 'Performance marketing, conversion tracking, and optimization.',
+            className: 'text-green-500',
+        },
+        {
+            title: 'Service 5',
+            subtext: 'Deep analytics, insights, and data-driven decision making.',
+            className: 'text-blue-500',
+        },
+        {
+            title: 'Service 6',
+            subtext: 'Scaling solutions globally and entering new markets.',
+            className: 'text-indigo-500',
+        },
+        {
+            title: 'Service 7',
+            subtext: 'Future-proofing your business through innovation and tech integration.',
+            className: 'text-pink-500',
+        },
     ];
 
     // This function remains unchanged
@@ -320,10 +356,10 @@ const Animation = () => {
                     trigger: '.scroll-container',
                     start: 'top top',
                     end: '100% bottom',
-                    scrub: 1.2, // smooth scroll-scrub
+                    scrub: 0.82, // smooth scroll-scrub
                     snap: {
                         snapTo: 'labelsDirectional',
-                        duration: 0, // instant transition to snap point
+                        duration: 1.14, // instant transition to snap point
                         delay: 0, // start snapping immediately when scroll stops
                         ease: 'none',
                         inertia: false,
@@ -434,31 +470,71 @@ const Animation = () => {
             const overlap = 0.3; // 30% overlap
 
             flyingTexts.forEach((el, i) => {
-                // same relative start used for the tween
                 const startTime = i === 0 ? '>' : `>-=${textDuration * overlap + 0.5}`;
                 console.log(startTime);
 
-                // give each text a unique label at the start of its animation
                 const labelName = `flyingText-${i}`;
                 tl.addLabel(labelName, startTime);
 
-                // schedule the tween using the labelName (keeps things explicit)
-                tl.fromTo(
-                    el,
-                    { opacity: 0, scale: 0.1 },
-                    {
-                        opacity: 0,
-                        scale: 1.1,
-                        ease: 'power2.inOut',
-                        duration: textDuration,
-                        onUpdate: function () {
-                            const p = this.progress();
-                            const fade = Math.pow(Math.sin(p * Math.PI), 2.2);
-                            gsap.set(el, { opacity: fade });
+                if (i === flyingTexts.length - 1) {
+                    tl.fromTo(
+                        el,
+                        { opacity: 0, scale: 0.1 },
+                        {
+                            opacity: 1,
+                            scale: 1.1,
+                            y: 0,
+                            ease: 'power2.out',
+                            duration: textDuration * 0.6,
                         },
-                    },
-                    labelName
-                );
+                        labelName
+                    );
+
+                    tl.to(
+                        el,
+                        {
+                            y: -300,
+                            opacity: 0,
+                            scale: 1.1,
+                            duration: textDuration,
+                            ease: 'power2.inOut',
+                        },
+                        `>${textDuration * 0.4}`
+                    );
+                } else {
+                    // 🔸 Normal animation for first 6 flying texts
+                    tl.fromTo(
+                        el,
+                        { opacity: 0, scale: 0.1 },
+                        {
+                            opacity: 0,
+                            scale: 1.1,
+                            ease: 'power2.inOut',
+                            duration: textDuration,
+                            onUpdate: function () {
+                                const p = this.progress();
+                                const fade = Math.pow(Math.sin(p * Math.PI), 2.2);
+                                gsap.set(el, { opacity: fade });
+                            },
+                        },
+                        labelName
+                    );
+                }
+                // 🌌 Change Starfield direction after 6th flying text
+                if (i === 5) {
+                    // index 5 = 6th text
+                    tl.to(
+                        window.starfieldUniforms.uDirection.value,
+                        {
+                            x: 0,
+                            y: 1,
+                            z: 0,
+                            duration: 2,
+                            ease: 'power2.inOut',
+                        },
+                        `>${textDuration * 0.4}` // during fade transition to 7th
+                    );
+                }
             });
 
             tl.to(
@@ -469,18 +545,10 @@ const Animation = () => {
                     ease: 'power2.inOut',
                 },
                 '>-1'
-            ); // starts as the last text fades out
-            tl.addLabel('starfieldFadeOut');
-            tl.to(
-                '.next-section',
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 3,
-                    ease: 'power2.inOut',
-                },
-                '<'
             );
+
+            tl.addLabel('starfieldFadeOut');
+
             tl.to(
                 flowingParticlesMaterialRef.current.uniforms.uOpacity,
                 {
@@ -488,11 +556,137 @@ const Animation = () => {
                     duration: 1.5,
                     ease: 'power2.inOut',
                 },
-                '<'
-            ); // start at the same time
+                '<-3'
+            );
+            tl.addLabel('serviceSectionReveal');
+            tl.to(
+                '.next-section',
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 2,
+                    ease: 'power2.inOut',
+                },
+                '>0.5'
+            );
 
-            // Optional: add a little more scroll to settle the final state
-            tl.to({}, { duration: 2 });
+            // --- STEP 7: Logo + service text synchronized animation ---
+
+            const serviceCount = SERVICE_DATA.length;
+            const TRANSITION_DURATION = 2.5;
+
+            // reset all texts and logo
+            gsap.set('.service-text', { opacity: 0 });
+            gsap.set('.service-logo', { opacity: 0 });
+            setActiveServiceIndex(0);
+
+            tl.to(
+                '.service-logo',
+                {
+                    opacity: 1,
+                    duration: 2.8,
+                    ease: 'power2.inOut',
+                },
+                '>-0.4'
+            );
+
+            tl.to(
+                '.service-0',
+                {
+                    opacity: 1,
+                    duration: 1.8,
+                    ease: 'power2.inOut',
+                    onStart: () => setActiveServiceIndex(0),
+                },
+                '<'
+            );
+
+            for (let i = 1; i < serviceCount; i++) {
+                const label = `service-${i}`;
+                tl.addLabel(label, `>+1.2`);
+
+                // fade out previous text
+                tl.to(
+                    `.service-${i - 1}`,
+                    {
+                        opacity: 0,
+                        duration: 1,
+                        ease: 'power2.inOut',
+                    },
+                    `>+${TRANSITION_DURATION * 0.8}`
+                ); // start mid-way for smooth crossfade
+
+                // fade in next text and update logo slice simultaneously
+                tl.to(
+                    `.service-${i}`,
+                    {
+                        opacity: 1,
+                        duration: 1,
+                        ease: 'power2.inOut',
+                        onStart: () => setActiveServiceIndex(i),
+                        onReverseComplete: () => {
+                            requestAnimationFrame(() => {
+                                setActiveServiceIndex(i - 1 >= 0 ? i - 1 : 0);
+                            });
+                        },
+                    },
+                    '<'
+                ); // overlap for smooth simultaneous transition
+            }
+
+            // 5️⃣ cleanup when scrolling past last service
+            // tl.addLabel('serviceEnd', '>+1');
+            tl.to(
+                {},
+                {
+                    duration: 0.1,
+                    onComplete: () => {
+                        // gsap.set('.service-text', { opacity: 0 });
+                        setActiveServiceIndex(serviceCount - 1);
+                    },
+                    onReverseComplete: () => {
+                        // gsap.set('.service-text', { opacity: 0 });
+                        setActiveServiceIndex(0);
+                    },
+                },
+                'serviceEnd'
+            );
+            // 5️⃣ Transition after last (7th) service text
+            tl.addLabel('afterLastService', '>+1'); // small scroll gap after 7th text
+
+            // Fade out flowing particles, service texts, and logo model
+            tl.to(
+                flowingParticlesMaterialRef.current.uniforms.uOpacity,
+                {
+                    value: 0,
+                    duration: 4,
+                    ease: 'power2.inOut',
+                },
+                '>+1'
+            );
+
+            // Slight upward movement for smooth exit
+            tl.to(
+                '.next-section',
+                {
+                    y: -150,
+                    opacity: 0,
+                    duration: 4,
+                    ease: 'power2.inOut',
+                },
+                '<'
+            );
+
+            tl.addLabel('statsReveal', '>+0.5');
+            tl.to(
+                '.statSection',
+                {
+                    opacity: 1,
+                    duration: 3,
+                    ease: 'power3.out',
+                },
+                '<-3'
+            );
         }
 
         let mouseX = 0;
@@ -674,9 +868,32 @@ const Animation = () => {
                 </div>
             </div>
 
-            <div className="next-section fixed inset-0 flex items-center justify-center opacity-0  z-10">
-                <h2 className="text-5xl font-bold text-black">Welcome to the Next Phase 🚀</h2>
+            <div className="next-section fixed inset-0 flex items-center justify-center opacity-0 z-50 ">
+                <div className="service-logo fixed inset-0 opacity-1 ">
+                    <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
+                        <pointLight position={[-3, 0, 100]} intensity={1.5} />
+
+                        <ScrollServiceLogo activeIndex={activeServiceIndex} />
+                    </Canvas>
+                </div>
+
+                {/* Service Texts beside logo */}
+                <div className="absolute right-[10%] w-[400px] h-[200px] flex items-center justify-center text-left text-black space-y-6 service-texts ">
+                    {SERVICE_DATA.map((service, i) => (
+                        <div
+                            key={i}
+                            className={`absolute inset-0 transition-opacity duration-700 service-text service-${i} opacity-0`}
+                        >
+                            <h2 className={`text-6xl font-bold `}>{service.title}</h2>
+                            <p className="text-xl mt-2">{service.subtext}</p>
+                        </div>
+                    ))}
+                </div>
             </div>
+            <div className="statSection opacity-0 z-0">
+                <StatsSection />
+            </div>
+            <Footer />
         </main>
     );
 };

@@ -21,9 +21,9 @@ export default function StarfieldBackground({}) {
             label: 'Base Speed',
         },
         spacing: { value: 87, min: 10, max: 200, step: 1, label: 'Grid Spacing' }, // New control
-        count: { value: 11, min: 1, max: 50, step: 1, label: 'Grid Count' }, // New control
+        count: { value: 15, min: 1, max: 50, step: 1, label: 'Grid Count' }, // New control
         sizeScale: {
-            value: 500.0, // Used in uSizeScale uniform
+            value: 150.0, // Used in uSizeScale uniform
             min: 100,
             max: 2000,
             step: 10,
@@ -76,42 +76,41 @@ export default function StarfieldBackground({}) {
 
     // ---
 
- function createCircleTexture() {
-     const size = 128;
-     const canvas = document.createElement('canvas');
-     canvas.width = size;
-     canvas.height = size;
-     const ctx = canvas.getContext('2d');
+    function createCircleTexture() {
+        const size = 128;
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
 
-     const cx = size / 2;
-     const cy = size / 2;
-     const coreR = Math.floor(size * 0.18); // smaller core for glow effect
-     const outerR = Math.floor(size * 0.5); // glow radius
+        const cx = size / 2;
+        const cy = size / 2;
+        const coreR = Math.floor(size * 0.18); // smaller core for glow effect
+        const outerR = Math.floor(size * 0.5); // glow radius
 
-     ctx.clearRect(0, 0, size, size);
-     ctx.imageSmoothingEnabled = true; // smooth gradient
+        ctx.clearRect(0, 0, size, size);
+        ctx.imageSmoothingEnabled = true; // smooth gradient
 
-     // Create radial gradient
-     const gradient = ctx.createRadialGradient(cx, cy, coreR, cx, cy, outerR);
-     gradient.addColorStop(0, 'rgba(255,255,255,1)'); // core bright white
-     gradient.addColorStop(0.2, 'rgba(255,255,255,0.8)');
-     gradient.addColorStop(0.4, 'rgba(255,255,255,0.5)');
-     gradient.addColorStop(1, 'rgba(255,255,255,0)'); // fade out to transparent
+        // Create radial gradient
+        const gradient = ctx.createRadialGradient(cx, cy, coreR, cx, cy, outerR);
+        gradient.addColorStop(0, 'rgba(255,255,255,1)'); // core bright white
+        gradient.addColorStop(0.2, 'rgba(255,255,255,0.8)');
+        gradient.addColorStop(0.4, 'rgba(255,255,255,0.5)');
+        gradient.addColorStop(1, 'rgba(255,255,255,0)'); // fade out to transparent
 
-     ctx.fillStyle = gradient;
-     ctx.beginPath();
-     ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
-     ctx.fill();
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
+        ctx.fill();
 
-     // Create Three.js texture
-     const tex = new THREE.CanvasTexture(canvas);
-     tex.minFilter = THREE.LinearFilter;
-     tex.magFilter = THREE.LinearFilter;
-     tex.needsUpdate = true;
+        // Create Three.js texture
+        const tex = new THREE.CanvasTexture(canvas);
+        tex.minFilter = THREE.LinearFilter;
+        tex.magFilter = THREE.LinearFilter;
+        tex.needsUpdate = true;
 
-     return tex;
- }
-
+        return tex;
+    }
 
     const starData = useMemo(() => {
         const starPositions = [];
@@ -120,7 +119,7 @@ export default function StarfieldBackground({}) {
 
         for (let x = -count; x <= count; x++) {
             for (let y = -count; y <= count; y++) {
-                if (x === 0) continue;
+                if (y === 0 || x === 0) continue;
                 for (let zLayer = -count; zLayer <= count; zLayer++) {
                     const jitter = (Math.random() - 0.5) * 30;
                     const z = zLayer * 40 + jitter;
@@ -225,6 +224,9 @@ export default function StarfieldBackground({}) {
                 uTime: { value: 0 },
                 uSpiralProgress: { value: 0 },
                 uMergeProgress: { value: 0 },
+                uDirection: { value: new THREE.Vector3(0, 0, 1) }, // starts moving along Z-axis
+                uSpeed: { value: controls.baseSpeed },
+
                 uMinOpacity: { value: controls.minOpacity },
                 uMaxOpacity: { value: controls.maxOpacity },
                 uOpacityFalloff: { value: controls.opacityFalloff },
@@ -312,7 +314,8 @@ export default function StarfieldBackground({}) {
             depthWrite: false,
             blending: THREE.AdditiveBlending,
         });
-
+        window.starfieldUniforms = material.uniforms;
+        window.starfieldTotalDepth = totalDepth;
         const stars = new THREE.Points(starsGeometry, material);
         scene.add(stars);
         // gsap.to(camera.position, {
@@ -383,14 +386,24 @@ export default function StarfieldBackground({}) {
             const currentSpeed = baseSpeed + scrollSpeed;
 
             // Move stars backward/forward based on total speed
-            stars.position.z += currentSpeed;
+            // Move stars along the current direction
+            // 🌌 Move stars along direction vector
+            const dir = material.uniforms.uDirection.value;
+            stars.position.addScaledVector(dir, currentSpeed);
 
-            // Seamless infinite loop - bidirectional wrapping
-            const halfDepth = totalDepth / 2;
-            if (stars.position.z > halfDepth) {
-                stars.position.z -= totalDepth;
-            } else if (stars.position.z < -halfDepth) {
-                stars.position.z += totalDepth;
+            // 🌠 Axis-agnostic wrapping
+            const total = window.starfieldTotalDepth || totalDepth;
+            const half = total / 2;
+
+            if (Math.abs(dir.z) >= Math.abs(dir.x) && Math.abs(dir.z) >= Math.abs(dir.y)) {
+                if (stars.position.z > half) stars.position.z -= total;
+                if (stars.position.z < -half) stars.position.z += total;
+            } else if (Math.abs(dir.y) >= Math.abs(dir.x) && Math.abs(dir.y) >= Math.abs(dir.z)) {
+                if (stars.position.y > half) stars.position.y -= total;
+                if (stars.position.y < -half) stars.position.y += total;
+            } else {
+                if (stars.position.x > half) stars.position.x -= total;
+                if (stars.position.x < -half) stars.position.x += total;
             }
 
             // Decay scroll speed - returns to 0, leaving only baseSpeed

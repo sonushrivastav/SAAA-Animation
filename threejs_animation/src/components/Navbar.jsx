@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
 import { FiMenu, FiX } from 'react-icons/fi';
 
@@ -15,19 +16,21 @@ const Navbar = () => {
 
     return (
         <>
-            <header className="fixed top-0     w-full bg-transparent  py-6  px-12 z-50 ">
-                <nav className=" border-2 py-2 px-6 rounded-full bg-slate-900 text-white mx-auto flex justify-between items-center">
-                    <a href="#" className="text-2xl font-bold z-50">
-                        <span className="text-purple-600">SAAA</span>
-                        <span className="text-white"> consultants</span>
-                    </a>
+            <header className="fixed top-0     w-full bg-transparent  z-50 ">
+                <nav className="  px-6  bg-white text-black mx-auto flex justify-between items-center shadow-xl">
+                    <Image
+                        src={'/images/Screenshot 2025-10-25 101941-Photoroom.png'}
+                        width={180}
+                        height={180}
+                        alt="logo"
+                    />
 
                     <div className="hidden md:flex items-center gap-8">
                         {navLinks.map(link => (
                             <a
                                 key={link.label}
                                 href={link.href}
-                                className="text-white hover:text-purple-600 transition-colors duration-300"
+                                className="text-black hover:text-purple-600 transition-colors duration-300"
                             >
                                 {link.label}
                             </a>

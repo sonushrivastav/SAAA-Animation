@@ -3,9 +3,9 @@
 'use client';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import FlyingTexts from '../components/FlyingTexts';
+import Footer from '../components/Footer';
 import Navbar from '../components/Navbar';
-import StarfieldBackground from '../components/StarfieldBackground';
+import StatsSection from '../components/Stats';
 
 // Register the GSAP plugin once
 gsap.registerPlugin(ScrollTrigger);
@@ -173,7 +173,10 @@ export default function Home() {
       </div> */}
 
             <Navbar />
-            <StarfieldBackground />
+            {/* <StarfieldBackground /> */}
+            <StatsSection />
+            <Footer />
+
             {/* <FlyingTexts /> */}
 
             {/* Place your text elements here for GSAP to target them */}
