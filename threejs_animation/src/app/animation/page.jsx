@@ -205,6 +205,9 @@ const Animation = () => {
 
                 // Create the particle system from the rotated clone
                 createParticleSystem(samplingGroup, allMaterials);
+
+                // const serviceSectionLogoModel = logoGroup.clone(true);
+                // convertToParticles(serviceSectionLogoModel, allMaterials);
             },
             undefined,
             error => {
@@ -476,65 +479,22 @@ const Animation = () => {
                 const labelName = `flyingText-${i}`;
                 tl.addLabel(labelName, startTime);
 
-                if (i === flyingTexts.length - 1) {
-                    tl.fromTo(
-                        el,
-                        { opacity: 0, scale: 0.1 },
-                        {
-                            opacity: 1,
-                            scale: 1.1,
-                            y: 0,
-                            ease: 'power2.out',
-                            duration: textDuration * 0.6,
+                tl.fromTo(
+                    el,
+                    { opacity: 0, scale: 0.1 },
+                    {
+                        opacity: 0,
+                        scale: 1.1,
+                        ease: 'power2.inOut',
+                        duration: textDuration,
+                        onUpdate: function () {
+                            const p = this.progress();
+                            const fade = Math.pow(Math.sin(p * Math.PI), 2.2);
+                            gsap.set(el, { opacity: fade });
                         },
-                        labelName
-                    );
-
-                    tl.to(
-                        el,
-                        {
-                            y: -300,
-                            opacity: 0,
-                            scale: 1.1,
-                            duration: textDuration,
-                            ease: 'power2.inOut',
-                        },
-                        `>${textDuration * 0.4}`
-                    );
-                } else {
-                    // 🔸 Normal animation for first 6 flying texts
-                    tl.fromTo(
-                        el,
-                        { opacity: 0, scale: 0.1 },
-                        {
-                            opacity: 0,
-                            scale: 1.1,
-                            ease: 'power2.inOut',
-                            duration: textDuration,
-                            onUpdate: function () {
-                                const p = this.progress();
-                                const fade = Math.pow(Math.sin(p * Math.PI), 2.2);
-                                gsap.set(el, { opacity: fade });
-                            },
-                        },
-                        labelName
-                    );
-                }
-                // 🌌 Change Starfield direction after 6th flying text
-                if (i === 5) {
-                    // index 5 = 6th text
-                    tl.to(
-                        window.starfieldUniforms.uDirection.value,
-                        {
-                            x: 0,
-                            y: 1,
-                            z: 0,
-                            duration: 2,
-                            ease: 'power2.inOut',
-                        },
-                        `>${textDuration * 0.4}` // during fade transition to 7th
-                    );
-                }
+                    },
+                    labelName
+                );
             });
 
             tl.to(
@@ -552,7 +512,7 @@ const Animation = () => {
             tl.to(
                 flowingParticlesMaterialRef.current.uniforms.uOpacity,
                 {
-                    value: 1,
+                    value: 0,
                     duration: 1.5,
                     ease: 'power2.inOut',
                 },
@@ -575,8 +535,7 @@ const Animation = () => {
             const serviceCount = SERVICE_DATA.length;
             const TRANSITION_DURATION = 2.5;
 
-            // reset all texts and logo
-            gsap.set('.service-text', { opacity: 0 });
+            gsap.set('.service-text', { opacity: 0, y: 150 });
             gsap.set('.service-logo', { opacity: 0 });
             setActiveServiceIndex(0);
 
@@ -594,6 +553,7 @@ const Animation = () => {
                 '.service-0',
                 {
                     opacity: 1,
+                    y: 0,
                     duration: 1.8,
                     ease: 'power2.inOut',
                     onStart: () => setActiveServiceIndex(0),
@@ -610,18 +570,21 @@ const Animation = () => {
                     `.service-${i - 1}`,
                     {
                         opacity: 0,
-                        duration: 1,
+                        y: 150,
+                        duration: 2.5,
                         ease: 'power2.inOut',
                     },
                     `>+${TRANSITION_DURATION * 0.8}`
                 ); // start mid-way for smooth crossfade
 
                 // fade in next text and update logo slice simultaneously
-                tl.to(
+                tl.fromTo(
                     `.service-${i}`,
+                    { opacity: 0, y: 150 },
                     {
                         opacity: 1,
-                        duration: 1,
+                        y: 0,
+                        duration: 2.5,
                         ease: 'power2.inOut',
                         onStart: () => setActiveServiceIndex(i),
                         onReverseComplete: () => {
@@ -634,8 +597,6 @@ const Animation = () => {
                 ); // overlap for smooth simultaneous transition
             }
 
-            // 5️⃣ cleanup when scrolling past last service
-            // tl.addLabel('serviceEnd', '>+1');
             tl.to(
                 {},
                 {
@@ -644,14 +605,13 @@ const Animation = () => {
                         // gsap.set('.service-text', { opacity: 0 });
                         setActiveServiceIndex(serviceCount - 1);
                     },
-                    onReverseComplete: () => {
-                        // gsap.set('.service-text', { opacity: 0 });
-                        setActiveServiceIndex(0);
-                    },
+                    // onReverseComplete: () => {
+                    //     // gsap.set('.service-text', { opacity: 0 });
+                    //     setActiveServiceIndex(0);
+                    // },
                 },
                 'serviceEnd'
             );
-            // 5️⃣ Transition after last (7th) service text
             tl.addLabel('afterLastService', '>+1'); // small scroll gap after 7th text
 
             // Fade out flowing particles, service texts, and logo model
@@ -868,21 +828,21 @@ const Animation = () => {
                 </div>
             </div>
 
-            <div className="next-section fixed inset-0 flex items-center justify-center opacity-0 z-50 ">
+            <div className="next-section bg-black  text-white fixed inset-0 flex items-center justify-center opacity-0 z-50 ">
                 <div className="service-logo fixed inset-0 opacity-1 ">
                     <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
-                        <pointLight position={[-3, 0, 100]} intensity={1.5} />
+                        {/* <pointLight position={[-3, 0, 100]} intensity={1.5} /> */}
 
                         <ScrollServiceLogo activeIndex={activeServiceIndex} />
                     </Canvas>
                 </div>
 
                 {/* Service Texts beside logo */}
-                <div className="absolute right-[10%] w-[400px] h-[200px] flex items-center justify-center text-left text-black space-y-6 service-texts ">
+                <div className="absolute right-[10%] w-[400px] h-[200px] flex items-center justify-center text-left  space-y-6 service-texts ">
                     {SERVICE_DATA.map((service, i) => (
                         <div
                             key={i}
-                            className={`absolute inset-0 transition-opacity duration-700 service-text service-${i} opacity-0`}
+                            className={`absolute inset-0 transition-opacity duration-700 service-text service-${i} opacity-0 flex flex-col items-start justify-center`}
                         >
                             <h2 className={`text-6xl font-bold `}>{service.title}</h2>
                             <p className="text-xl mt-2">{service.subtext}</p>
