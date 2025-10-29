@@ -15,49 +15,52 @@ uniform float uSize;
 uniform vec2 uMouse; // normalized mouse (-1..1)
 attribute vec3 aBasePos;
 attribute float aRandom;
-varying float vRandom;
 varying float vDist;
+varying float vRandom;
 
-// --- Smoother pseudo-noise (sinusoidal, stable over time) ---
-float smoothNoise(vec3 p) {
-  return sin(p.x * 2.0 + uTime * 0.3) *
-         cos(p.y * 2.2 + uTime * 0.35) *
-         sin(p.z * 1.7 + uTime * 0.25);
+float hash(float n) {
+  return fract(sin(n) * 43758.5453123);
 }
 
 void main() {
   vRandom = aRandom;
 
-  vec3 pos = aBasePos;
+  vec3 base = aBasePos;
+  vec3 pos = base;
 
-  // --- Convert position to screen space ---
-  vec4 mvPos = modelViewMatrix * vec4(pos, 1.0);
+  // Project position to screen space (clip-space)
+  vec4 mvPos = modelViewMatrix * vec4(base, 1.0);
   vec4 projPos = projectionMatrix * mvPos;
   vec2 screenPos = projPos.xy / projPos.w;
 
-  // --- Distance from mouse ---
   float dist = distance(screenPos, uMouse);
   vDist = dist;
 
-  // --- Influence radius (smaller + smoother falloff) ---
-  float influence = 1.0 - smoothstep(0.0, 0.18, dist); // smaller area
+  float influence = smoothstep(0.24, 0.0, dist);
 
-  // --- Gentle noise-driven displacement ---
-  float n = smoothNoise(pos * 0.6 + vec3(aRandom * 10.0));
-  vec3 displaced = pos + normalize(pos + 0.001) * n * influence * 0.05; // small strength
+  vec2 dir = normalize( uMouse);
+  vec3 displaced = base;
 
-  // --- Subtle continuous breathing motion ---
-  displaced += vec3(
-    sin(uTime * 0.2 + aRandom * 6.2831) * 0.015,
-    cos(uTime * 0.25 + aRandom * 3.2831) * 0.015,
-    sin(uTime * 0.22 + aRandom * 4.2831) * 0.015
+  float strength = 0.055;
+//   displaced.x += dir.x * influence *  0.25;
+  displaced.y += dir.y * influence *  0.25;
+
+
+  // Viscous return with slow easing
+  float ease = smoothstep(0.0, 0.3, influence);
+  pos = mix(base, displaced, ease * 0.9);
+
+  pos += vec3(
+    sin(uTime * 0.4 + aRandom * 6.2831) * 0.01,
+    cos(uTime * 0.3 + aRandom * 4.2831) * 0.01,
+    sin(uTime * 0.25 + aRandom * 8.2831) * 0.008
   );
 
-  // --- Smooth return-to-rest ---
-  float relax = smoothstep(0.1, 0.25, dist);
-  pos = mix(displaced, aBasePos, relax);
+  // --- Smooth push-back to base ---
+  float restore = 0.93 + 0.05 * sin(uTime * 0.2 + aRandom * 5.0);
+  pos = mix(pos, base, restore * (1.0 - influence));
 
-  // --- Final projection ---
+  // Final projection
   vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
   gl_PointSize = uSize * (1.0 / -mvPosition.z);
   gl_Position = projectionMatrix * mvPosition;
@@ -84,9 +87,10 @@ void main() {
   vec3 baseColor = mix(uColorInactive, uColorActive, uActiveMix);
 
   // brightness based on distance + random flicker
-  float flicker = 0.85 + 0.25 * sin(vRandom * 10.0 + uTime * 1.5);
-  float mouseGlow = 1.0 - smoothstep(0.0, 0.35, vDist);
-  vec3 color = baseColor * (flicker + mouseGlow * 1.2);
+  float flicker = 0.85 + 0.15 * sin(vRandom * 8.0 + uTime * 1.5);
+ float mouseGlow = 1.0 - smoothstep(0.0, 0.25, vDist);
+vec3 color = baseColor * (flicker + 2.5 + mouseGlow * 1.5);
+
 
   float alpha = (1.0 - smoothstep(0.3, 0.5, d)) * uAlpha;
   gl_FragColor = vec4(color, alpha);
@@ -128,7 +132,7 @@ const ScrollServiceLogo = ({ activeIndex }) => {
                     // ✅ Build the surface sampler
                     const sampler = new MeshSurfaceSampler(child).build();
 
-                    const count = 4000; // number of points
+                    const count = 2000; // number of points
                     const positions = new Float32Array(count * 3);
                     const randoms = new Float32Array(count);
                     const basePositions = new Float32Array(count * 3);
@@ -149,8 +153,7 @@ const ScrollServiceLogo = ({ activeIndex }) => {
 
                     const geometry = new THREE.BufferGeometry();
                     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-                    geometry.setAttribute('aBasePos', new THREE.BufferAttribute(basePositions, 3)); // 👈 new
-
+                    geometry.setAttribute('aBasePos', new THREE.BufferAttribute(basePositions, 3));
                     geometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1));
 
                     const material = new THREE.ShaderMaterial({
@@ -162,8 +165,8 @@ const ScrollServiceLogo = ({ activeIndex }) => {
                         uniforms: {
                             uTime: { value: 0 },
                             uAlpha: { value: index === 0 ? 1 : 0.2 },
-                            uSize: { value: 20.0 }, // ✅ particle size
-                            uColorActive: { value: new THREE.Color(0xcfaff0) },
+                            uSize: { value: 15.0 }, // ✅ particle size
+                            uColorActive: { value: new THREE.Color(0xab76e2) },
                             uColorInactive: { value: new THREE.Color(0x52198c) },
                             uActiveMix: { value: 0.0 }, // 0 = all inactive, 1 = all active
                             uMouse: { value: new THREE.Vector2(0, 0) }, // ✅ add mouse uniform
