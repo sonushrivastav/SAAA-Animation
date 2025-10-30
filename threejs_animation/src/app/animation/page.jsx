@@ -226,24 +226,32 @@ const Animation = () => {
 
         scene.add(logoGroup);
 
-        // Create sampling group that matches the final assembled position
-        const samplingGroup = new THREE.Group();
-        samplingGroup.scale.set(1.15, 1.15, 0.15);
+        // // Create sampling group that matches the final assembled position
+        // const samplingGroup = new THREE.Group();
+        // samplingGroup.scale.set(1.15, 1.15, 0.15);
 
-        spiralConfigs.forEach((config) => {
-          const modelClone = sourceScene.clone();
-          modelClone.scale.setScalar(config.s);
-          modelClone.position.fromArray(config.p);
-          modelClone.rotation.fromArray(config.r);
-          samplingGroup.add(modelClone);
-        });
+        // spiralConfigs.forEach((config) => {
+        //   const modelClone = sourceScene.clone();
+        //   modelClone.scale.setScalar(config.s);
+        //   modelClone.position.fromArray(config.p);
+        //   modelClone.rotation.fromArray(config.r);
+        //   samplingGroup.add(modelClone);
+        // });
 
-        // Position the sampling group at the final centered and rotated position
-        samplingGroup.position.set(-0.5, -2, 2);
-        samplingGroup.rotation.set(0, -Math.PI / 8, -Math.PI / 2);
+        // // Position the sampling group at the final centered and rotated position
+        // samplingGroup.position.set(-0.5, -2, 2);
+        // samplingGroup.rotation.set(0, -Math.PI / 8, -Math.PI / 2);
 
         // Create the particle system from the rotated clone
-        createParticleSystem(samplingGroup, allMaterials, individualSpirals);
+        createParticleSystem(
+          logoGroup,
+          sourceScene,
+          spiralConfigs,
+          allMaterials,
+          individualSpirals,
+          scene,
+          camera
+        );
       },
       undefined,
       (error) => {
@@ -252,10 +260,47 @@ const Animation = () => {
     );
 
     // createParticleSystem function remains largely unchanged
-    function createParticleSystem(group, materials, spirals) {
+    function createParticleSystem(
+      logoGroup,
+      sourceScene,
+      spiralConfigs,
+      materials,
+      spirals,
+      scene,
+      camera
+    ) {
+      // Create a temporary sampling group that matches the FINAL assembled state
+      const samplingGroup = new THREE.Group();
+      samplingGroup.scale.copy(logoGroup.scale);
+
+      spiralConfigs.forEach((config, index) => {
+        const modelClone = sourceScene.clone();
+        modelClone.scale.setScalar(config.s);
+        modelClone.position.fromArray(config.p);
+        modelClone.rotation.fromArray(config.r);
+
+        // Create wrapper to match spiral structure
+        const spiralWrapper = new THREE.Group();
+        spiralWrapper.add(modelClone);
+
+        // Apply FINAL position and rotation
+        spiralWrapper.position.set(
+          spirals[index].finalPosition.x,
+          spirals[index].finalPosition.y,
+          spirals[index].finalPosition.z
+        );
+        spiralWrapper.rotation.set(
+          spirals[index].finalRotation.x,
+          spirals[index].finalRotation.y,
+          spirals[index].finalRotation.z
+        );
+
+        samplingGroup.add(spiralWrapper);
+      });
+
       const geometries = [];
-      group.updateWorldMatrix(true, true);
-      group.traverse((child) => {
+      samplingGroup.updateWorldMatrix(true, true);
+      samplingGroup.traverse((child) => {
         if (child.isMesh) {
           const geometry = child.geometry.clone();
           geometry.applyMatrix4(child.matrixWorld);
@@ -272,13 +317,19 @@ const Animation = () => {
       const mergedMeshForSampling = new THREE.Mesh(mergedGeometry);
 
       const sampler = new MeshSurfaceSampler(mergedMeshForSampling).build();
-      const numParticles = 8000;
+      const numParticles = 2000;
 
       const particlesGeometry = new THREE.BufferGeometry();
       const positions = new Float32Array(numParticles * 3);
       const randoms = new Float32Array(numParticles * 3);
       const sizes = new Float32Array(numParticles);
       const colors = new Float32Array(numParticles * 3);
+
+      const colorPalette = [
+        "#9F62FE", // sky blue
+        "#DF8CFF",
+        "#AB76E2",
+      ];
 
       for (let i = 0; i < numParticles; i++) {
         const newPosition = new THREE.Vector3();
@@ -288,16 +339,23 @@ const Animation = () => {
         positions[i * 3 + 1] = newPosition.y;
         positions[i * 3 + 2] = newPosition.z;
 
-        randoms[i * 3] = (Math.random() - 0.5) * 10;
-        randoms[i * 3 + 1] = (Math.random() - 0.5) * 10;
-        randoms[i * 3 + 2] = (Math.random() - 0.5) * 10;
+        randoms[i * 3] = 0;
+        randoms[i * 3 + 1] = 0;
+        randoms[i * 3 + 2] = Math.random() * 5.0;
 
-        sizes[i] = 8 + Math.random() * 64;
-        // const color = new THREE.Color();
-        // color.setHSL(Math.random(), 0.7, 0.6);
-        // colors[i * 3] = color.r;
-        // colors[i * 3 + 1] = color.g;
-        // colors[i * 3 + 2] = color.b;
+        sizes[i] = 4 + Math.random() * 18;
+
+        // const color =
+        //   Math.random() < 0.5
+        //     ? new THREE.Color("#352355")
+        //     : new THREE.Color("#AB76E2");
+        const colorHex =
+          colorPalette[Math.floor(Math.random() * colorPalette.length)];
+        const color = new THREE.Color(colorHex);
+
+        colors[i * 3] = color.r;
+        colors[i * 3 + 1] = color.g;
+        colors[i * 3 + 2] = color.b;
       }
 
       particlesGeometry.setAttribute(
@@ -312,7 +370,10 @@ const Animation = () => {
         "aSize",
         new THREE.BufferAttribute(sizes, 1)
       );
-      // particlesGeometry.setAttribute('aColor', new THREE.BufferAttribute(colors, 3));
+      particlesGeometry.setAttribute(
+        "aColor",
+        new THREE.BufferAttribute(colors, 3)
+      );
 
       particlesMaterial = createShaderMaterial();
       const particleSystem = new THREE.Points(
@@ -341,29 +402,62 @@ const Animation = () => {
                 attribute vec3 aRandom;
                 attribute float aSize;
                 attribute vec3 aColor;
+                attribute float aDelay;
 
                 uniform float uProgress;
                 uniform float uTime;
-                uniform vec3 uColor;
 
                 uniform float uSizeMultiplier;
 
                 varying float vProgress;
                 varying vec3 vColor;
+                varying float vAlpha;
 
                 void main() {
                     vProgress = uProgress;
-                    vColor = uColor;
-                    vec3 finalPosition = mix(position, aRandom, uProgress);
+                    vColor = aColor;
+                   // Calculate delayed progress for this particle
+                    // Edge particles (aDelay closer to 0) start moving first
+                    // Center particles (aDelay closer to 1) start moving last
+                    float delayedProgress = smoothstep(aDelay, aDelay + 0.3, uProgress);
+                    vProgress = delayedProgress;
+                    
+                    // Particles fade in as they start moving
+                    vAlpha = smoothstep(0.0, 0.1, delayedProgress);
+                    
+                    // Store original position
+                    vec3 originalPosition = position;
+                    
+                    // Calculate movement towards camera (Z direction) based on delayed progress
+                    vec3 finalPosition = position + normalize(vec3(0.0, 0.2, 1.0)) * aRandom.z * delayedProgress;
 
                     float orbitRadius = 0.3 + fract(aRandom.y) * 0.2;
                     float speed = 0.2 + fract(aRandom.z) * 0.5;
-                    finalPosition.x += cos(uTime * speed + aRandom.x) * orbitRadius * uProgress;
-                    finalPosition.y += sin(uTime * speed + aRandom.y) * orbitRadius * uProgress;
+                    finalPosition *= (1.0 + delayedProgress * 0.05);
 
                     vec4 modelViewPosition = modelViewMatrix * vec4(finalPosition, 1.0);
                     gl_Position = projectionMatrix * modelViewPosition;
-                    gl_PointSize = aSize * uSizeMultiplier;
+                    
+                    // Base size that's uniform at start
+                    float baseSize = 25.0;
+                    
+                    // Only particles that have started moving should increase in size
+                    // delayedProgress = 0 means particle hasn't started moving yet (stay small)
+                    // delayedProgress > 0 means particle is moving (size increases)
+                    
+                    // Calculate actual distance traveled toward camera
+                    float distanceTraveled = aRandom.z * delayedProgress;
+                    
+                    // Size multiplier based on how much THIS particle has moved
+                    // If delayedProgress = 0, sizeMultiplier = 1.0 (small)
+                    // As particle moves (delayedProgress increases), size grows
+                    float sizeMultiplier = 1.0 + (distanceTraveled * 2.25);
+                    
+                    // Apply size only if particle has started moving
+                    // This ensures waiting particles stay small
+                    float finalSize = baseSize * sizeMultiplier;
+                    
+                    gl_PointSize = finalSize * uSizeMultiplier;
                 }
             `;
       const fragmentShader = `
@@ -388,7 +482,7 @@ const Animation = () => {
           uTexture: { value: particleTexture },
           uVisibility: { value: 0.0 },
           uTime: { value: 0.0 },
-          uColor: { value: new THREE.Color("#AB76E2") }, // ✅ added single color uniform
+          // uColor: { value: new THREE.Color("#AB76E2") }, // ✅ added single color uniform
 
           uSizeMultiplier: { value: 1.0 },
           uMouse: { value: new THREE.Vector2(0.0, 0.0) },
