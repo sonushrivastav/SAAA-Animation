@@ -1,6 +1,5 @@
 'use client';
 import { Canvas } from '@react-three/fiber';
-import { Bloom, EffectComposer } from '@react-three/postprocessing';
 import Lenis from '@studio-freight/lenis';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -306,7 +305,7 @@ const Animation = () => {
             const mergedMeshForSampling = new THREE.Mesh(mergedGeometry);
 
             const sampler = new MeshSurfaceSampler(mergedMeshForSampling).build();
-            const numParticles = 10000;
+            const numParticles = 8000;
 
             const particlesGeometry = new THREE.BufferGeometry();
             const positions = new Float32Array(numParticles * 3);
@@ -334,10 +333,6 @@ const Animation = () => {
 
                 sizes[i] = 12 + Math.random() * 94;
 
-                // const color =
-                //   Math.random() < 0.5
-                //     ? new THREE.Color("#352355")
-                //     : new THREE.Color("#AB76E2");
                 const colorHex = colorPalette[Math.floor(Math.random() * colorPalette.length)];
                 const color = new THREE.Color(colorHex);
 
@@ -375,7 +370,6 @@ const Animation = () => {
                 attribute vec3 aRandom;
                 attribute float aSize;
                 attribute vec3 aColor;
-                attribute float aDelay;
 
                 uniform float uProgress;
                 uniform float uTime;
@@ -384,59 +378,43 @@ const Animation = () => {
 
                 varying float vProgress;
                 varying vec3 vColor;
-                varying float vAlpha;
 
                 void main() {
-                    vProgress = uProgress;
-                    vColor = aColor;
-                   // Calculate delayed progress for this particle
-                    // Edge particles (aDelay closer to 0) start moving first
-                    // Center particles (aDelay closer to 1) start moving last
-                    float delayedProgress = smoothstep(aDelay, aDelay + 0.3, uProgress);
-                    vProgress = delayedProgress;
+                     vProgress = uProgress;
+    vColor = aColor;
 
-                    // Particles fade in as they start moving
-                    vAlpha = smoothstep(0.0, 0.1, delayedProgress);
+    // float xSpread = (fract(sin(dot(position.xy ,vec2(12.9898,78.233))) * 43758.5453) - 0.5) * 2.0;
+    vec3 explodeDir = normalize(vec3(0, (aRandom.y + 2.0) * 0.1, 1.0)) * (aRandom.z * 0.4) * uProgress;
+    vec3 exploded = position + explodeDir * aRandom.z * uProgress;
 
-                    // Store original position
-                    vec3 originalPosition = position;
+    // ---------- floating orbit-based motion ----------
+    float orbitRadius = 0.2 + fract(aRandom.y) * 0.0;
+    float speed = 0.2 + fract(aRandom.z) * 0.1;
 
-                    // Calculate movement towards camera (Z direction) based on delayed progress
-                    vec3 finalPosition = position + normalize(vec3(0.0, 0.2, 1.0)) * aRandom.z * delayedProgress;
+    // base exploded position
+    vec3 finalPosition = exploded;
 
-                    float orbitRadius = 0.3 + fract(aRandom.y) * 0.2;
-                    float speed = 0.2 + fract(aRandom.z) * 0.5;
-                    finalPosition *= (1.0 + delayedProgress * 0.05);
+    // circular orbital motion applied during explosion
+    finalPosition.x += cos(uTime * speed + aRandom.x) * orbitRadius * uProgress;
+    finalPosition.y += sin(uTime * speed + aRandom.y) * orbitRadius * uProgress;
 
-                    vec4 modelViewPosition = modelViewMatrix * vec4(finalPosition, 1.0);
-                    gl_Position = projectionMatrix * modelViewPosition;
+    vec4 mvPosition = modelViewMatrix * vec4(finalPosition, 1.0);
+    gl_Position = projectionMatrix * mvPosition;
 
-                    // Base size that's uniform at start
-                    float baseSize = 25.0;
-
-                    // Only particles that have started moving should increase in size
-                    // delayedProgress = 0 means particle hasn't started moving yet (stay small)
-                    // delayedProgress > 0 means particle is moving (size increases)
-
-                    // Calculate actual distance traveled toward camera
-                    float distanceTraveled = aRandom.z * delayedProgress;
-
-                    // Size multiplier based on how much THIS particle has moved
-                    // If delayedProgress = 0, sizeMultiplier = 1.0 (small)
-                    // As particle moves (delayedProgress increases), size grows
-                    float sizeMultiplier = 1.0 + (distanceTraveled * 1.25);
-
-                    // Apply size only if particle has started moving
-                    // This ensures waiting particles stay small
-                    float finalSize = baseSize * sizeMultiplier;
-
-                    gl_PointSize = finalSize * uSizeMultiplier;
+    vec4 viewPos = modelViewMatrix * vec4(exploded, 1.0);
+    float dist = abs(viewPos.z);
+    float baseSize = 1.0;
+    float towardCamera = step(0.0, -explodeDir.z);
+    float sizeByDistance = mix(1.0, (1.0 / (dist * 0.25 + 1.0)), towardCamera);
+    float nearBoost = mix(1.0, 1.8, smoothstep(0.0, 0.0, -viewPos.z));
+    gl_PointSize = baseSize * sizeByDistance * nearBoost * 80.0 / -viewPos.z;
                 }
             `;
             const fragmentShader = `
                 uniform sampler2D uTexture;
                 uniform float uVisibility;
-
+uniform vec3 uDarkColor;
+uniform vec3 uLightColor;
                 varying float vProgress;
                 varying vec3 vColor;
 
@@ -444,7 +422,9 @@ const Animation = () => {
                     vec2 centeredCoord = gl_PointCoord - vec2(0.5);
                     if (length(centeredCoord) > 0.5) discard;
                     vec4 texColor = texture2D(uTexture, gl_PointCoord);
-                    vec4 finalColor = vec4(vColor, 1.0) * texColor;
+
+                   vec3 targetColor = mix(vColor, mix(uDarkColor, uLightColor, 0.4), smoothstep(0.0, 1.0, vProgress));
+                    vec4 finalColor = vec4(targetColor, 1.0) * texColor;
                     finalColor.a *= uVisibility;
                     gl_FragColor = finalColor;
                 }
@@ -459,6 +439,8 @@ const Animation = () => {
 
                     uSizeMultiplier: { value: 1.0 },
                     uMouse: { value: new THREE.Vector2(0.0, 0.0) },
+                    uDarkColor: { value: new THREE.Color('#12001a') }, // blackish purple
+                    uLightColor: { value: new THREE.Color('#a96cff') }, // bright purple
                 },
                 vertexShader,
                 fragmentShader,
@@ -680,27 +662,27 @@ const Animation = () => {
                 '>-1'
             );
 
-            // tl.addLabel('starfieldFadeOut');
+            tl.addLabel('starfieldFadeOut');
 
-            // tl.to(
-            //     flowingParticlesMaterialRef.current.uniforms.uOpacity,
-            //     {
-            //         value: 0,
-            //         duration: 1.5,
-            //         ease: 'power2.inOut',
-            //     },
-            //     '<-3'
-            // );
-            // tl.addLabel('serviceSectionReveal');
+            tl.to(
+                flowingParticlesMaterialRef.current.uniforms.uOpacity,
+                {
+                    value: 0,
+                    duration: 1.5,
+                    ease: 'power2.inOut',
+                },
+                '<-3'
+            );
+            tl.addLabel('serviceSectionReveal');
             tl.to(
                 '.next-section',
                 {
                     opacity: 1,
                     y: 0,
-                    duration: 3,
+                    duration: 2,
                     ease: 'power2.inOut',
                 },
-                '<-2.5'
+                '>0.5'
             );
 
             // --- STEP 7: Logo + service text synchronized animation ---
@@ -708,7 +690,8 @@ const Animation = () => {
             const serviceCount = SERVICE_DATA.length;
             const TRANSITION_DURATION = 2.5;
 
-            gsap.set('.service-text', { opacity: 0, y: 150 });
+            // reset all texts and logo
+            gsap.set('.service-text', { opacity: 0 });
             gsap.set('.service-logo', { opacity: 0 });
             setActiveServiceIndex(0);
 
@@ -726,7 +709,6 @@ const Animation = () => {
                 '.service-0',
                 {
                     opacity: 1,
-                    y: 0,
                     duration: 1.8,
                     ease: 'power2.inOut',
                     onStart: () => setActiveServiceIndex(0),
@@ -743,21 +725,18 @@ const Animation = () => {
                     `.service-${i - 1}`,
                     {
                         opacity: 0,
-                        y: 150,
-                        duration: 2.5,
+                        duration: 1,
                         ease: 'power2.inOut',
                     },
                     `>+${TRANSITION_DURATION * 0.8}`
                 ); // start mid-way for smooth crossfade
 
                 // fade in next text and update logo slice simultaneously
-                tl.fromTo(
+                tl.to(
                     `.service-${i}`,
-                    { opacity: 0, y: 150 },
                     {
                         opacity: 1,
-                        y: 0,
-                        duration: 2.5,
+                        duration: 1,
                         ease: 'power2.inOut',
                         onStart: () => setActiveServiceIndex(i),
                         onReverseComplete: () => {
@@ -770,6 +749,8 @@ const Animation = () => {
                 ); // overlap for smooth simultaneous transition
             }
 
+            // 5️⃣ cleanup when scrolling past last service
+            // tl.addLabel('serviceEnd', '>+1');
             tl.to(
                 {},
                 {
@@ -778,13 +759,14 @@ const Animation = () => {
                         // gsap.set('.service-text', { opacity: 0 });
                         setActiveServiceIndex(serviceCount - 1);
                     },
-                    // onReverseComplete: () => {
-                    //     // gsap.set('.service-text', { opacity: 0 });
-                    //     setActiveServiceIndex(0);
-                    // },
+                    onReverseComplete: () => {
+                        // gsap.set('.service-text', { opacity: 0 });
+                        setActiveServiceIndex(0);
+                    },
                 },
                 'serviceEnd'
             );
+            // 5️⃣ Transition after last (7th) service text
             tl.addLabel('afterLastService', '>+1'); // small scroll gap after 7th text
 
             // Fade out flowing particles, service texts, and logo model
@@ -904,17 +886,9 @@ const Animation = () => {
 
             <div className="next-section bg-black  text-white fixed inset-0 flex items-center justify-center opacity-0 z-50 ">
                 <div className="service-logo fixed inset-0 opacity-1 ">
-                    <Canvas camera={{ position: [0, 0, 5], fov: 75 }} gl={{ antialias: false }}>
+                    <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
                         {/* <primitive object={new AxesHelper(1)} /> */}
                         <ScrollServiceLogo activeIndex={activeServiceIndex} />
-                        <EffectComposer>
-                            <Bloom
-                                intensity={1.5} // strength of the glow
-                                luminanceThreshold={0.1} // how bright something must be to glow
-                                luminanceSmoothing={0.9} // smoother transition
-                                mipmapBlur={true}
-                            />
-                        </EffectComposer>
                     </Canvas>
                 </div>
 
@@ -923,7 +897,7 @@ const Animation = () => {
                     {SERVICE_DATA.map((service, i) => (
                         <div
                             key={i}
-                            className={`absolute inset-0 transition-opacity duration-700 service-text service-${i} opacity-0 flex flex-col items-start justify-start`}
+                            className={`absolute inset-0 transition-opacity duration-700 service-text service-${i} opacity-0 flex flex-col items-start justify-center`}
                         >
                             <h2 className={`text-6xl font-bold `}>{service.title}</h2>
                             <p className="text-xl mt-2">{service.subtext}</p>
