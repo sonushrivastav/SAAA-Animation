@@ -128,7 +128,9 @@ const ScrollServiceLogo = ({ activeIndex }) => {
                 if (child.isMesh) {
                     // ✅ Make sure the mesh world matrix is up to date
                     child.updateWorldMatrix(true, false);
-
+                    if (child.isMesh) {
+                        child.renderOrder = 1; // Background lower order
+                    }
                     // ✅ Build the surface sampler
                     const sampler = new MeshSurfaceSampler(child).build();
 

@@ -1,14 +1,17 @@
 'use client';
 import { Canvas } from '@react-three/fiber';
+import { Bloom, EffectComposer } from '@react-three/postprocessing';
 import Lenis from '@studio-freight/lenis';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { BlendFunction } from 'postprocessing';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
+import FloatingParticles from '../../components/FloatingParticles';
 import Footer from '../../components/Footer';
 import Navbar from '../../components/Navbar';
 import FlowingParticles from '../../components/ParticleBackground';
@@ -887,8 +890,28 @@ uniform vec3 uLightColor;
             <div className="next-section bg-black  text-white fixed inset-0 flex items-center justify-center opacity-0 z-50 ">
                 <div className="service-logo fixed inset-0 opacity-1 ">
                     <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
-                        {/* <primitive object={new AxesHelper(1)} /> */}
+                        <color attach="background" args={['#000']} />
+                        <ambientLight intensity={0.2} />
+                        <spotLight
+                            position={[5, 5, 5]}
+                            angle={0.3}
+                            penumbra={1}
+                            intensity={2}
+                            color={'#9c4df4'}
+                        />
+                        <pointLight position={[-5, -5, -5]} intensity={1.5} color={'#2f00ff'} />
+                        <fog attach="fog" args={['#000', 2, 10]} />
+                        {/* <ServiceLogoBG /> */}
                         <ScrollServiceLogo activeIndex={activeServiceIndex} />
+                        {/* <FloatingParticles /> */}
+                        <EffectComposer>
+                            <Bloom
+                                intensity={1.2} // brightness of glow
+                                luminanceThreshold={0.2} // lower = more glow
+                                luminanceSmoothing={0.8}
+                                blendFunction={BlendFunction.ADD}
+                            />
+                        </EffectComposer>
                     </Canvas>
                 </div>
 
