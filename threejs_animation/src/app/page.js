@@ -5,6 +5,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Footer from '../components/Footer';
 import Navbar from '../components/Navbar';
+import WebGPUParticleLogo from '../components/ScrollServiceLogo';
 import StatsSection from '../components/Stats';
 
 // Register the GSAP plugin once
@@ -172,10 +173,11 @@ export default function Home() {
         </Canvas>
       </div> */}
 
-            <Navbar />
+            {/* <Navbar /> */}
             {/* <StarfieldBackground /> */}
-            <StatsSection />
-            <Footer />
+            <WebGPUParticleLogo />
+            {/* <StatsSection /> */}
+            {/* <Footer /> */}
 
             {/* <FlyingTexts /> */}
 

@@ -1,11 +1,11 @@
 'use client';
 import { Canvas } from '@react-three/fiber';
-import { Bloom, EffectComposer } from '@react-three/postprocessing';
 import Lenis from '@studio-freight/lenis';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { AxesHelper } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
@@ -163,7 +163,7 @@ const Animation = () => {
         const loader = new GLTFLoader();
         let particlesMaterial = null;
         let logoGroup = null;
-        const individualSpirals = [];
+
         loader.load(
             '/models/T3d.glb',
             gltf => {
@@ -172,15 +172,12 @@ const Animation = () => {
                 logoGroup.scale.set(1.15, 1.15, 0.15);
 
                 // ✅ Set initial position to the left, as per the first image.
-                // logoGroup.position.set(-3, -0.5, 0);
-                // logoGroup.rotation.set(-0.1, 0.2, -0.2);
+                logoGroup.position.set(-3, -0.5, 0);
+                logoGroup.rotation.set(-0.1, 0.2, -0.2);
 
                 const allMaterials = [];
 
                 spiralConfigs.forEach(config => {
-                    // Create a separate group for each spiral
-                    const spiralGroup = new THREE.Group();
-
                     const modelClone = sourceScene.clone();
                     modelClone.scale.setScalar(config.s);
                     modelClone.position.fromArray(config.p);
@@ -195,55 +192,23 @@ const Animation = () => {
                             allMaterials.push(newMaterial);
                         }
                     });
-
-                    spiralGroup.add(modelClone);
-
-                    // Set initial position (offset to the left)
-                    spiralGroup.position.set(-3, -0.5, 0);
-                    spiralGroup.rotation.set(-0.1, 0.2, -0.2);
-
-                    // Store reference to this spiral
-                    individualSpirals.push({
-                        group: spiralGroup,
-                        finalPosition: { x: -0.5, y: -2, z: 2 },
-                        finalRotation: {
-                            x: 0,
-                            y: spiralGroup.rotation.y - Math.PI / 8,
-                            z: spiralGroup.rotation.z - Math.PI / 2,
-                        },
-                    });
-
-                    logoGroup.add(spiralGroup);
+                    logoGroup.add(modelClone);
                 });
 
                 scene.add(logoGroup);
 
-                // // Create sampling group that matches the final assembled position
-                // const samplingGroup = new THREE.Group();
-                // samplingGroup.scale.set(1.15, 1.15, 0.15);
-
-                // spiralConfigs.forEach((config) => {
-                //   const modelClone = sourceScene.clone();
-                //   modelClone.scale.setScalar(config.s);
-                //   modelClone.position.fromArray(config.p);
-                //   modelClone.rotation.fromArray(config.r);
-                //   samplingGroup.add(modelClone);
-                // });
-
-                // // Position the sampling group at the final centered and rotated position
-                // samplingGroup.position.set(-0.5, -2, 2);
-                // samplingGroup.rotation.set(0, -Math.PI / 8, -Math.PI / 2);
+                // Create an invisible, rotated clone of the model JUST for sampling particles
+                const samplingGroup = logoGroup.clone(true);
+                // This clone should be at the *final* centered position for correct sampling
+                samplingGroup.position.set(-0.5, -2, 2);
+                samplingGroup.rotation.z += -Math.PI / 2; // Apply the final rotation
+                samplingGroup.rotation.y += -Math.PI / 8; // Apply the final rotation
 
                 // Create the particle system from the rotated clone
-                createParticleSystem(
-                    logoGroup,
-                    sourceScene,
-                    spiralConfigs,
-                    allMaterials,
-                    individualSpirals,
-                    scene,
-                    camera
-                );
+                createParticleSystem(samplingGroup, allMaterials);
+
+                // const serviceSectionLogoModel = logoGroup.clone(true);
+                // convertToParticles(serviceSectionLogoModel, allMaterials);
             },
             undefined,
             error => {
@@ -252,47 +217,10 @@ const Animation = () => {
         );
 
         // createParticleSystem function remains largely unchanged
-        function createParticleSystem(
-            logoGroup,
-            sourceScene,
-            spiralConfigs,
-            materials,
-            spirals,
-            scene,
-            camera
-        ) {
-            // Create a temporary sampling group that matches the FINAL assembled state
-            const samplingGroup = new THREE.Group();
-            samplingGroup.scale.copy(logoGroup.scale);
-
-            spiralConfigs.forEach((config, index) => {
-                const modelClone = sourceScene.clone();
-                modelClone.scale.setScalar(config.s);
-                modelClone.position.fromArray(config.p);
-                modelClone.rotation.fromArray(config.r);
-
-                // Create wrapper to match spiral structure
-                const spiralWrapper = new THREE.Group();
-                spiralWrapper.add(modelClone);
-
-                // Apply FINAL position and rotation
-                spiralWrapper.position.set(
-                    spirals[index].finalPosition.x,
-                    spirals[index].finalPosition.y,
-                    spirals[index].finalPosition.z
-                );
-                spiralWrapper.rotation.set(
-                    spirals[index].finalRotation.x,
-                    spirals[index].finalRotation.y,
-                    spirals[index].finalRotation.z
-                );
-
-                samplingGroup.add(spiralWrapper);
-            });
-
+        function createParticleSystem(group, materials) {
             const geometries = [];
-            samplingGroup.updateWorldMatrix(true, true);
-            samplingGroup.traverse(child => {
+            group.updateWorldMatrix(true, true);
+            group.traverse(child => {
                 if (child.isMesh) {
                     const geometry = child.geometry.clone();
                     geometry.applyMatrix4(child.matrixWorld);
@@ -306,19 +234,13 @@ const Animation = () => {
             const mergedMeshForSampling = new THREE.Mesh(mergedGeometry);
 
             const sampler = new MeshSurfaceSampler(mergedMeshForSampling).build();
-            const numParticles = 10000;
+            const numParticles = 8000;
 
             const particlesGeometry = new THREE.BufferGeometry();
             const positions = new Float32Array(numParticles * 3);
             const randoms = new Float32Array(numParticles * 3);
             const sizes = new Float32Array(numParticles);
             const colors = new Float32Array(numParticles * 3);
-
-            const colorPalette = [
-                '#9F62FE', // sky blue
-                '#DF8CFF',
-                '#AB76E2',
-            ];
 
             for (let i = 0; i < numParticles; i++) {
                 const newPosition = new THREE.Vector3();
@@ -328,39 +250,33 @@ const Animation = () => {
                 positions[i * 3 + 1] = newPosition.y;
                 positions[i * 3 + 2] = newPosition.z;
 
-                randoms[i * 3] = 0;
-                randoms[i * 3 + 1] = 0;
-                randoms[i * 3 + 2] = Math.random() * 5.0;
+                randoms[i * 3] = (Math.random() - 0.5) * 10;
+                randoms[i * 3 + 1] = (Math.random() - 0.5) * 10;
+                randoms[i * 3 + 2] = (Math.random() - 0.5) * 10;
 
-                sizes[i] = 12 + Math.random() * 94;
-
-                // const color =
-                //   Math.random() < 0.5
-                //     ? new THREE.Color("#352355")
-                //     : new THREE.Color("#AB76E2");
-                const colorHex = colorPalette[Math.floor(Math.random() * colorPalette.length)];
-                const color = new THREE.Color(colorHex);
-
-                colors[i * 3] = color.r;
-                colors[i * 3 + 1] = color.g;
-                colors[i * 3 + 2] = color.b;
+                sizes[i] = 8 + Math.random() * 64;
+                // const color = new THREE.Color();
+                // color.setHSL(Math.random(), 0.7, 0.6);
+                // colors[i * 3] = color.r;
+                // colors[i * 3 + 1] = color.g;
+                // colors[i * 3 + 2] = color.b;
             }
 
             particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
             particlesGeometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 3));
             particlesGeometry.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1));
-            particlesGeometry.setAttribute('aColor', new THREE.BufferAttribute(colors, 3));
+            // particlesGeometry.setAttribute('aColor', new THREE.BufferAttribute(colors, 3));
 
             particlesMaterial = createShaderMaterial();
             const particleSystem = new THREE.Points(particlesGeometry, particlesMaterial);
 
             scene.add(particleSystem);
             if (flowingParticlesMaterialRef.current) {
-                setupScrollAnimation(materials, spirals, particlesMaterial, camera);
+                setupScrollAnimation(materials);
             } else {
                 const checkRefInterval = setInterval(() => {
                     if (flowingParticlesMaterialRef.current) {
-                        setupScrollAnimation(materials, spirals, particlesMaterial, camera);
+                        setupScrollAnimation(materials);
                         clearInterval(checkRefInterval);
                     }
                 }, 100);
@@ -375,62 +291,29 @@ const Animation = () => {
                 attribute vec3 aRandom;
                 attribute float aSize;
                 attribute vec3 aColor;
-                attribute float aDelay;
 
                 uniform float uProgress;
                 uniform float uTime;
+                uniform vec3 uColor;
 
                 uniform float uSizeMultiplier;
 
                 varying float vProgress;
                 varying vec3 vColor;
-                varying float vAlpha;
 
                 void main() {
                     vProgress = uProgress;
-                    vColor = aColor;
-                   // Calculate delayed progress for this particle
-                    // Edge particles (aDelay closer to 0) start moving first
-                    // Center particles (aDelay closer to 1) start moving last
-                    float delayedProgress = smoothstep(aDelay, aDelay + 0.3, uProgress);
-                    vProgress = delayedProgress;
-
-                    // Particles fade in as they start moving
-                    vAlpha = smoothstep(0.0, 0.1, delayedProgress);
-
-                    // Store original position
-                    vec3 originalPosition = position;
-
-                    // Calculate movement towards camera (Z direction) based on delayed progress
-                    vec3 finalPosition = position + normalize(vec3(0.0, 0.2, 1.0)) * aRandom.z * delayedProgress;
+                    vColor = uColor;
+                    vec3 finalPosition = mix(position, aRandom, uProgress);
 
                     float orbitRadius = 0.3 + fract(aRandom.y) * 0.2;
                     float speed = 0.2 + fract(aRandom.z) * 0.5;
-                    finalPosition *= (1.0 + delayedProgress * 0.05);
+                    finalPosition.x += cos(uTime * speed + aRandom.x) * orbitRadius * uProgress;
+                    finalPosition.y += sin(uTime * speed + aRandom.y) * orbitRadius * uProgress;
 
                     vec4 modelViewPosition = modelViewMatrix * vec4(finalPosition, 1.0);
                     gl_Position = projectionMatrix * modelViewPosition;
-
-                    // Base size that's uniform at start
-                    float baseSize = 25.0;
-
-                    // Only particles that have started moving should increase in size
-                    // delayedProgress = 0 means particle hasn't started moving yet (stay small)
-                    // delayedProgress > 0 means particle is moving (size increases)
-
-                    // Calculate actual distance traveled toward camera
-                    float distanceTraveled = aRandom.z * delayedProgress;
-
-                    // Size multiplier based on how much THIS particle has moved
-                    // If delayedProgress = 0, sizeMultiplier = 1.0 (small)
-                    // As particle moves (delayedProgress increases), size grows
-                    float sizeMultiplier = 1.0 + (distanceTraveled * 1.25);
-
-                    // Apply size only if particle has started moving
-                    // This ensures waiting particles stay small
-                    float finalSize = baseSize * sizeMultiplier;
-
-                    gl_PointSize = finalSize * uSizeMultiplier;
+                    gl_PointSize = aSize * uSizeMultiplier;
                 }
             `;
             const fragmentShader = `
@@ -455,7 +338,7 @@ const Animation = () => {
                     uTexture: { value: particleTexture },
                     uVisibility: { value: 0.0 },
                     uTime: { value: 0.0 },
-                    // uColor: { value: new THREE.Color("#AB76E2") }, // ✅ added single color uniform
+                    uColor: { value: new THREE.Color('#AB76E2') }, // ✅ added single color uniform
 
                     uSizeMultiplier: { value: 1.0 },
                     uMouse: { value: new THREE.Vector2(0.0, 0.0) },
@@ -467,7 +350,7 @@ const Animation = () => {
             });
         }
 
-        function setupScrollAnimation(materials, spirals, particlesMaterial, camera) {
+        function setupScrollAnimation(materials) {
             // Make sure starfield starts hidden
             gsap.set('.starfield-layer', { opacity: 0 });
             gsap.set('.text-wrapper', { opacity: 0, scale: 0.1 });
@@ -478,13 +361,13 @@ const Animation = () => {
                     start: 'top top',
                     end: '100% bottom',
                     scrub: 0.82, // smooth scroll-scrub
-                    // snap: {
-                    //   snapTo: "labelsDirectional",
-                    //   duration: 0.9, // instant transition to snap point
-                    //   delay: 0, // start snapping immediately when scroll stops
-                    //   ease: "none",
-                    //   inertia: false,
-                    // },
+                    snap: {
+                        snapTo: 'labelsDirectional',
+                        duration: 1.14, // instant transition to snap point
+                        delay: 0, // start snapping immediately when scroll stops
+                        ease: 'none',
+                        inertia: false,
+                    },
 
                     onUpdate: self => {
                         gsap.to(flowAnimation.current, {
@@ -497,62 +380,50 @@ const Animation = () => {
             });
 
             // --- STEP 1: Move logo to center ---
-            // tl.addLabel("initial");
-
-            // Animate each spiral individually to center with rotation
-            spirals.forEach((spiral, index) => {
-                const delay = index * 0.3;
-
-                // Move each spiral to center
-                tl.to(
-                    spiral.group.position,
-                    {
-                        x: spiral.finalPosition.x,
-                        y: spiral.finalPosition.y,
-                        z: spiral.finalPosition.z,
-                        duration: 5,
-                        ease: 'power1.inOut',
-                    },
-                    delay
-                );
-
-                // Rotate each spiral into place
-                tl.to(
-                    spiral.group.rotation,
-                    {
-                        x: spiral.finalRotation.x,
-                        y: spiral.finalRotation.y,
-                        z: spiral.finalRotation.z,
-                        duration: 5,
-                        ease: 'power1.inOut',
-                    },
-                    delay
-                );
+            tl.addLabel('initial');
+            tl.to(logoGroup.position, {
+                x: -0.5,
+                y: -2,
+                z: 2,
+                duration: 5,
+                ease: 'power1.inOut',
             });
+
+            // --- STEP 2: Rotate logo into place ---
+            tl.to(
+                logoGroup.rotation,
+                {
+                    x: 0,
+                    y: logoGroup.rotation.y - Math.PI / 8,
+                    z: logoGroup.rotation.z - Math.PI / 2,
+                    duration: 5,
+                    ease: 'power1.inOut',
+                },
+                '<'
+            );
 
             // --- STEP 3: Fade initial text ---
             tl.to('.initial-text', { opacity: 0, duration: 3.5, ease: 'power1.inOut' }, '<-1');
 
             tl.to('.second-text', { opacity: 1, duration: 2.5, ease: 'power1.inOut' }, '>+1');
-            // tl.addLabel("rotation");
+            tl.addLabel('rotation');
             tl.to('.second-text', { opacity: 0, duration: 3, ease: 'power1.inOut' }, '>');
 
             // --- STEP 4: Particle explosion ---
 
             tl.to(particlesMaterial.uniforms.uVisibility, { value: 1, duration: 5 }, '>1');
             tl.to(materials, { opacity: 0.0, duration: 0.5 }, '<');
-            // tl.addLabel("particleConversion");
+            tl.addLabel('particleConversion');
             tl.to(
                 particlesMaterial.uniforms.uProgress,
                 { value: 1, duration: 20, ease: 'power1.inOut' },
                 '>'
             );
-
             tl.to(
                 camera,
                 {
                     fov: 5,
-                    duration: 50,
+                    duration: 18,
                     ease: 'power1.inOut',
                     onUpdate: () => camera.updateProjectionMatrix(),
                 },
@@ -609,65 +480,22 @@ const Animation = () => {
                 const labelName = `flyingText-${i}`;
                 tl.addLabel(labelName, startTime);
 
-                if (i === flyingTexts.length - 1) {
-                    tl.fromTo(
-                        el,
-                        { opacity: 0, scale: 0.1 },
-                        {
-                            opacity: 1,
-                            scale: 1.1,
-                            y: 0,
-                            ease: 'power2.out',
-                            duration: textDuration * 0.6,
+                tl.fromTo(
+                    el,
+                    { opacity: 0, scale: 0.1 },
+                    {
+                        opacity: 0,
+                        scale: 1.1,
+                        ease: 'power2.inOut',
+                        duration: textDuration,
+                        onUpdate: function () {
+                            const p = this.progress();
+                            const fade = Math.pow(Math.sin(p * Math.PI), 2.2);
+                            gsap.set(el, { opacity: fade });
                         },
-                        labelName
-                    );
-
-                    tl.to(
-                        el,
-                        {
-                            y: -300,
-                            opacity: 0,
-                            scale: 1.1,
-                            duration: textDuration,
-                            ease: 'power2.inOut',
-                        },
-                        `>${textDuration * 0.4}`
-                    );
-                } else {
-                    // 🔸 Normal animation for first 6 flying texts
-                    tl.fromTo(
-                        el,
-                        { opacity: 0, scale: 0.1 },
-                        {
-                            opacity: 0,
-                            scale: 1.1,
-                            ease: 'power2.inOut',
-                            duration: textDuration,
-                            onUpdate: function () {
-                                const p = this.progress();
-                                const fade = Math.pow(Math.sin(p * Math.PI), 2.2);
-                                gsap.set(el, { opacity: fade });
-                            },
-                        },
-                        labelName
-                    );
-                }
-                // 🌌 Change Starfield direction after 6th flying text
-                if (i === 5) {
-                    // index 5 = 6th text
-                    tl.to(
-                        window.starfieldUniforms.uDirection.value,
-                        {
-                            x: 0,
-                            y: 1,
-                            z: 0,
-                            duration: 2,
-                            ease: 'power2.inOut',
-                        },
-                        `>${textDuration * 0.4}` // during fade transition to 7th
-                    );
-                }
+                    },
+                    labelName
+                );
             });
 
             tl.to(
@@ -680,27 +508,27 @@ const Animation = () => {
                 '>-1'
             );
 
-            // tl.addLabel('starfieldFadeOut');
+            tl.addLabel('starfieldFadeOut');
 
-            // tl.to(
-            //     flowingParticlesMaterialRef.current.uniforms.uOpacity,
-            //     {
-            //         value: 0,
-            //         duration: 1.5,
-            //         ease: 'power2.inOut',
-            //     },
-            //     '<-3'
-            // );
-            // tl.addLabel('serviceSectionReveal');
+            tl.to(
+                flowingParticlesMaterialRef.current.uniforms.uOpacity,
+                {
+                    value: 0,
+                    duration: 1.5,
+                    ease: 'power2.inOut',
+                },
+                '<-3'
+            );
+            tl.addLabel('serviceSectionReveal');
             tl.to(
                 '.next-section',
                 {
                     opacity: 1,
                     y: 0,
-                    duration: 3,
+                    duration: 2,
                     ease: 'power2.inOut',
                 },
-                '<-2.5'
+                '>0.5'
             );
 
             // --- STEP 7: Logo + service text synchronized animation ---
@@ -847,6 +675,105 @@ const Animation = () => {
         };
     }, []);
 
+    // ---------- Flying text timeline that initializes when starfield is shown ----------
+    // useEffect(() => {
+    //     if (!showStarfield) return;
+
+    //     const initDelay = 100;
+    //     let initTimeout = setTimeout(() => {
+    //         const container = flyingTextRef.current;
+    //         if (!container) return;
+
+    //         const flyingTexts = Array.from(container.children);
+    //         // gsap.set(flyingTexts, { opacity: 0, scale: 0.1 });
+
+    //         const tlTexts = gsap.timeline({
+    //             scrollTrigger: {
+    //                 id: 'flyingTextTrigger',
+    //                 trigger: '.scroll-container',
+    //                 start: '50% top', // starts right after main animation
+    //                 end: 'bottom bottom', // lasts until end of scroll
+    //                 scrub: 1.5,
+    //                 anticipatePin: 1,
+    //             },
+    //         });
+
+    //         const num = flyingTexts.length || 1;
+    //         const portion = 1 / num;
+
+    //         flyingTexts.forEach((el, i) => {
+    //             const overlap = portion * 0.3;
+    //             const start = i * (portion - overlap);
+
+    //             // Target the wrapper div (not the h1)
+    //             tlTexts.fromTo(
+    //                 el,
+    //                 { opacity: 0, scale: 0.1, y: 0 },
+    //                 {
+    //                     opacity: 0,
+    //                     scale: 1.1,
+    //                     ease: 'power2.inOut',
+    //                     duration: portion,
+    //                     onUpdate: function () {
+    //                         const p = this.progress();
+    //                         const fade = Math.pow(Math.sin(p * Math.PI), 2.2);
+    //                         const yShift = p > 0.5 ? (p - 0.5) * -600 : 0;
+    //                         gsap.set(el, { opacity: fade, y: yShift });
+    //                     },
+    //                 },
+    //                 start
+    //             );
+
+    //             // ✅ Trigger transition when last (7th) text starts fading out
+    //             // if (i === flyingTexts.length - 1) {
+    //             //     tlTexts.add(() => {
+    //             //         // 1️⃣ Fade out the starfield
+    //             //         gsap.to('.revealed-content', {
+    //             //             opacity: 0,
+    //             //             duration: 2,
+    //             //             ease: 'power2.inOut',
+    //             //         });
+
+    //             //         2️⃣ Reveal the new section
+    //             //         gsap.to('.next-section', {
+    //             //             opacity: 1,
+    //             //             y: 0,
+    //             //             duration: 2.5,
+    //             //             ease: 'power2.inOut',
+
+    //             //         });
+    //             //     }, start + portion * 0.5); // starts when last text begins to fade/translate
+    //             // }
+    //         });
+
+    //         ScrollTrigger.refresh();
+
+    //         const cleanup = () => {
+    //             try {
+    //                 tlTexts.kill();
+    //                 const st = ScrollTrigger.getById('flyingTextTrigger');
+    //                 if (st) st.kill();
+    //             } catch (e) {
+    //                 console.warn('cleanup flying texts', e);
+    //             }
+    //         };
+
+    //         container.__cleanupFlyingTexts = cleanup;
+    //     }, initDelay);
+
+    //     return () => {
+    //         clearTimeout(initTimeout);
+    //         const c = flyingTextRef.current;
+    //         if (c && c.__cleanupFlyingTexts) {
+    //             c.__cleanupFlyingTexts();
+    //             delete c.__cleanupFlyingTexts;
+    //         } else {
+    //             const st = ScrollTrigger.getById('flyingTextTrigger');
+    //             if (st) st.kill();
+    //         }
+    //     };
+    // }, [showStarfield]);
+
     return (
         <main className="relative bg-white  font-sans text-black">
             <Navbar />
@@ -904,17 +831,11 @@ const Animation = () => {
 
             <div className="next-section bg-black  text-white fixed inset-0 flex items-center justify-center opacity-0 z-50 ">
                 <div className="service-logo fixed inset-0 opacity-1 ">
-                    <Canvas camera={{ position: [0, 0, 5], fov: 75 }} gl={{ antialias: false }}>
-                        {/* <primitive object={new AxesHelper(1)} /> */}
+                    <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
+                        {/* <pointLight position={[-3, 0, 100]} intensity={1.5} /> */}
+                        <primitive object={new AxesHelper(1)} />
                         <ScrollServiceLogo activeIndex={activeServiceIndex} />
-                        <EffectComposer>
-                            <Bloom
-                                intensity={1.5} // strength of the glow
-                                luminanceThreshold={0.1} // how bright something must be to glow
-                                luminanceSmoothing={0.9} // smoother transition
-                                mipmapBlur={true}
-                            />
-                        </EffectComposer>
+                        {/* <OrbitControls /> */}
                     </Canvas>
                 </div>
 
@@ -923,7 +844,7 @@ const Animation = () => {
                     {SERVICE_DATA.map((service, i) => (
                         <div
                             key={i}
-                            className={`absolute inset-0 transition-opacity duration-700 service-text service-${i} opacity-0 flex flex-col items-start justify-start`}
+                            className={`absolute inset-0 transition-opacity duration-700 service-text service-${i} opacity-0 flex flex-col items-start justify-center`}
                         >
                             <h2 className={`text-6xl font-bold `}>{service.title}</h2>
                             <p className="text-xl mt-2">{service.subtext}</p>
@@ -931,7 +852,6 @@ const Animation = () => {
                     ))}
                 </div>
             </div>
-
             <div className="statSection opacity-0 z-0">
                 <StatsSection />
             </div>
