@@ -317,7 +317,7 @@ const Animation = () => {
       const mergedMeshForSampling = new THREE.Mesh(mergedGeometry);
 
       const sampler = new MeshSurfaceSampler(mergedMeshForSampling).build();
-      const numParticles = 8000;
+      const numParticles = 25000;
 
       const particlesGeometry = new THREE.BufferGeometry();
       const positions = new Float32Array(numParticles * 3);
@@ -406,45 +406,48 @@ const Animation = () => {
 
                 varying float vProgress;
                 varying vec3 vColor;
+                varying float vDepth;
 
                 void main() {
                      vProgress = uProgress;
-    vColor = aColor;
+                     vColor = aColor;
 
-    // float xSpread = (fract(sin(dot(position.xy ,vec2(12.9898,78.233))) * 43758.5453) - 0.5) * 2.0;
-    vec3 explodeDir = normalize(vec3(0, (aRandom.y + 2.0) * 0.1, 1.0)) * (aRandom.z * 0.4) * uProgress;
-    vec3 exploded = position + explodeDir * aRandom.z * uProgress;
+                    vec3 explodeDir = normalize(vec3(0, (aRandom.y + 2.0) * 0.1, 1.0)) * (aRandom.z * 0.4) * uProgress;
+                    vec3 exploded = position + explodeDir * 2.0 * aRandom.z * uProgress;
+ 
+                     // ---------- floating orbit-based motion ----------
+                    float orbitRadius = 0.2 + fract(aRandom.y) * 0.0;
+                    float speed = 0.2 + fract(aRandom.z) * 0.1;
 
-    // ---------- floating orbit-based motion ----------
-    float orbitRadius = 0.2 + fract(aRandom.y) * 0.0;
-    float speed = 0.2 + fract(aRandom.z) * 0.1;
+                      // base exploded position
+                     vec3 finalPosition = exploded;
 
-    // base exploded position
-    vec3 finalPosition = exploded;
+                    // circular orbital motion applied during explosion
+                    finalPosition.x += cos(uTime * speed + aRandom.x) * orbitRadius * uProgress;
+                    finalPosition.y += sin(uTime * speed + aRandom.y) * orbitRadius * uProgress;
 
-    // circular orbital motion applied during explosion
-    finalPosition.x += cos(uTime * speed + aRandom.x) * orbitRadius * uProgress;
-    finalPosition.y += sin(uTime * speed + aRandom.y) * orbitRadius * uProgress;
+                     vec4 mvPosition = modelViewMatrix * vec4(finalPosition, 1.0);
+                     gl_Position = projectionMatrix * mvPosition;
 
-    vec4 mvPosition = modelViewMatrix * vec4(finalPosition, 1.0);
-    gl_Position = projectionMatrix * mvPosition;
-
-    vec4 viewPos = modelViewMatrix * vec4(exploded, 1.0);
-    float dist = abs(viewPos.z);
-    float baseSize = 1.0;
-    float towardCamera = step(0.0, -explodeDir.z);
-    float sizeByDistance = mix(1.0, (1.0 / (dist * 0.25 + 1.0)), towardCamera);
-    float nearBoost = mix(1.0, 1.8, smoothstep(0.0, 0.0, -viewPos.z));
-    gl_PointSize = baseSize * sizeByDistance * nearBoost * 80.0 / -viewPos.z;
+                     // Pass depth for fadeout calculation
+                    vDepth = mvPosition.z;
+                    vec4 viewPos = modelViewMatrix * vec4(exploded, 1.0);
+                    float dist = abs(viewPos.z);
+                    float baseSize = 1.0;
+                    float towardCamera = step(0.0, -explodeDir.z);
+                    float sizeByDistance = mix(1.0, (1.0 / (dist * 0.25 + 1.0)), towardCamera);
+                    float nearBoost = mix(1.0, 1.8, smoothstep(0.0, 0.0, -viewPos.z));
+                    gl_PointSize = baseSize * sizeByDistance * nearBoost * 100.0 / -viewPos.z * uSizeMultiplier;
                 }
             `;
       const fragmentShader = `
                 uniform sampler2D uTexture;
                 uniform float uVisibility;
-uniform vec3 uDarkColor;
-uniform vec3 uLightColor;
+                uniform vec3 uDarkColor;
+                uniform vec3 uLightColor;
                 varying float vProgress;
                 varying vec3 vColor;
+                
 
                 void main() {
                     vec2 centeredCoord = gl_PointCoord - vec2(0.5);
@@ -568,22 +571,22 @@ uniform vec3 uLightColor;
 
       tl.to(
         particlesMaterial.uniforms.uVisibility,
-        { value: 1, duration: 5 },
+        { value: 1, duration: 4 },
         ">1"
       );
       tl.to(materials, { opacity: 0.0, duration: 0.5 }, "<");
       // tl.addLabel("particleConversion");
       tl.to(
         particlesMaterial.uniforms.uProgress,
-        { value: 1, duration: 20, ease: "power1.inOut" },
+        { value: 1, duration: 10, ease: "power1.inOut" },
         ">"
       );
 
       tl.to(
         camera,
         {
-          fov: 5,
-          duration: 50,
+          fov: 4,
+          duration: 10,
           ease: "power1.inOut",
           onUpdate: () => camera.updateProjectionMatrix(),
         },
@@ -592,7 +595,7 @@ uniform vec3 uLightColor;
       // tl.addLabel('beforeParticleFade', '>-5.5');
       tl.to(
         particlesMaterial.uniforms.uSizeMultiplier,
-        { value: 0, duration: 2.5, ease: "power2.inOut" },
+        { value: 0, duration: 0.5, ease: "power2.in" },
         ">-3"
       );
       if (
@@ -606,12 +609,12 @@ uniform vec3 uLightColor;
             duration: 1.5,
             ease: "power2.inOut",
           },
-          ">-4"
+          "<"
         );
       }
       tl.to(
         particlesMaterial.uniforms.uVisibility,
-        { value: 0, duration: 0.5, ease: "power2.inOut" },
+        { value: 0, duration: 0.7, ease: "power2.inOut" },
         "<"
       );
       tl.addLabel("starfieldFadeIn", ">-1");
@@ -623,7 +626,7 @@ uniform vec3 uLightColor;
           duration: 3,
           ease: "power2.inOut",
         },
-        ">-4"
+        ">-3.8"
       );
       // tl.addLabel('flyingText');
 
