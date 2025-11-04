@@ -177,7 +177,7 @@ const Animation = () => {
       (gltf) => {
         const sourceScene = gltf.scene;
         logoGroup = new THREE.Group();
-        logoGroup.scale.set(1.15, 1.15, 0.15);
+        logoGroup.scale.set(1.6, 1.6, 0.15);
 
         // ✅ Set initial position to the left, as per the first image.
         // logoGroup.position.set(-3, -0.5, 0);
@@ -207,7 +207,7 @@ const Animation = () => {
           spiralGroup.add(modelClone);
 
           // Set initial position (offset to the left)
-          spiralGroup.position.set(-3, -0.5, 0);
+          spiralGroup.position.set(-0.5, -0.5, 0);
           spiralGroup.rotation.set(-0.1, 0.2, -0.2);
 
           // Store reference to this spiral
@@ -317,7 +317,7 @@ const Animation = () => {
       const mergedMeshForSampling = new THREE.Mesh(mergedGeometry);
 
       const sampler = new MeshSurfaceSampler(mergedMeshForSampling).build();
-      const numParticles = 25000;
+      const numParticles = 18000;
 
       const particlesGeometry = new THREE.BufferGeometry();
       const positions = new Float32Array(numParticles * 3);
@@ -325,33 +325,55 @@ const Animation = () => {
       const sizes = new Float32Array(numParticles);
       const colors = new Float32Array(numParticles * 3);
 
-      const colorPalette = [
-        "#9F62FE", // sky blue
-        "#DF8CFF",
-        "#AB76E2",
+      const colorGradient = [
+        // "#5B2C91", // Deep purple (leftmost)
+        "#7B3DAF", // Purple
+        "#9B54CD", // Medium purple
+        "#B56EE3", // Light purple
+        "#CF89F5", // Lighter purple
+        "#E9A4FF", // Pink-purple (rightmost)
       ];
 
+      // Find bounds for normalization
+      let minX = Infinity,
+        maxX = -Infinity;
       for (let i = 0; i < numParticles; i++) {
         const newPosition = new THREE.Vector3();
         sampler.sample(newPosition);
-
         positions[i * 3] = newPosition.x;
         positions[i * 3 + 1] = newPosition.y;
         positions[i * 3 + 2] = newPosition.z;
+
+        minX = Math.min(minX, newPosition.x);
+        maxX = Math.max(maxX, newPosition.x);
+      }
+
+      for (let i = 0; i < numParticles; i++) {
+        const x = positions[i * 3];
+
+        // Normalize x position to 0-1 range
+        const t = (x - minX) / (maxX - minX);
+
+        // Map to gradient array index
+        const gradientIndex = t * (colorGradient.length - 1);
+        const lowerIndex = Math.floor(gradientIndex);
+        const upperIndex = Math.ceil(gradientIndex);
+        const localT = gradientIndex - lowerIndex;
+
+        // Interpolate between two colors
+        const color1 = new THREE.Color(colorGradient[lowerIndex]);
+        const color2 = new THREE.Color(colorGradient[upperIndex]);
+        const finalColor = color1.lerp(color2, localT);
+
+        colors[i * 3] = finalColor.r;
+        colors[i * 3 + 1] = finalColor.g;
+        colors[i * 3 + 2] = finalColor.b;
 
         randoms[i * 3] = 0;
         randoms[i * 3 + 1] = 0;
         randoms[i * 3 + 2] = Math.random() * 5.0;
 
         sizes[i] = 12 + Math.random() * 94;
-
-        const colorHex =
-          colorPalette[Math.floor(Math.random() * colorPalette.length)];
-        const color = new THREE.Color(colorHex);
-
-        colors[i * 3] = color.r;
-        colors[i * 3 + 1] = color.g;
-        colors[i * 3 + 2] = color.b;
       }
 
       particlesGeometry.setAttribute(
@@ -895,7 +917,7 @@ const Animation = () => {
 
       <canvas
         ref={canvasRef}
-        className="fixed top-0 left-0 outline-none z-10"
+        className="fixed top-0 left-0 outline-none z-30"
       />
 
       {/* ✅ This container will hold all the text content */}
@@ -907,9 +929,13 @@ const Animation = () => {
 
             {/* ✅ Initial text on the right */}
             <div className="w-1/2 initial-text">
-              <h1 className="text-5xl md:text-7xl font-bold leading-tight text-black  ">
+              <h1 className="text-5xl md:text-6xl font-bold leading-tight text-black  ">
                 One small step for your brand.
               </h1>
+              <p className="text-xl mt-2">Your journey begins here.</p>
+              <button className="hidden mt-4 md:block bg-purple-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-purple-700 transition-colors duration-300 ease-in-out">
+                Get Started
+              </button>
             </div>
           </div>
         </div>

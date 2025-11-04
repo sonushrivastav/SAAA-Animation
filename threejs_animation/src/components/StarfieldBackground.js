@@ -3,8 +3,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
-
-// 💡 Add the import for useControls from Leva
 import { Leva, useControls } from "leva";
 
 export default function StarfieldBackground({}) {
@@ -14,16 +12,16 @@ export default function StarfieldBackground({}) {
   const controls = useControls({
     // Starfield Controls
     baseSpeed: {
-      value: 0.5, // Used in the animate loop
+      value: 0.5,
       min: 0.01,
       max: 5.0,
       step: 0.01,
       label: "Base Speed",
     },
-    spacing: { value: 87, min: 10, max: 200, step: 1, label: "Grid Spacing" }, // New control
-    count: { value: 15, min: 1, max: 50, step: 1, label: "Grid Count" }, // New control
+    spacing: { value: 87, min: 10, max: 200, step: 1, label: "Grid Spacing" },
+    count: { value: 15, min: 1, max: 50, step: 1, label: "Grid Count" },
     sizeScale: {
-      value: 150.0, // Used in uSizeScale uniform
+      value: 150.0,
       min: 100,
       max: 2000,
       step: 10,
@@ -57,24 +55,29 @@ export default function StarfieldBackground({}) {
       step: 10,
       label: "Opacity Offset",
     },
-    // Animation/Distortion Controls
-    maxStretch: {
-      value: 30.0, // Used in scroll listener
-      min: 1.0,
-      max: 100,
-      step: 1,
-      label: "Max Stretch X",
+    // 🌠 New Streak Controls
+    streakLength: {
+      value: 2.5,
+      min: 0.0,
+      max: 10.0,
+      step: 0.1,
+      label: "Streak Length",
     },
-    maxShrink: {
-      value: 15.0, // Used in scroll listener
-      min: 1.0,
-      max: 50,
-      step: 1,
-      label: "Max Shrink Y",
+    streakIntensity: {
+      value: 0.8,
+      min: 0.0,
+      max: 1.0,
+      step: 0.01,
+      label: "Streak Intensity",
+    },
+    streakThreshold: {
+      value: 0.3,
+      min: 0.0,
+      max: 2.0,
+      step: 0.05,
+      label: "Speed Threshold",
     },
   });
-
-  // ---
 
   function createCircleTexture() {
     const size = 128;
@@ -85,25 +88,65 @@ export default function StarfieldBackground({}) {
 
     const cx = size / 2;
     const cy = size / 2;
-    const coreR = Math.floor(size * 0.18); // smaller core for glow effect
-    const outerR = Math.floor(size * 0.5); // glow radius
+    const coreR = Math.floor(size * 0.18);
+    const outerR = Math.floor(size * 0.5);
 
     ctx.clearRect(0, 0, size, size);
-    ctx.imageSmoothingEnabled = true; // smooth gradient
+    ctx.imageSmoothingEnabled = true;
 
-    // Create radial gradient
     const gradient = ctx.createRadialGradient(cx, cy, coreR, cx, cy, outerR);
-    gradient.addColorStop(0, "rgba(255,255,255,1)"); // core bright white
+    gradient.addColorStop(0, "rgba(255,255,255,1)");
     gradient.addColorStop(0.2, "rgba(255,255,255,0.8)");
     gradient.addColorStop(0.4, "rgba(255,255,255,0.5)");
-    gradient.addColorStop(1, "rgba(255,255,255,0)"); // fade out to transparent
+    gradient.addColorStop(1, "rgba(255,255,255,0)");
 
     ctx.fillStyle = gradient;
     ctx.beginPath();
     ctx.arc(cx, cy, outerR, 0, Math.PI * 2);
     ctx.fill();
 
-    // Create Three.js texture
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.minFilter = THREE.LinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+    tex.needsUpdate = true;
+
+    return tex;
+  }
+
+  // 🌠 New function to create streak/trail texture
+  function createStreakTexture() {
+    const width = 128;
+    const height = 512; // Longer for trail effect
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+
+    ctx.clearRect(0, 0, width, height);
+    ctx.imageSmoothingEnabled = true;
+
+    // Create vertical gradient for streak
+    const gradient = ctx.createLinearGradient(0, 0, 0, height);
+    gradient.addColorStop(0, "rgba(255,255,255,1)"); // Bright head
+    gradient.addColorStop(0.1, "rgba(255,255,255,0.9)");
+    gradient.addColorStop(0.3, "rgba(200,220,255,0.6)"); // Slight blue tint
+    gradient.addColorStop(0.6, "rgba(180,200,255,0.3)");
+    gradient.addColorStop(1, "rgba(150,180,255,0)"); // Fade to transparent
+
+    // Draw elongated ellipse
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.ellipse(
+      width / 2,
+      height / 2,
+      width / 3,
+      height / 2,
+      0,
+      0,
+      Math.PI * 2
+    );
+    ctx.fill();
+
     const tex = new THREE.CanvasTexture(canvas);
     tex.minFilter = THREE.LinearFilter;
     tex.magFilter = THREE.LinearFilter;
@@ -123,13 +166,14 @@ export default function StarfieldBackground({}) {
         for (let zLayer = -count; zLayer <= count; zLayer++) {
           const jitter = (Math.random() - 0.5) * 30;
           const z = zLayer * 40 + jitter;
-          starPositions.push(x * spacing, y * spacing, z); // Using spacing control
+          starPositions.push(x * spacing, y * spacing, z);
         }
       }
     }
 
     const total = starPositions.length / 3;
     const sizes = new Float32Array(total);
+    const randomValues = new Float32Array(total); // For variation
 
     let zMin = Infinity,
       zMax = -Infinity;
@@ -149,20 +193,16 @@ export default function StarfieldBackground({}) {
       const biased = Math.pow(normalized, 0.9);
       const base = minBase + biased * (maxBase - minBase);
       sizes[i] = base * (0.85 + Math.random() * 0.35);
+      randomValues[i] = Math.random(); // Store random value for each particle
     }
 
-    return { starPositions, sizes, totalDepth };
+    return { starPositions, sizes, randomValues, totalDepth };
   }, [controls.spacing, controls.count]);
 
   useEffect(() => {
-    // We use the destructured values from the controls
-    const { baseSpeed, spacing, count, sizeScale, maxStretch, maxShrink } =
-      controls;
+    const { baseSpeed, spacing, count, sizeScale } = controls;
+    const { starPositions, sizes, randomValues, totalDepth } = starData;
 
-    const { starPositions, sizes, totalDepth } = starData;
-
-    const loader = new THREE.TextureLoader();
-    const star = loader.load("/images/sp2.png");
     const scene = new THREE.Scene();
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
@@ -175,6 +215,7 @@ export default function StarfieldBackground({}) {
       hdrMap.mapping = THREE.EquirectangularReflectionMapping;
       scene.environment = hdrMap;
     });
+
     const camera = new THREE.PerspectiveCamera(
       75,
       window.innerWidth / window.innerHeight,
@@ -191,24 +232,6 @@ export default function StarfieldBackground({}) {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
 
-    // const colors = new Float32Array(total * 3);
-    // const color = new THREE.Color();
-
-    // for (let i = 0; i < total; i++) {
-    //   // ✨ Generate a random color for each star
-    //   color.setHSL(Math.random(), 0.7, 0.6);
-
-    //   // ✨ Store the R, G, B components in the array
-    //   colors[i * 3] = color.r;
-    //   colors[i * 3 + 1] = color.g;
-    //   colors[i * 3 + 2] = color.b;
-    // }
-
-    // starsGeometry.setAttribute(
-    //   "color",
-    //   new THREE.Float32BufferAttribute(colors, 3)
-    // );
-
     const starsGeometry = new THREE.BufferGeometry();
     starsGeometry.setAttribute(
       "position",
@@ -218,59 +241,53 @@ export default function StarfieldBackground({}) {
       "aSize",
       new THREE.Float32BufferAttribute(sizes, 1)
     );
+    starsGeometry.setAttribute(
+      "aRandom",
+      new THREE.Float32BufferAttribute(randomValues, 1)
+    );
 
     const starTexture = createCircleTexture();
+    const streakTexture = createStreakTexture();
 
-    // 💡 Use sizeScale from controls
     const material = new THREE.ShaderMaterial({
       uniforms: {
         uTexture: { value: starTexture },
+        uStreakTexture: { value: streakTexture },
         uSizeScale: { value: controls.sizeScale },
-        uStretchX: { value: 1.0 },
-        uShrinkY: { value: 1.0 },
         uTime: { value: 0 },
-        uSpiralProgress: { value: 0 },
-        uMergeProgress: { value: 0 },
-        uDirection: { value: new THREE.Vector3(0, 0, 1) }, // starts moving along Z-axis
+        uDirection: { value: new THREE.Vector3(0, 0, 1) },
         uSpeed: { value: controls.baseSpeed },
-
         uMinOpacity: { value: controls.minOpacity },
         uMaxOpacity: { value: controls.maxOpacity },
         uOpacityFalloff: { value: controls.opacityFalloff },
         uOpacityOffset: { value: controls.opacityOffset },
-        vertexColors: true,
+
+        // 🌠 Streak uniforms
+        uStreakLength: { value: controls.streakLength },
+        uStreakIntensity: { value: controls.streakIntensity },
+        uVelocity: { value: new THREE.Vector3(0, 0, 0) },
+        uStreakThreshold: { value: controls.streakThreshold },
       },
       vertexShader: `
         attribute float aSize;
-        attribute float aSpiral;
-        attribute vec3 color;
+        attribute float aRandom;
 
-        varying vec3 vColor;
         varying float vDepth;
+        varying float vSize;
+        varying float vRandom;
+        varying vec3 vPosition;
+        varying vec3 vVelocity;
 
         uniform float uSizeScale;
         uniform float uTime;
-        uniform float uSpiralProgress;
-        uniform float uMergeProgress;
+        uniform vec3 uDirection;
+        uniform vec3 uVelocity;
 
         void main() {
           vec3 pos = position;
-
-          vColor = color;
-
-          // Spiral effect (unchanged)
-          if (aSpiral > 0.5) {
-            float angle = uTime * 2.0 + pos.z * 0.05;
-            float radius = length(pos.xy) * (1.0 - uMergeProgress);
-
-            vec3 spiralPos = vec3(
-              cos(angle) * radius,
-              sin(angle) * radius,
-              pos.z
-            );
-
-            pos = mix(pos, spiralPos, uSpiralProgress);
-          }
+          vPosition = pos;
+          vRandom = aRandom;
+          vVelocity = uVelocity;
 
           vec4 mvPos = modelViewMatrix * vec4(pos, 1.0);
           float depth = -mvPos.z;
@@ -279,6 +296,7 @@ export default function StarfieldBackground({}) {
 
           float size = aSize * perspective;
           size = clamp(size, 1.0, 160.0);
+          vSize = size;
 
           gl_Position = projectionMatrix * mvPos;
           gl_PointSize = size;
@@ -288,92 +306,102 @@ export default function StarfieldBackground({}) {
       `,
       fragmentShader: `
         uniform sampler2D uTexture;
-        uniform float uStretchX;
-        uniform float uShrinkY;
-        varying vec3 vColor;
-        varying float vDepth;
-
+        uniform sampler2D uStreakTexture;
         uniform float uMinOpacity;
         uniform float uMaxOpacity;
         uniform float uOpacityFalloff;
         uniform float uOpacityOffset;
+        uniform float uStreakLength;
+        uniform float uStreakIntensity;
+        uniform vec3 uDirection;
+        uniform float uStreakThreshold;
+
+        varying float vDepth;
+        varying float vSize;
+        varying float vRandom;
+        varying vec3 vPosition;
+        varying vec3 vVelocity;
 
         void main() {
-          vec2 uv = gl_PointCoord - 0.5;
-
-          // elongate vertically and shrink horizontally
-          uv.x *= uStretchX;
-          uv.y /= uShrinkY;
-
-          uv += 0.5;
-
-          vec4 tex = texture2D(uTexture, uv);
-          if (tex.a < 0.05) discard;
+          vec2 uv = gl_PointCoord;
+          
+          // Calculate velocity magnitude
+          float velocityMag = length(vVelocity);
+          
+          // Determine if we should show streak based on velocity and direction
+          float isVertical = abs(uDirection.y);
+          float showStreak = step(uStreakThreshold, velocityMag) * isVertical;
+          
+          // Calculate streak effect
+          vec2 streakUV = uv;
+          
+          // Stretch UV based on velocity direction
+          if (showStreak > 0.5) {
+            // Align streak with movement direction
+            vec2 dir = normalize(vVelocity.xy);
+            float angle = atan(dir.y, dir.x) + 3.14159 / 2.0;
+            
+            // Rotate UV coordinates
+            vec2 centered = uv - 0.5;
+            float cosA = cos(angle);
+            float sinA = sin(angle);
+            streakUV = vec2(
+              centered.x * cosA - centered.y * sinA,
+              centered.x * sinA + centered.y * cosA
+            ) + 0.5;
+            
+            // Stretch vertically for streak
+            streakUV.y = (streakUV.y - 0.5) * (1.0 + velocityMag * uStreakLength) + 0.5;
+          }
+          
+          // Sample textures
+          vec4 dotColor = texture2D(uTexture, uv);
+          vec4 streakColor = texture2D(uStreakTexture, streakUV);
+          
+          // Blend between dot and streak based on velocity
+          float streakBlend = showStreak * uStreakIntensity * smoothstep(uStreakThreshold, uStreakThreshold + 0.5, velocityMag);
+          vec4 finalTexture = mix(dotColor, streakColor, streakBlend);
+          
+          // Add brightness boost for fast-moving particles
+          float speedBoost = 1.0 + (velocityMag * 0.3);
+          finalTexture.rgb *= speedBoost;
+          
+          if (finalTexture.a < 0.05) discard;
 
           // Calculate opacity based on depth
           float normalizedDepth = clamp((vDepth + uOpacityOffset) / uOpacityFalloff, 0.0, 1.0);
           float finalOpacity = mix(uMaxOpacity, uMinOpacity, normalizedDepth);
 
-          gl_FragColor = tex * vec4(vColor, finalOpacity);
+          // Add subtle color variation to streaks
+          vec3 streakTint = vec3(0.9, 0.95, 1.0); // Slight blue-white tint
+          vec3 finalColor = mix(vec3(1.0), streakTint, streakBlend * 0.5);
+
+          gl_FragColor = vec4(finalColor, finalOpacity) * finalTexture;
         }
       `,
       transparent: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
     });
+
     window.starfieldUniforms = material.uniforms;
     window.starfieldTotalDepth = totalDepth;
+
     const stars = new THREE.Points(starsGeometry, material);
     scene.add(stars);
-    // gsap.to(camera.position, {
-    //     z: 0,
-    //     duration: 4,
-    //     ease: 'power2.out',
-    //     delay: 0.2,
-    //     onUpdate: () => {
-    //         camera.updateProjectionMatrix();
-    //     },
-    // });
+
     let lastScroll = window.scrollY;
     let scrollSpeed = 0;
     let velocity = 0;
     let targetSpeed = 0;
+    let lastPosition = new THREE.Vector3();
+    let currentVelocity = new THREE.Vector3();
 
     window.addEventListener("scroll", () => {
       const newScroll = window.scrollY;
       velocity = newScroll - lastScroll;
       lastScroll = newScroll;
       scrollSpeed += velocity * 0.05;
-
-      // 💡 Use maxStretch and maxShrink from controls
-      // const stretchX = 1.0 + Math.min(Math.abs(velocity) * 0.08, maxStretch);
-      // const shrinkY = 1.0 + Math.min(Math.abs(velocity) * 0.05, maxShrink);
-
-      // gsap.to(material.uniforms.uStretchX, {
-      //   value: stretchX,
-      //   duration: 0.5,
-      //   ease: "power2.out",
-      //   onComplete: () => {
-      //     gsap.to(material.uniforms.uStretchX, {
-      //       value: 1.0,
-      //       duration: 0.5,
-      //       ease: "power2.out",
-      //     });
-      //   },
-      // });
-
-      // gsap.to(material.uniforms.uShrinkY, {
-      //   value: shrinkY,
-      //   duration: 0.5,
-      //   ease: "power2.out",
-      //   onComplete: () => {
-      //     gsap.to(material.uniforms.uShrinkY, {
-      //       value: 1.0,
-      //       duration: 0.5,
-      //       ease: "power2.out",
-      //     });
-      //   },
-      // });
     });
 
     // 🖱 Mouse parallax
@@ -392,10 +420,19 @@ export default function StarfieldBackground({}) {
       // Always move forward with baseSpeed, add scroll speed for reverse effect
       const currentSpeed = baseSpeed + scrollSpeed;
 
-      // Move stars backward/forward based on total speed
-      // Move stars along the current direction
-      // 🌌 Move stars along direction vector
+      // Calculate velocity for streak effect
       const dir = material.uniforms.uDirection.value;
+      const movement = dir.clone().multiplyScalar(currentSpeed);
+
+      // Calculate actual velocity (change in position)
+      const newPosition = stars.position.clone();
+      currentVelocity.copy(newPosition).sub(lastPosition);
+      lastPosition.copy(newPosition);
+
+      // Update velocity uniform for shader
+      material.uniforms.uVelocity.value.copy(currentVelocity);
+
+      // Move stars along the current direction
       stars.position.addScaledVector(dir, currentSpeed);
 
       // 🌠 Axis-agnostic wrapping
@@ -419,13 +456,11 @@ export default function StarfieldBackground({}) {
         if (stars.position.x < -half) stars.position.x += total;
       }
 
-      // Decay scroll speed - returns to 0, leaving only baseSpeed
+      // Decay scroll speed
       targetSpeed *= 0.85;
 
       camera.position.x += (mouse.x * 15 - camera.position.x) * 0.03;
       camera.position.y += (mouse.y * 15 - camera.position.y) * 0.03;
-      // stars.position.x += (mouse.x * 15 - stars.position.x) * 0.03;
-      // stars.position.y += (mouse.y * 15 - stars.position.y) * 0.03;
 
       renderer.render(scene, camera);
     };
@@ -440,11 +475,11 @@ export default function StarfieldBackground({}) {
     window.addEventListener("resize", onResize);
 
     return () => {
-      renderer.setAnimationLoop(null); // Use null instead of cancelAnimationFrame(animate) for modern usage
-      window.removeEventListener("scroll", () => {}); // Need to properly remove the scroll listener
+      renderer.setAnimationLoop(null);
       window.removeEventListener("resize", onResize);
       renderer.dispose();
       starTexture.dispose();
+      streakTexture.dispose();
       material.dispose();
       starsGeometry.dispose();
     };
@@ -452,7 +487,7 @@ export default function StarfieldBackground({}) {
 
   return (
     <>
-      <Leva hidden />
+      <Leva hidden={false} />
 
       <div className="fixed inset-0 z-0 bg-[linear-gradient(to_bottom,_#352355,_#0F0F0F,_#352355)]">
         <canvas ref={canvasRef} className="w-full h-full" />
