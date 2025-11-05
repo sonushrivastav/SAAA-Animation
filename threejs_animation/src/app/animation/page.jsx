@@ -168,10 +168,15 @@ const Animation = () => {
       { s: 3.8, p: [-0.46, -0.8, -0.11], r: [Math.PI / 3, 2.5, 0.0] },
     ];
 
+    // Store initial positions/rotations for floating animation
+    const spiralInitialStates = [];
+
     const loader = new GLTFLoader();
     let particlesMaterial = null;
     let logoGroup = null;
     const individualSpirals = [];
+    let animationState = { isInitialState: true };
+
     loader.load(
       "/models/T3d.glb",
       (gltf) => {
@@ -209,6 +214,13 @@ const Animation = () => {
           // Set initial position (offset to the left)
           spiralGroup.position.set(-0.5, -0.5, 0);
           spiralGroup.rotation.set(-0.1, 0.2, -0.2);
+
+          // Store initial state for floating animation
+          spiralInitialStates.push({
+            initialY: -0.5,
+            initialRotX: -0.1,
+            initialRotZ: -0.2,
+          });
 
           // Store reference to this spiral
           individualSpirals.push({
@@ -250,7 +262,9 @@ const Animation = () => {
           allMaterials,
           individualSpirals,
           scene,
-          camera
+          camera,
+          animationState,
+          spiralInitialStates
         );
       },
       undefined,
@@ -267,7 +281,8 @@ const Animation = () => {
       materials,
       spirals,
       scene,
-      camera
+      camera,
+      animState
     ) {
       // Create a temporary sampling group that matches the FINAL assembled state
       const samplingGroup = new THREE.Group();
@@ -401,11 +416,23 @@ const Animation = () => {
 
       scene.add(particleSystem);
       if (flowingParticlesMaterialRef.current) {
-        setupScrollAnimation(materials, spirals, particlesMaterial, camera);
+        setupScrollAnimation(
+          materials,
+          spirals,
+          particlesMaterial,
+          camera,
+          animState
+        );
       } else {
         const checkRefInterval = setInterval(() => {
           if (flowingParticlesMaterialRef.current) {
-            setupScrollAnimation(materials, spirals, particlesMaterial, camera);
+            setupScrollAnimation(
+              materials,
+              spirals,
+              particlesMaterial,
+              camera,
+              animState
+            );
             clearInterval(checkRefInterval);
           }
         }, 100);
@@ -506,7 +533,8 @@ const Animation = () => {
       materials,
       spirals,
       particlesMaterial,
-      camera
+      camera,
+      animState
     ) {
       // Make sure starfield starts hidden
       gsap.set(".starfield-layer", { opacity: 0 });
@@ -527,6 +555,11 @@ const Animation = () => {
           // },
 
           onUpdate: (self) => {
+            if (self.progress > 0) {
+              animState.isInitialState = false;
+            } else if (self.progress <= 0.05) {
+              animState.isInitialState = true;
+            }
             gsap.to(flowAnimation.current, {
               scrollSpeed: self.getVelocity() * 0.005,
               duration: 0.9,
@@ -538,7 +571,7 @@ const Animation = () => {
 
       // --- STEP 1: Move logo to center ---
       // tl.addLabel("initial");
-
+      const TEXT1_START_EARLY = 1.5;
       // Animate each spiral individually to center with rotation
       spirals.forEach((spiral, index) => {
         const delay = index * 0.3;
@@ -570,22 +603,103 @@ const Animation = () => {
         );
       });
 
-      // --- STEP 3: Fade initial text ---
+      const TOTAL_ROTATION_DURATION = 5; // matches spiral rotation duration
+      const STEPS = 4; // number of steps/pauses
+      const STEP_MOVE_DISTANCE = -50; // pixels to move each step
+      const PAUSE_DURATION = TOTAL_ROTATION_DURATION / (STEPS * 2);
+
+      // Text1 stepping animation synchronized with logo rotation
+      for (let i = 0; i < STEPS; i++) {
+        const stepDelay = i === 0 ? `<-${TEXT1_START_EARLY}` : ">"; // first step starts with rotation, others follow
+
+        // Move upward
+        tl.to(
+          ".initial-text",
+          {
+            y: STEP_MOVE_DISTANCE * (i + 1), // cumulative upward movement
+            duration: PAUSE_DURATION,
+            ease: "power1.inOut",
+          },
+          stepDelay
+        );
+
+        // Pause/hold position
+        tl.to(
+          ".initial-text",
+          {
+            duration: PAUSE_DURATION * 0.8, // slightly shorter pause
+            ease: "none",
+          },
+          ">"
+        );
+      }
+
+      // Final move - text1 goes completely off screen
       tl.to(
         ".initial-text",
-        { opacity: 0, duration: 3.5, ease: "power1.inOut" },
-        "<-1"
+        {
+          y: "-100vh", // completely off screen
+          opacity: 0,
+          duration: 1.5,
+          ease: "power2.in",
+        },
+        ">"
       );
 
-      tl.to(
+      // --- Second text appears and moves up in steps ---
+      // Text2 enters from bottom
+      tl.fromTo(
         ".second-text",
-        { opacity: 1, duration: 2.5, ease: "power1.inOut" },
-        ">+1"
+        {
+          y: "20vh", // start from below
+          opacity: 0,
+        },
+        {
+          y: 0, // move to center
+          opacity: 1,
+          duration: 1.5,
+          ease: "power2.out",
+        },
+        ">+0.5"
       );
-      // tl.addLabel("rotation");
+
+      // Text2 stepping animation (similar to text1)
+      const TEXT2_STEPS = 5; // can be different number of steps
+      const TEXT2_STEP_DISTANCE = -60;
+      const TEXT2_STEP_DURATION = 0.8;
+
+      for (let i = 0; i < TEXT2_STEPS; i++) {
+        // Move upward
+        tl.to(
+          ".second-text",
+          {
+            y: TEXT2_STEP_DISTANCE * (i + 1),
+            duration: TEXT2_STEP_DURATION,
+            ease: "power1.inOut",
+          },
+          ">"
+        );
+
+        // Pause/hold
+        tl.to(
+          ".second-text",
+          {
+            duration: TEXT2_STEP_DURATION * 0.7,
+            ease: "none",
+          },
+          ">"
+        );
+      }
+
+      // Final move - text2 goes completely off screen
       tl.to(
         ".second-text",
-        { opacity: 0, duration: 3, ease: "power1.inOut" },
+        {
+          y: "-100vh",
+          opacity: 0,
+          duration: 1.8,
+          ease: "power2.in",
+        },
         ">"
       );
 
@@ -887,9 +1001,38 @@ const Animation = () => {
     window.addEventListener("mousemove", handleMouseMove);
 
     function animate() {
+      const time = performance.now() * 0.001;
+
       if (particlesMaterial) {
-        particlesMaterial.uniforms.uTime.value = performance.now() * 0.001;
+        particlesMaterial.uniforms.uTime.value = time;
       }
+
+      // Float each spiral on its own axis ONLY when in initial state (before scroll)
+      if (animationState.isInitialState && individualSpirals.length > 0) {
+        individualSpirals.forEach((spiral, index) => {
+          const initialState = spiralInitialStates[index];
+          if (!initialState) return;
+
+          const offset = index * 0.01; // Phase offset for variety
+          const speed = 0.5 + index * 0.03; // Different speeds per spiral
+
+          // Gentle floating motion on Y axis
+          const floatAmplitude = 0.02;
+          spiral.group.position.y =
+            initialState.initialY +
+            Math.sin(time * speed + offset) * floatAmplitude;
+
+          // Subtle rotation float
+          const rotAmplitude = 0.03;
+          spiral.group.rotation.x =
+            initialState.initialRotX +
+            Math.sin(time * speed * 0.7 + offset) * rotAmplitude;
+          spiral.group.rotation.z =
+            initialState.initialRotZ +
+            Math.cos(time * speed * 0.5 + offset) * rotAmplitude;
+        });
+      }
+
       // camera.position.x += (mouseX * 5 - camera.position.x) * 0.02;
       // camera.position.y += (mouseY * 5 - camera.position.y) * 0.02;
       renderer.render(scene, camera);
@@ -929,13 +1072,13 @@ const Animation = () => {
 
             {/* ✅ Initial text on the right */}
             <div className="w-1/2 initial-text">
-              <h1 className="text-5xl md:text-6xl font-bold leading-tight text-black  ">
+              <h1 className="text-5xl md:text-7xl font-bold leading-tight text-black  ">
                 One small step for your brand.
               </h1>
-              <p className="text-xl mt-2">Your journey begins here.</p>
+              {/* <p className="text-xl mt-2">Your journey begins here.</p>
               <button className="hidden mt-4 md:block bg-purple-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-purple-700 transition-colors duration-300 ease-in-out">
                 Get Started
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
