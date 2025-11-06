@@ -1,5 +1,12 @@
 "use client";
 
+import {
+  BlendFunction,
+  BloomEffect,
+  EffectComposer,
+  EffectPass,
+  RenderPass,
+} from "postprocessing";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
@@ -23,7 +30,7 @@ export default function StarfieldBackground({}) {
     spacing: { value: 87, min: 10, max: 200, step: 1, label: "Grid Spacing" }, // New control
     count: { value: 15, min: 1, max: 50, step: 1, label: "Grid Count" }, // New control
     sizeScale: {
-      value: 150.0, // Used in uSizeScale uniform
+      value: 200.0, // Used in uSizeScale uniform
       min: 100,
       max: 2000,
       step: 10,
@@ -151,7 +158,7 @@ export default function StarfieldBackground({}) {
       sizes[i] = base * (0.85 + Math.random() * 0.35);
     }
 
-    return { starPositions, sizes, totalDepth };
+    return { starPositions, sizes, totalDepth, total };
   }, [controls.spacing, controls.count]);
 
   useEffect(() => {
@@ -159,7 +166,9 @@ export default function StarfieldBackground({}) {
     const { baseSpeed, spacing, count, sizeScale, maxStretch, maxShrink } =
       controls;
 
-    const { starPositions, sizes, totalDepth } = starData;
+    const { starPositions, sizes, totalDepth, total } = starData;
+    // Store globally so other component can use
+    window.globalStarPositions = starPositions;
 
     const loader = new THREE.TextureLoader();
     const star = loader.load("/images/sp2.png");
@@ -191,6 +200,20 @@ export default function StarfieldBackground({}) {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
 
+    // 🌟 Add postprocessing composer
+    const composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+
+    const bloomEffect = new BloomEffect({
+      intensity: 1.8, // controls glow brightness
+      luminanceThreshold: 0.02, // lower = more glow
+      luminanceSmoothing: 1.9,
+      blendFunction: BlendFunction.ADD,
+    });
+
+    const bloomPass = new EffectPass(camera, bloomEffect);
+    composer.addPass(bloomPass);
+
     // const colors = new Float32Array(total * 3);
     // const color = new THREE.Color();
 
@@ -209,6 +232,19 @@ export default function StarfieldBackground({}) {
     //   new THREE.Float32BufferAttribute(colors, 3)
     // );
 
+    // 🌈 Set single color for all particles
+    const colors = new Float32Array(total * 3);
+    const color = new THREE.Color();
+    color.set("#ab76e2"); // 👈 change this hex value to your desired color
+
+    for (let i = 0; i < total; i++) {
+      colors[i * 3] = color.r;
+      colors[i * 3 + 1] = color.g;
+      colors[i * 3 + 2] = color.b;
+    }
+
+    // Attach color attribute to geometry
+
     const starsGeometry = new THREE.BufferGeometry();
     starsGeometry.setAttribute(
       "position",
@@ -217,6 +253,10 @@ export default function StarfieldBackground({}) {
     starsGeometry.setAttribute(
       "aSize",
       new THREE.Float32BufferAttribute(sizes, 1)
+    );
+    starsGeometry.setAttribute(
+      "color",
+      new THREE.Float32BufferAttribute(colors, 3)
     );
 
     const starTexture = createCircleTexture();
@@ -427,7 +467,8 @@ export default function StarfieldBackground({}) {
       // stars.position.x += (mouse.x * 15 - stars.position.x) * 0.03;
       // stars.position.y += (mouse.y * 15 - stars.position.y) * 0.03;
 
-      renderer.render(scene, camera);
+      // renderer.render(scene, camera);
+      composer.render();
     };
     renderer.setAnimationLoop(animate);
 
@@ -436,6 +477,7 @@ export default function StarfieldBackground({}) {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
+      composer.setSize(window.innerWidth, window.innerHeight);
     };
     window.addEventListener("resize", onResize);
 
@@ -454,7 +496,7 @@ export default function StarfieldBackground({}) {
     <>
       <Leva hidden />
 
-      <div className="fixed inset-0 z-0 bg-[linear-gradient(to_bottom,_#352355,_#0F0F0F,_#352355)]">
+      <div className="fixed inset-0 z-0 bg-[#0f0f0f] ">
         <canvas ref={canvasRef} className="w-full h-full" />
       </div>
     </>

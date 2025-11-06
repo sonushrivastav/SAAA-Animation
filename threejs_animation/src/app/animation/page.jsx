@@ -12,10 +12,11 @@ import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
 import Footer from "../../components/Footer";
 import Navbar from "../../components/Navbar";
 import FlowingParticles from "../../components/ParticleBackground";
-import ScrollServiceLogo from "../../components/ScrollServiceLogo";
 import StarfieldBackground from "../../components/StarfieldBackground";
 import StatsSection from "../../components/Stats";
-
+import ParticlesMorphPerSlice from "../../components/ScrollServiceLogo";
+import { Bloom, EffectComposer } from "@react-three/postprocessing";
+import { BlendFunction } from "postprocessing";
 // ✅ It's good practice to register the plugin once
 gsap.registerPlugin(ScrollTrigger);
 
@@ -844,24 +845,24 @@ const Animation = () => {
         ".starfield-layer",
         {
           opacity: 0,
-          duration: 3,
+          duration: 2,
           ease: "power2.inOut",
         },
         ">-1"
       );
 
-      tl.addLabel("starfieldFadeOut");
+      // tl.addLabel('starfieldFadeOut');
 
-      tl.to(
-        flowingParticlesMaterialRef.current.uniforms.uOpacity,
-        {
-          value: 0,
-          duration: 1.5,
-          ease: "power2.inOut",
-        },
-        "<-3"
-      );
-      tl.addLabel("serviceSectionReveal");
+      // tl.to(
+      //     flowingParticlesMaterialRef.current.uniforms.uOpacity,
+      //     {
+      //         value: 0,
+      //         duration: 1.5,
+      //         ease: 'power2.inOut',
+      //     },
+      //     '<-3'
+      // );
+      // tl.addLabel('serviceSectionReveal');
       tl.to(
         ".next-section",
         {
@@ -870,8 +871,35 @@ const Animation = () => {
           duration: 2,
           ease: "power2.inOut",
         },
-        ">0.5"
+        "<-4"
       );
+
+      const morphState = { value: 0 }; // proxy variable for morph progress
+
+      tl.to(
+        morphState,
+        {
+          value: 1,
+          duration: 18, // adjust for slower morph
+          ease: "power2.inOut",
+          onUpdate: () => {
+            if (window.particleMorphUniforms) {
+              window.particleMorphUniforms.forEach((u) => {
+                u.uMorph.value = morphState.value;
+              });
+            }
+          },
+        },
+        "<-2.5"
+      );
+
+      tl.eventCallback("onReverseUpdate", () => {
+        if (window.particleMorphUniforms) {
+          window.particleMorphUniforms.forEach((u) => {
+            u.uMorph.value = morphState.value;
+          });
+        }
+      }); // runs while it fades in
 
       // --- STEP 7: Logo + service text synchronized animation ---
 
@@ -880,18 +908,8 @@ const Animation = () => {
 
       // reset all texts and logo
       gsap.set(".service-text", { opacity: 0 });
-      gsap.set(".service-logo", { opacity: 0 });
+      gsap.set(".service-logo", { opacity: 1 });
       setActiveServiceIndex(0);
-
-      tl.to(
-        ".service-logo",
-        {
-          opacity: 1,
-          duration: 2.8,
-          ease: "power2.inOut",
-        },
-        ">-0.4"
-      );
 
       tl.to(
         ".service-0",
@@ -901,7 +919,7 @@ const Animation = () => {
           ease: "power2.inOut",
           onStart: () => setActiveServiceIndex(0),
         },
-        "<"
+        ">-1"
       );
 
       for (let i = 1; i < serviceCount; i++) {
@@ -949,7 +967,7 @@ const Animation = () => {
           },
           onReverseComplete: () => {
             // gsap.set('.service-text', { opacity: 0 });
-            setActiveServiceIndex(0);
+            // setActiveServiceIndex(0);
           },
         },
         "serviceEnd"
@@ -972,7 +990,7 @@ const Animation = () => {
       tl.to(
         ".next-section",
         {
-          y: -150,
+          y: -550,
           opacity: 0,
           duration: 4,
           ease: "power2.inOut",
@@ -1075,10 +1093,6 @@ const Animation = () => {
               <h1 className="text-5xl md:text-7xl font-bold leading-tight text-black  ">
                 One small step for your brand.
               </h1>
-              {/* <p className="text-xl mt-2">Your journey begins here.</p>
-              <button className="hidden mt-4 md:block bg-purple-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-purple-700 transition-colors duration-300 ease-in-out">
-                Get Started
-              </button> */}
             </div>
           </div>
         </div>
@@ -1108,11 +1122,41 @@ const Animation = () => {
         </div>
       </div>
 
-      <div className="next-section bg-black  text-white fixed inset-0 flex items-center justify-center opacity-0 z-50 ">
+      <div className="next-section   text-white fixed inset-0  flex items-center justify-center opacity-0 z-15 ">
         <div className="service-logo fixed inset-0 opacity-1 ">
           <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
-            {/* <primitive object={new AxesHelper(1)} /> */}
-            <ScrollServiceLogo activeIndex={activeServiceIndex} />
+            <color attach="background" args={["#0f0f0f"]} />/
+            <ambientLight intensity={0.8} />
+            <spotLight
+              position={[5, 5, 5]}
+              angle={0.3}
+              penumbra={1}
+              intensity={2}
+              color={"#9c4df4"}
+            />
+            <pointLight
+              position={[-5, -5, 5]}
+              intensity={1.5}
+              color={"#2f00ff"}
+            />
+            <ParticlesMorphPerSlice
+              glbPath={"/models/T3d.glb"}
+              particleCount={15000}
+              size={14}
+              streamLength={8}
+              streamRatio={0.4}
+              initialActiveIndex={0}
+              activeIndex={activeServiceIndex}
+            />
+            {/* <ServiceLogoBG /> */}
+            <EffectComposer>
+              <Bloom
+                intensity={1.2} // brightness of glow
+                luminanceThreshold={0.2} // lower = more glow
+                luminanceSmoothing={0.8}
+                blendFunction={BlendFunction.ADD}
+              />
+            </EffectComposer>
           </Canvas>
         </div>
 
