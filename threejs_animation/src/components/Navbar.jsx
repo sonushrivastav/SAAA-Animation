@@ -10,7 +10,7 @@ const Navbar = () => {
   // Helper array for navigation links to keep the code clean
   const navLinks = [
     { href: "#home", label: "Home" },
-    { href: "#about", label: "About" },
+    { href: "/service", label: "Service" },
     { href: "#contact", label: "Contact" },
   ];
 
