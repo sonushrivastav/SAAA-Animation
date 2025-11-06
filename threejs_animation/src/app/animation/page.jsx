@@ -11,11 +11,10 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
-import FloatingParticles from '../../components/FloatingParticles';
 import Footer from '../../components/Footer';
 import Navbar from '../../components/Navbar';
 import FlowingParticles from '../../components/ParticleBackground';
-import ScrollServiceLogo from '../../components/ScrollServiceLogo';
+import ParticlesMorphPerSlice from '../../components/ScrollServiceLogo';
 import StarfieldBackground from '../../components/StarfieldBackground';
 import StatsSection from '../../components/Stats';
 
@@ -162,16 +161,20 @@ const Animation = () => {
             { s: 3.8, p: [-0.46, -0.8, -0.11], r: [Math.PI / 3, 2.5, 0.0] },
         ];
 
+        const spiralInitialStates = [];
+
         const loader = new GLTFLoader();
         let particlesMaterial = null;
         let logoGroup = null;
         const individualSpirals = [];
+        let animationState = { isInitialState: true };
+
         loader.load(
             '/models/T3d.glb',
             gltf => {
                 const sourceScene = gltf.scene;
                 logoGroup = new THREE.Group();
-                logoGroup.scale.set(1.15, 1.15, 0.15);
+                logoGroup.scale.set(1.6, 1.6, 0.15);
 
                 // ✅ Set initial position to the left, as per the first image.
                 // logoGroup.position.set(-3, -0.5, 0);
@@ -201,8 +204,15 @@ const Animation = () => {
                     spiralGroup.add(modelClone);
 
                     // Set initial position (offset to the left)
-                    spiralGroup.position.set(-3, -0.5, 0);
+                    spiralGroup.position.set(-0.5, -0.5, 0);
                     spiralGroup.rotation.set(-0.1, 0.2, -0.2);
+
+                    // Store initial state for floating animation
+                    spiralInitialStates.push({
+                        initialY: -0.5,
+                        initialRotX: -0.1,
+                        initialRotZ: -0.2,
+                    });
 
                     // Store reference to this spiral
                     individualSpirals.push({
@@ -244,7 +254,9 @@ const Animation = () => {
                     allMaterials,
                     individualSpirals,
                     scene,
-                    camera
+                    camera,
+                    animationState,
+                    spiralInitialStates
                 );
             },
             undefined,
@@ -261,7 +273,8 @@ const Animation = () => {
             materials,
             spirals,
             scene,
-            camera
+            camera,
+            animState
         ) {
             // Create a temporary sampling group that matches the FINAL assembled state
             const samplingGroup = new THREE.Group();
@@ -308,7 +321,7 @@ const Animation = () => {
             const mergedMeshForSampling = new THREE.Mesh(mergedGeometry);
 
             const sampler = new MeshSurfaceSampler(mergedMeshForSampling).build();
-            const numParticles = 8000;
+            const numParticles = 18000;
 
             const particlesGeometry = new THREE.BufferGeometry();
             const positions = new Float32Array(numParticles * 3);
@@ -316,32 +329,55 @@ const Animation = () => {
             const sizes = new Float32Array(numParticles);
             const colors = new Float32Array(numParticles * 3);
 
-            const colorPalette = [
-                '#9F62FE', // sky blue
-                '#DF8CFF',
-                '#AB76E2',
+            const colorGradient = [
+                // "#5B2C91", // Deep purple (leftmost)
+                '#7B3DAF', // Purple
+                '#9B54CD', // Medium purple
+                '#B56EE3', // Light purple
+                '#CF89F5', // Lighter purple
+                '#E9A4FF', // Pink-purple (rightmost)
             ];
 
+            // Find bounds for normalization
+            let minX = Infinity,
+                maxX = -Infinity;
             for (let i = 0; i < numParticles; i++) {
                 const newPosition = new THREE.Vector3();
                 sampler.sample(newPosition);
-
                 positions[i * 3] = newPosition.x;
                 positions[i * 3 + 1] = newPosition.y;
                 positions[i * 3 + 2] = newPosition.z;
+
+                minX = Math.min(minX, newPosition.x);
+                maxX = Math.max(maxX, newPosition.x);
+            }
+
+            for (let i = 0; i < numParticles; i++) {
+                const x = positions[i * 3];
+
+                // Normalize x position to 0-1 range
+                const t = (x - minX) / (maxX - minX);
+
+                // Map to gradient array index
+                const gradientIndex = t * (colorGradient.length - 1);
+                const lowerIndex = Math.floor(gradientIndex);
+                const upperIndex = Math.ceil(gradientIndex);
+                const localT = gradientIndex - lowerIndex;
+
+                // Interpolate between two colors
+                const color1 = new THREE.Color(colorGradient[lowerIndex]);
+                const color2 = new THREE.Color(colorGradient[upperIndex]);
+                const finalColor = color1.lerp(color2, localT);
+
+                colors[i * 3] = finalColor.r;
+                colors[i * 3 + 1] = finalColor.g;
+                colors[i * 3 + 2] = finalColor.b;
 
                 randoms[i * 3] = 0;
                 randoms[i * 3 + 1] = 0;
                 randoms[i * 3 + 2] = Math.random() * 5.0;
 
                 sizes[i] = 12 + Math.random() * 94;
-
-                const colorHex = colorPalette[Math.floor(Math.random() * colorPalette.length)];
-                const color = new THREE.Color(colorHex);
-
-                colors[i * 3] = color.r;
-                colors[i * 3 + 1] = color.g;
-                colors[i * 3 + 2] = color.b;
             }
 
             particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
@@ -354,11 +390,17 @@ const Animation = () => {
 
             scene.add(particleSystem);
             if (flowingParticlesMaterialRef.current) {
-                setupScrollAnimation(materials, spirals, particlesMaterial, camera);
+                setupScrollAnimation(materials, spirals, particlesMaterial, camera, animState);
             } else {
                 const checkRefInterval = setInterval(() => {
                     if (flowingParticlesMaterialRef.current) {
-                        setupScrollAnimation(materials, spirals, particlesMaterial, camera);
+                        setupScrollAnimation(
+                            materials,
+                            spirals,
+                            particlesMaterial,
+                            camera,
+                            animState
+                        );
                         clearInterval(checkRefInterval);
                     }
                 }, 100);
@@ -381,45 +423,48 @@ const Animation = () => {
 
                 varying float vProgress;
                 varying vec3 vColor;
+                varying float vDepth;
 
                 void main() {
                      vProgress = uProgress;
-    vColor = aColor;
+                     vColor = aColor;
 
-    // float xSpread = (fract(sin(dot(position.xy ,vec2(12.9898,78.233))) * 43758.5453) - 0.5) * 2.0;
-    vec3 explodeDir = normalize(vec3(0, (aRandom.y + 2.0) * 0.1, 1.0)) * (aRandom.z * 0.4) * uProgress;
-    vec3 exploded = position + explodeDir * aRandom.z * uProgress;
+                    vec3 explodeDir = normalize(vec3(0, (aRandom.y + 2.0) * 0.1, 1.0)) * (aRandom.z * 0.4) * uProgress;
+                    vec3 exploded = position + explodeDir * 2.0 * aRandom.z * uProgress;
 
-    // ---------- floating orbit-based motion ----------
-    float orbitRadius = 0.2 + fract(aRandom.y) * 0.0;
-    float speed = 0.2 + fract(aRandom.z) * 0.1;
+                     // ---------- floating orbit-based motion ----------
+                    float orbitRadius = 0.2 + fract(aRandom.y) * 0.0;
+                    float speed = 0.2 + fract(aRandom.z) * 0.1;
 
-    // base exploded position
-    vec3 finalPosition = exploded;
+                      // base exploded position
+                     vec3 finalPosition = exploded;
 
-    // circular orbital motion applied during explosion
-    finalPosition.x += cos(uTime * speed + aRandom.x) * orbitRadius * uProgress;
-    finalPosition.y += sin(uTime * speed + aRandom.y) * orbitRadius * uProgress;
+                    // circular orbital motion applied during explosion
+                    finalPosition.x += cos(uTime * speed + aRandom.x) * orbitRadius * uProgress;
+                    finalPosition.y += sin(uTime * speed + aRandom.y) * orbitRadius * uProgress;
 
-    vec4 mvPosition = modelViewMatrix * vec4(finalPosition, 1.0);
-    gl_Position = projectionMatrix * mvPosition;
+                     vec4 mvPosition = modelViewMatrix * vec4(finalPosition, 1.0);
+                     gl_Position = projectionMatrix * mvPosition;
 
-    vec4 viewPos = modelViewMatrix * vec4(exploded, 1.0);
-    float dist = abs(viewPos.z);
-    float baseSize = 1.0;
-    float towardCamera = step(0.0, -explodeDir.z);
-    float sizeByDistance = mix(1.0, (1.0 / (dist * 0.25 + 1.0)), towardCamera);
-    float nearBoost = mix(1.0, 1.8, smoothstep(0.0, 0.0, -viewPos.z));
-    gl_PointSize = baseSize * sizeByDistance * nearBoost * 80.0 / -viewPos.z;
+                     // Pass depth for fadeout calculation
+                    vDepth = mvPosition.z;
+                    vec4 viewPos = modelViewMatrix * vec4(exploded, 1.0);
+                    float dist = abs(viewPos.z);
+                    float baseSize = 1.0;
+                    float towardCamera = step(0.0, -explodeDir.z);
+                    float sizeByDistance = mix(1.0, (1.0 / (dist * 0.25 + 1.0)), towardCamera);
+                    float nearBoost = mix(1.0, 1.8, smoothstep(0.0, 0.0, -viewPos.z));
+                    gl_PointSize = baseSize * sizeByDistance * nearBoost * 100.0 / -viewPos.z * uSizeMultiplier;
                 }
             `;
             const fragmentShader = `
                 uniform sampler2D uTexture;
                 uniform float uVisibility;
-uniform vec3 uDarkColor;
-uniform vec3 uLightColor;
+                uniform vec3 uDarkColor;
+                uniform vec3 uLightColor;
                 varying float vProgress;
                 varying vec3 vColor;
+
 
                 void main() {
                     vec2 centeredCoord = gl_PointCoord - vec2(0.5);
@@ -452,7 +497,7 @@ uniform vec3 uLightColor;
             });
         }
 
-        function setupScrollAnimation(materials, spirals, particlesMaterial, camera) {
+        function setupScrollAnimation(materials, spirals, particlesMaterial, camera, animState) {
             // Make sure starfield starts hidden
             gsap.set('.starfield-layer', { opacity: 0 });
             gsap.set('.text-wrapper', { opacity: 0, scale: 0.1 });
@@ -472,6 +517,11 @@ uniform vec3 uLightColor;
                     // },
 
                     onUpdate: self => {
+                        if (self.progress > 0) {
+                            animState.isInitialState = false;
+                        } else if (self.progress <= 0.05) {
+                            animState.isInitialState = true;
+                        }
                         gsap.to(flowAnimation.current, {
                             scrollSpeed: self.getVelocity() * 0.005,
                             duration: 0.9,
@@ -483,7 +533,7 @@ uniform vec3 uLightColor;
 
             // --- STEP 1: Move logo to center ---
             // tl.addLabel("initial");
-
+            const TEXT1_START_EARLY = 1.5;
             // Animate each spiral individually to center with rotation
             spirals.forEach((spiral, index) => {
                 const delay = index * 0.3;
@@ -515,29 +565,122 @@ uniform vec3 uLightColor;
                 );
             });
 
-            // --- STEP 3: Fade initial text ---
-            tl.to('.initial-text', { opacity: 0, duration: 3.5, ease: 'power1.inOut' }, '<-1');
+            const TOTAL_ROTATION_DURATION = 5; // matches spiral rotation duration
+            const STEPS = 4; // number of steps/pauses
+            const STEP_MOVE_DISTANCE = -50; // pixels to move each step
+            const PAUSE_DURATION = TOTAL_ROTATION_DURATION / (STEPS * 2);
 
-            tl.to('.second-text', { opacity: 1, duration: 2.5, ease: 'power1.inOut' }, '>+1');
-            // tl.addLabel("rotation");
-            tl.to('.second-text', { opacity: 0, duration: 3, ease: 'power1.inOut' }, '>');
+            // Text1 stepping animation synchronized with logo rotation
+            for (let i = 0; i < STEPS; i++) {
+                const stepDelay = i === 0 ? `<-${TEXT1_START_EARLY}` : '>'; // first step starts with rotation, others follow
+
+                // Move upward
+                tl.to(
+                    '.initial-text',
+                    {
+                        y: STEP_MOVE_DISTANCE * (i + 1), // cumulative upward movement
+                        duration: PAUSE_DURATION,
+                        ease: 'power1.inOut',
+                    },
+                    stepDelay
+                );
+
+                // Pause/hold position
+                tl.to(
+                    '.initial-text',
+                    {
+                        duration: PAUSE_DURATION * 0.8, // slightly shorter pause
+                        ease: 'none',
+                    },
+                    '>'
+                );
+            }
+
+            // Final move - text1 goes completely off screen
+            tl.to(
+                '.initial-text',
+                {
+                    y: '-100vh', // completely off screen
+                    opacity: 0,
+                    duration: 1.5,
+                    ease: 'power2.in',
+                },
+                '>'
+            );
+
+            // --- Second text appears and moves up in steps ---
+            // Text2 enters from bottom
+            tl.fromTo(
+                '.second-text',
+                {
+                    y: '20vh', // start from below
+                    opacity: 0,
+                },
+                {
+                    y: 0, // move to center
+                    opacity: 1,
+                    duration: 1.5,
+                    ease: 'power2.out',
+                },
+                '>+0.5'
+            );
+
+            // Text2 stepping animation (similar to text1)
+            const TEXT2_STEPS = 5; // can be different number of steps
+            const TEXT2_STEP_DISTANCE = -60;
+            const TEXT2_STEP_DURATION = 0.8;
+
+            for (let i = 0; i < TEXT2_STEPS; i++) {
+                // Move upward
+                tl.to(
+                    '.second-text',
+                    {
+                        y: TEXT2_STEP_DISTANCE * (i + 1),
+                        duration: TEXT2_STEP_DURATION,
+                        ease: 'power1.inOut',
+                    },
+                    '>'
+                );
+
+                // Pause/hold
+                tl.to(
+                    '.second-text',
+                    {
+                        duration: TEXT2_STEP_DURATION * 0.7,
+                        ease: 'none',
+                    },
+                    '>'
+                );
+            }
+
+            // Final move - text2 goes completely off screen
+            tl.to(
+                '.second-text',
+                {
+                    y: '-100vh',
+                    opacity: 0,
+                    duration: 1.8,
+                    ease: 'power2.in',
+                },
+                '>'
+            );
 
             // --- STEP 4: Particle explosion ---
 
-            tl.to(particlesMaterial.uniforms.uVisibility, { value: 1, duration: 5 }, '>1');
+            tl.to(particlesMaterial.uniforms.uVisibility, { value: 1, duration: 4 }, '>1');
             tl.to(materials, { opacity: 0.0, duration: 0.5 }, '<');
             // tl.addLabel("particleConversion");
             tl.to(
                 particlesMaterial.uniforms.uProgress,
-                { value: 1, duration: 20, ease: 'power1.inOut' },
+                { value: 1, duration: 10, ease: 'power1.inOut' },
                 '>'
             );
 
             tl.to(
                 camera,
                 {
-                    fov: 5,
-                    duration: 50,
+                    fov: 4,
+                    duration: 10,
                     ease: 'power1.inOut',
                     onUpdate: () => camera.updateProjectionMatrix(),
                 },
@@ -546,7 +689,7 @@ uniform vec3 uLightColor;
             // tl.addLabel('beforeParticleFade', '>-5.5');
             tl.to(
                 particlesMaterial.uniforms.uSizeMultiplier,
-                { value: 0, duration: 2.5, ease: 'power2.inOut' },
+                { value: 0, duration: 0.5, ease: 'power2.in' },
                 '>-3'
             );
             if (
@@ -560,12 +703,12 @@ uniform vec3 uLightColor;
                         duration: 1.5,
                         ease: 'power2.inOut',
                     },
-                    '>-4'
+                    '<'
                 );
             }
             tl.to(
                 particlesMaterial.uniforms.uVisibility,
-                { value: 0, duration: 0.5, ease: 'power2.inOut' },
+                { value: 0, duration: 0.7, ease: 'power2.inOut' },
                 '<'
             );
             tl.addLabel('starfieldFadeIn', '>-1');
@@ -653,30 +796,31 @@ uniform vec3 uLightColor;
                         `>${textDuration * 0.4}` // during fade transition to 7th
                     );
                 }
+                // ✅ After final flying text disappears → start starfield morph
             });
 
             tl.to(
                 '.starfield-layer',
                 {
                     opacity: 0,
-                    duration: 3,
+                    duration: 2,
                     ease: 'power2.inOut',
                 },
                 '>-1'
             );
 
-            tl.addLabel('starfieldFadeOut');
+            // tl.addLabel('starfieldFadeOut');
 
-            tl.to(
-                flowingParticlesMaterialRef.current.uniforms.uOpacity,
-                {
-                    value: 0,
-                    duration: 1.5,
-                    ease: 'power2.inOut',
-                },
-                '<-3'
-            );
-            tl.addLabel('serviceSectionReveal');
+            // tl.to(
+            //     flowingParticlesMaterialRef.current.uniforms.uOpacity,
+            //     {
+            //         value: 0,
+            //         duration: 1.5,
+            //         ease: 'power2.inOut',
+            //     },
+            //     '<-3'
+            // );
+            // tl.addLabel('serviceSectionReveal');
             tl.to(
                 '.next-section',
                 {
@@ -685,8 +829,35 @@ uniform vec3 uLightColor;
                     duration: 2,
                     ease: 'power2.inOut',
                 },
-                '>0.5'
+                '<-4'
             );
+
+            const morphState = { value: 0 }; // proxy variable for morph progress
+
+            tl.to(
+                morphState,
+                {
+                    value: 1,
+                    duration: 18, // adjust for slower morph
+                    ease: 'power2.inOut',
+                    onUpdate: () => {
+                        if (window.particleMorphUniforms) {
+                            window.particleMorphUniforms.forEach(u => {
+                                u.uMorph.value = morphState.value;
+                            });
+                        }
+                    },
+                },
+                '<-2.5'
+            );
+
+            tl.eventCallback('onReverseUpdate', () => {
+                if (window.particleMorphUniforms) {
+                    window.particleMorphUniforms.forEach(u => {
+                        u.uMorph.value = morphState.value;
+                    });
+                }
+            }); // runs while it fades in
 
             // --- STEP 7: Logo + service text synchronized animation ---
 
@@ -695,18 +866,8 @@ uniform vec3 uLightColor;
 
             // reset all texts and logo
             gsap.set('.service-text', { opacity: 0 });
-            gsap.set('.service-logo', { opacity: 0 });
+            gsap.set('.service-logo', { opacity: 1 });
             setActiveServiceIndex(0);
-
-            tl.to(
-                '.service-logo',
-                {
-                    opacity: 1,
-                    duration: 2.8,
-                    ease: 'power2.inOut',
-                },
-                '>-0.4'
-            );
 
             tl.to(
                 '.service-0',
@@ -716,7 +877,7 @@ uniform vec3 uLightColor;
                     ease: 'power2.inOut',
                     onStart: () => setActiveServiceIndex(0),
                 },
-                '<'
+                '>-1'
             );
 
             for (let i = 1; i < serviceCount; i++) {
@@ -764,7 +925,7 @@ uniform vec3 uLightColor;
                     },
                     onReverseComplete: () => {
                         // gsap.set('.service-text', { opacity: 0 });
-                        setActiveServiceIndex(0);
+                        // setActiveServiceIndex(0);
                     },
                 },
                 'serviceEnd'
@@ -787,7 +948,7 @@ uniform vec3 uLightColor;
             tl.to(
                 '.next-section',
                 {
-                    y: -150,
+                    y: -550,
                     opacity: 0,
                     duration: 4,
                     ease: 'power2.inOut',
@@ -816,9 +977,37 @@ uniform vec3 uLightColor;
         window.addEventListener('mousemove', handleMouseMove);
 
         function animate() {
+            const time = performance.now() * 0.001;
+
             if (particlesMaterial) {
-                particlesMaterial.uniforms.uTime.value = performance.now() * 0.001;
+                particlesMaterial.uniforms.uTime.value = time;
             }
+
+            // Float each spiral on its own axis ONLY when in initial state (before scroll)
+            if (animationState.isInitialState && individualSpirals.length > 0) {
+                individualSpirals.forEach((spiral, index) => {
+                    const initialState = spiralInitialStates[index];
+                    if (!initialState) return;
+
+                    const offset = index * 0.01; // Phase offset for variety
+                    const speed = 0.5 + index * 0.03; // Different speeds per spiral
+
+                    // Gentle floating motion on Y axis
+                    const floatAmplitude = 0.02;
+                    spiral.group.position.y =
+                        initialState.initialY + Math.sin(time * speed + offset) * floatAmplitude;
+
+                    // Subtle rotation float
+                    const rotAmplitude = 0.03;
+                    spiral.group.rotation.x =
+                        initialState.initialRotX +
+                        Math.sin(time * speed * 0.7 + offset) * rotAmplitude;
+                    spiral.group.rotation.z =
+                        initialState.initialRotZ +
+                        Math.cos(time * speed * 0.5 + offset) * rotAmplitude;
+                });
+            }
+
             // camera.position.x += (mouseX * 5 - camera.position.x) * 0.02;
             // camera.position.y += (mouseY * 5 - camera.position.y) * 0.02;
             renderer.render(scene, camera);
@@ -887,11 +1076,11 @@ uniform vec3 uLightColor;
                 </div>
             </div>
 
-            <div className="next-section bg-black  text-white fixed inset-0 flex items-center justify-center opacity-0 z-50 ">
+            <div className="next-section   text-white fixed inset-0  flex items-center justify-center opacity-0 z-15 ">
                 <div className="service-logo fixed inset-0 opacity-1 ">
                     <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
-                        <color attach="background" args={['#000']} />
-                        <ambientLight intensity={0.2} />
+                        <color attach="background" args={['#0f0f0f']} />/
+                        <ambientLight intensity={0.8} />
                         <spotLight
                             position={[5, 5, 5]}
                             angle={0.3}
@@ -899,11 +1088,16 @@ uniform vec3 uLightColor;
                             intensity={2}
                             color={'#9c4df4'}
                         />
-                        <pointLight position={[-5, -5, -5]} intensity={1.5} color={'#2f00ff'} />
-                        <fog attach="fog" args={['#000', 2, 10]} />
-                        {/* <ServiceLogoBG /> */}
-                        <ScrollServiceLogo activeIndex={activeServiceIndex} />
-                        {/* <FloatingParticles /> */}
+                        <pointLight position={[-5, -5, 5]} intensity={1.5} color={'#2f00ff'} />
+                        <ParticlesMorphPerSlice
+                            glbPath={'/models/T3d.glb'}
+                            particleCount={15000}
+                            size={14}
+                            streamLength={8}
+                            streamRatio={0.4}
+                            initialActiveIndex={0}
+                            activeIndex={activeServiceIndex}
+                        />
                         <EffectComposer>
                             <Bloom
                                 intensity={1.2} // brightness of glow
