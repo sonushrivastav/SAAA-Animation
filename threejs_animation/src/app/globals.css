@@ -1,11 +1,11 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @font-face {
-    font-family: 'TWKLausanne';
-    src: url('/fonts/TWKLausanne-200.otf') format('opentype');
-    font-weight: 200;
-    font-style: normal;
-    font-display: swap;
+  font-family: "TWKLausanne";
+  src: url("/fonts/TWKLausanne-200.otf") format("opentype");
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
 }
 
 :root {
@@ -16,23 +16,82 @@
 } */
 
 @theme inline {
-    --color-background: var(--background);
-    --color-foreground: var(--foreground);
-    --font-sans: var(--font-geist-sans);
-    --font-mono: var(--font-geist-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
-    :root {
-        /* --background: #0a0a0a; */
-        /* --foreground: #ededed; */
-    }
+  :root {
+    /* --background: #0a0a0a; */
+    /* --foreground: #ededed; */
+  }
 }
 
 html,
 body {
-    height: auto;
-    overflow-x: hidden;
-    overflow-y: auto;
-    font-family: 'TWKLausanne', sans-serif;
+  height: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  font-family: "TWKLausanne", sans-serif;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes bgMoveVertical {
+  0% {
+    transform: translate(-50%, -40%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -60%) scale(1.05);
+  }
+  100% {
+    transform: translate(-50%, -40%) scale(1);
+  }
+}
+
+@keyframes bgSpinSlow {
+  0% {
+    transform: translateY(-50%) rotate(0deg) scale(1);
+  }
+  100% {
+    transform: translateY(-50%) rotate(360deg) scale(1);
+  }
+}
+
+@keyframes bgSpinReverse {
+  0% {
+    transform: translateY(-50%) rotate(0deg) scale(1);
+  }
+  100% {
+    transform: translateY(-50%) rotate(-360deg) scale(1);
+  }
+}
+
+/* keep your float animation for spheres */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }

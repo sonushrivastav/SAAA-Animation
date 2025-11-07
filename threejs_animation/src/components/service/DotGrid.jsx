@@ -2,7 +2,9 @@
 import { useRef, useEffect, useCallback, useMemo } from "react";
 import { gsap } from "gsap";
 import { InertiaPlugin } from "gsap/InertiaPlugin";
-
+import ScrollStack, {
+  ScrollStackItem,
+} from "../../components/service/ScrollStack";
 gsap.registerPlugin(InertiaPlugin);
 
 const throttle = (func, limit) => {
@@ -264,7 +266,7 @@ const DotGrid = ({
 
   return (
     <section
-      className={`p-2 bg-[#060010] flex items-center justify-center flex-col  h-full w-full absolute ${className}`}
+      className={` bg-[#060010] sticky top-0 flex items-center justify-center flex-col  h-full w-full  ${className}`}
       style={style}
     >
       <div ref={wrapperRef} className="w-full h-full relative">
@@ -272,6 +274,20 @@ const DotGrid = ({
           ref={canvasRef}
           className="absolute inset-0 w-full h-full pointer-events-none"
         />
+        {/* <ScrollStack useWindowScroll={true} className="absolute h-full">
+          <ScrollStackItem itemClassName="bg-red-400">
+            <h2>Card 1</h2>
+            <p>This is the first card in the stack</p>
+          </ScrollStackItem>
+          <ScrollStackItem itemClassName="bg-red-400">
+            <h2>Card 2</h2>
+            <p>This is the second card in the stack</p>
+          </ScrollStackItem>
+          <ScrollStackItem itemClassName="bg-red-400">
+            <h2>Card 3</h2>
+            <p>This is the third card in the stack</p>
+          </ScrollStackItem>
+        </ScrollStack> */}
       </div>
     </section>
   );
