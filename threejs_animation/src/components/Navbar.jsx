@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useState } from 'react';
 import { FiMenu, FiX } from 'react-icons/fi';
 
@@ -9,8 +10,8 @@ const Navbar = () => {
 
     // Helper array for navigation links to keep the code clean
     const navLinks = [
-        { href: '#home', label: 'Home' },
-        { href: '#about', label: 'About' },
+        { href: '/animation', label: 'Home' },
+        { href: '/service', label: 'Service' },
         { href: '#contact', label: 'Contact' },
     ];
 
@@ -27,13 +28,13 @@ const Navbar = () => {
 
                     <div className="hidden md:flex items-center gap-8">
                         {navLinks.map(link => (
-                            <a
+                            <Link
                                 key={link.label}
                                 href={link.href}
                                 className="text-black hover:text-purple-600 transition-colors duration-300"
                             >
                                 {link.label}
-                            </a>
+                            </Link>
                         ))}
                     </div>
 

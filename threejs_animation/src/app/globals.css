@@ -1,8 +1,8 @@
 @import 'tailwindcss';
 
 @font-face {
-    font-family: 'TWKLausanne';
-    src: url('/fonts/TWKLausanne-200.otf') format('opentype');
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    src: url('/fonts/Lausanne.otf') format('opentype');
     font-weight: 200;
     font-style: normal;
     font-display: swap;

@@ -1,87 +1,75 @@
-'use client';
-import { useGLTF } from '@react-three/drei';
-import { useFrame } from '@react-three/fiber';
-import { useEffect, useRef } from 'react';
-import * as THREE from 'three';
+import {
+    Environment,
+    MeshTransmissionMaterial,
+    OrbitControls,
+    Text,
+    useGLTF,
+} from '@react-three/drei';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { useControls } from 'leva';
+import { useRef } from 'react';
 
-export default function ServiceLogoBG() {
-    const { scene: bgScene } = useGLTF('/models/background.glb');
-    const bgRef = useRef();
+function Model() {
+    const { nodes } = useGLTF('/models/new3.glb');
+    console.log(nodes);
 
-    const mouse = useRef({ x: 0, y: 0 });
+    const torus = useRef(null);
 
-    const scroll = useRef(0);
-
-    useEffect(() => {
-        if (!bgScene) return;
-        bgScene.traverse(child => {
-            if (child.isMesh) {
-                child.material = child.material.clone();
-                child.material.transparent = false;
-                child.material.opacity = 1;
-                child.material.emissive = new THREE.Color(0xab76e2);
-                child.material.emissiveIntensity = 1;
-                child.renderOrder = -1; // Background lower order
-            }
-        });
-    }, [bgScene]);
-
-    useEffect(() => {
-        const handleMouseMove = e => {
-            const x = (e.clientX / window.innerWidth) * 2 - 1;
-            const y = -(e.clientY / window.innerHeight) * 2 + 1;
-            mouse.current.x = x;
-            mouse.current.y = y;
-        };
-        window.addEventListener('mousemove', handleMouseMove);
-        return () => window.removeEventListener('mousemove', handleMouseMove);
-    }, []);
-
-    useEffect(() => {
-        const handleScroll = () => {
-            scroll.current = window.scrollY / (document.body.scrollHeight - window.innerHeight);
-        };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+    const sphere = useRef(null);
 
     useFrame(() => {
-        if (!bgRef.current) return;
+        // torus.current.rotation.x += 0.02;
+        // sphere.current.rotation.x += 0.02;
+        // sphere.current.rotation.y += 0.01;
+    });
 
-        bgRef.current.rotation.x = THREE.MathUtils.lerp(
-            bgRef.current.rotation.x,
-            mouse.current.y * 0.3,
-            0.05
-        );
-        bgRef.current.rotation.y = THREE.MathUtils.lerp(
-            bgRef.current.rotation.y,
-            mouse.current.x * 0.3,
-            0.05
-        );
+    const materialProps = useControls({
+        thickness: { value: 0.2, min: 0, max: 3, step: 0.05 },
 
-        // const zScroll = THREE.MathUtils.lerp(0, -1, scroll.current);
-        // bgRef.current.position.z = zScroll;
+        roughness: { value: 0, min: 0, max: 1, step: 0.1 },
+
+        transmission: { value: 1, min: 0, max: 1, step: 0.1 },
+
+        ior: { value: 1.2, min: 0, max: 3, step: 0.1 },
+
+        chromaticAberration: { value: 0.02, min: 0, max: 1 },
+
+        backside: { value: true },
+
+        metalness: { value: 0, min: 0, max: 1 },
     });
 
     return (
-        <>
-            <primitive
-                ref={bgRef}
-                object={bgScene}
-                scale={[0.1, 0.1, 0.1]}
-                position={[-3, 0, -3]}
-                rotation={[0, 0, 0]}
-            />
-            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.5, 0]}>
-                <circleGeometry args={[5, 64]} />
-                <meshStandardMaterial
-                    color={'#220044'}
-                    transparent
-                    opacity={0.1}
-                    emissive={'#7722ff'}
-                    emissiveIntensity={1}
-                />
+        <group>
+            <Text
+                font={'/fonts/Lausanne.otf'}
+                position={[0, 0, -11]}
+                fontSize={0.5}
+                color="white"
+                anchorX="center"
+                anchorY="middle"
+            >
+                hello world!
+            </Text>
+            {/*
+            <mesh ref={sphere} position={[0, 0, 0]} scale={[2, 2, 2]}>
+                <sphereGeometry args={[1, 64, 64]} />
+                <MeshTransmissionMaterial {...materialProps} />
+            </mesh> */}
+            <mesh ref={torus} {...nodes.Text002} scale={[2, 2, 2]} position={[0, 0, 0]}>
+                <MeshTransmissionMaterial {...materialProps} transparent={true} opacity={1} />
             </mesh>
-        </>
+        </group>
+    );
+}
+
+export default function NewScene() {
+    return (
+        <Canvas>
+            <OrbitControls />
+            <Model />
+            <directionalLight intensity={2} position={[0, 2, 3]} />
+            <Environment background={true} preset="city" />
+        </Canvas>
     );
 }
