@@ -1,55 +1,10 @@
 "use client";
-import React, { useRef, useEffect, useCallback, useMemo } from "react";
 import { gsap } from "gsap";
 import { InertiaPlugin } from "gsap/InertiaPlugin";
-import ScrollStack, {
-  ScrollStackItem,
-} from "../../components/service/ScrollStack";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-gsap.registerPlugin(ScrollTrigger, InertiaPlugin);
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
-const Card = React.forwardRef(({ title, items, description }, ref) => {
-  return (
-    <div
-      ref={ref}
-      className="absolute left-1/2 top-1/2 w-full max-w-7xl h-[500px] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-[#555555]/30 backdrop-blur-[10px] border border-[#9C9C9C]   p-8 flex justify-between gap-8"
-      style={{ willChange: "transform" }}
-    >
-      {/* Left content */}
-      <div className="w-3/5 flex flex-col">
-        <span className="inline-block w-fit text-xl font-semibold  text-[#FAFAFA] uppercase  bg-[#844DE9] p-3.5 rounded-md mb-4">
-          {title}
-        </span>
-        <p className="text-sm text-[#9C9C9C] font-normal  ">{description}</p>
-        <ul className="flex flex-col  pt-5 text-sm flex-1">
-          {items.map((it, i) => (
-            <li
-              key={i}
-              className="text-[#FBFBFB] border-t border-dashed border-[#555555] py-3.5 font-semibold uppercase underline tracking-normal text-md"
-            >
-              {it}
-            </li>
-          ))}
-        </ul>
-      </div>
+gsap.registerPlugin(InertiaPlugin);
 
-      {/* Right placeholder (3D model area) */}
-      <div className="w-2/5 flex items-center justify-center p-6 text-center">
-        <div>
-          <p className="font-semibold text-white text-sm mb-2">
-            3D Model (Glass Morphism)
-          </p>
-          <p className="text-gray-500 text-xs break-words leading-relaxed">
-            ref: https://in.pinterest.com/
-            <br />
-            pin/33284484741592100/
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-});
-Card.displayName = "Card";
 const throttle = (func, limit) => {
   let lastCall = 0;
   return function (...args) {
@@ -89,8 +44,6 @@ const DotGrid = ({
   const wrapperRef = useRef(null);
   const canvasRef = useRef(null);
   const dotsRef = useRef([]);
-  const rootRef = useRef(null);
-  const cardRefs = useRef([]);
   const pointerRef = useRef({
     x: 0,
     y: 0,
@@ -309,140 +262,16 @@ const DotGrid = ({
     shockStrength,
   ]);
 
-  const cards = [
-    {
-      title: "DESIGN",
-      description:
-        "We build brands that speak before they’re introduced. From identity to visuals, we craft every detail to make your presence unforgettable. Because every great impression starts with a design that feels alive.",
-      items: [
-        "UI / UX",
-        "BRANDING",
-        "3D MODELING",
-        "MOTION GRAPHICS / EDITING",
-        "PRINT MEDIA",
-        "CREATIVE / MARKETING COLLATERALS",
-      ],
-    },
-    {
-      title: "BUILD",
-      description:
-        "Our developers are part artists, part architects. They code, craft, and fine-tune every pixel until your site feels alive. Built to perform beautifully, no matter the screen or scale. ",
-      items: [
-        "BASIC WEBSITE",
-        "E-COMMERCE WEBSITE",
-        "CUSTOM CMS",
-        "LANDING PAGES",
-        "WEB / MOBILE APPLICATIONS",
-        "AMC",
-      ],
-    },
-    {
-      title: "GROW",
-      description:
-        "We build brands that speak before they’re introduced. From identity to visuals, we craft every detail to make your presence unforgettable. Because every great impression starts with a design that feels alive.",
-      items: [
-        "SOCIAL MEDIA MARKETING",
-        "PAID ADS / PERFORMANCE MARKETING",
-        "SEO",
-        "EMAIL & WHATSAPP MARKETING",
-      ],
-    },
-  ];
-  useEffect(() => {
-    // Prepare refs array
-    cardRefs.current = cardRefs.current.slice(0, cards.length);
-
-    const ctx = gsap.context(() => {
-      // Basic starting state: every card centered, slightly down, invisible, low scale
-      gsap.set(cardRefs.current, {
-        y: window.innerHeight,
-        scale: 1,
-        transformOrigin: "60% 60%",
-        zIndex: (i) => i, // top card highest z
-      });
-
-      // Create timeline to control stacking
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: rootRef.current,
-          start: "top top",
-          // Pin for enough distance: one viewport per card + a little extra
-          end: () => `+=${window.innerHeight * cards.length}`,
-          pin: true,
-          scrub: 1,
-          anticipatePin: 1,
-        },
-      });
-
-      cards.forEach((_, i) => {
-        const el = cardRefs.current[i];
-        // label for in
-        tl.to(
-          el,
-          {
-            y: 0,
-            ease: "power2.out",
-            duration: 1,
-          },
-          i * 1.2 // overlapping timing for smoothness
-        );
-
-        // Push previous card up slightly when next appears
-        if (i > 0) {
-          for (let j = 0; j < i; j++) {
-            const prevCard = cardRefs.current[j];
-            tl.to(
-              prevCard,
-              {
-                y: -120 * (i - j), // Stack with offset
-                scale: 0.9 - (i - j) * 0.1, // Slight scale down
-                ease: "power2.out",
-                duration: 1,
-              },
-              i * 1.2 // Same timing as current card
-            );
-          }
-        }
-      });
-    }, rootRef);
-
-    return () => ctx.revert();
-  }, [cards]);
-
   return (
     <section
-      ref={rootRef}
-      className={` relative   bg-[#060010] overflow-hidden ${className}`}
-      style={{ height: `${100}vh`, ...style }}
+      className={`p-1 flex items-center justify-center h-full w-full relative ${className}`}
+      style={style}
     >
-      <div
-        ref={wrapperRef}
-        className="sticky top-0  h-screen w-full flex flex-col gap-12 py-24 px-48"
-      >
-        {/* Header */}
-        <div className="relative z-10 ">
-          <h2 className="text-4xl font-semibold text-white tracking-tight">
-            What we do
-          </h2>
-        </div>
-
+      <div ref={wrapperRef} className="w-full h-full relative">
         <canvas
           ref={canvasRef}
-          className="absolute inset-0 w-full h-full pointer-events-none "
+          className="absolute inset-0 w-full h-full pointer-events-none"
         />
-
-        {/* Cards container — stacking absolutely for perfect overlay */}
-        <div className="relative flex-1 w-full   flex items-center justify-center">
-          {cards.map((c, i) => (
-            <Card
-              key={i}
-              ref={(el) => (cardRefs.current[i] = el)}
-              title={c.title}
-              description={c.description}
-              items={c.items}
-            />
-          ))}
-        </div>
       </div>
     </section>
   );

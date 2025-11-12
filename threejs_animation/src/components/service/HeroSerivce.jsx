@@ -21,17 +21,17 @@ const HeroSerivce = () => {
   const isHovering = useRef(false);
 
   let curX = 50,
-    curY = 40, // start near center-top to match composition
+    curY = 70,
     tgtX = 50,
-    tgtY = 40;
+    tgtY = 70;
   let time = 0;
 
   let blob1X = 45,
-    blob1Y = 35;
+    blob1Y = 68;
   let blob2X = 55,
-    blob2Y = 45;
+    blob2Y = 72;
   let blob3X = 50,
-    blob3Y = 40;
+    blob3Y = 75;
 
   useEffect(() => {
     const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -49,8 +49,8 @@ const HeroSerivce = () => {
       // center band ~ [25..75] percent
       const horizontalMin = 5; // 5% padding from edges
       const horizontalMax = 95;
-      const verticalMin = 20;
-      const verticalMax = 80;
+      const verticalMin = 60;
+      const verticalMax = 90;
       tgtX = clamp(
         horizontalMin + nx * (horizontalMax - horizontalMin),
         horizontalMin,
@@ -66,7 +66,7 @@ const HeroSerivce = () => {
     const handleLeave = () => {
       isHovering.current = false;
       tgtX = 50;
-      tgtY = 40;
+      tgtY = 70;
     };
 
     let raf = null;
@@ -78,16 +78,16 @@ const HeroSerivce = () => {
         // Automatic morphing animation - multiple gradient points moving independently
         // Create organic, fluid movement patterns
         blob1X = 50 + Math.sin(time * 0.5) * 15 + Math.cos(time * 0.3) * 8;
-        blob1Y = 40 + Math.cos(time * 0.4) * 12 + Math.sin(time * 0.25) * 6;
+        blob1Y = 70 + Math.cos(time * 0.4) * 10 + Math.sin(time * 0.25) * 5;
 
         blob2X =
           50 + Math.sin(time * 0.6 + 2) * 18 + Math.cos(time * 0.35) * 10;
-        blob2Y = 40 + Math.cos(time * 0.5 + 2) * 15 + Math.sin(time * 0.3) * 7;
+        blob2Y = 70 + Math.cos(time * 0.5 + 2) * 12 + Math.sin(time * 0.3) * 6;
 
         blob3X =
           50 + Math.sin(time * 0.45 + 4) * 12 + Math.cos(time * 0.28) * 9;
         blob3Y =
-          40 + Math.cos(time * 0.38 + 4) * 10 + Math.sin(time * 0.32) * 8;
+          70 + Math.cos(time * 0.38 + 4) * 10 + Math.sin(time * 0.32) * 6;
 
         // Average position for main gradient
         curX += ((blob1X + blob2X + blob3X) / 3 - curX) * 0.08;
@@ -113,13 +113,13 @@ const HeroSerivce = () => {
       const horizMax = isHovering.current ? 100 : 75;
 
       blob1X = clamp(blob1X, horizMin, horizMax);
-      blob1Y = clamp(blob1Y, 15, 65);
+      blob1Y = clamp(blob1Y, 55, 90);
       blob2X = clamp(blob2X, horizMin, horizMax);
-      blob2Y = clamp(blob2Y, 15, 65);
+      blob2Y = clamp(blob2Y, 55, 90);
       blob3X = clamp(blob3X, horizMin, horizMax);
-      blob3Y = clamp(blob3Y, 15, 65);
+      blob3Y = clamp(blob3Y, 55, 90);
       curX = clamp(curX, horizMin, horizMax);
-      curY = clamp(curY, 15, 65);
+      curY = clamp(curY, 55, 90);
 
       // Apply positions to CSS variables
       if (interactiveRef.current) {
@@ -134,7 +134,7 @@ const HeroSerivce = () => {
 
         // Dynamic opacity based on distance from center
         const dx = (curX - 50) / 50;
-        const dy = (curY - 40) / 50;
+        const dy = (curY - 70) / 50;
         const dist = Math.min(1, Math.sqrt(dx * dx + dy * dy));
         interactiveRef.current.style.setProperty(
           "--blob-opacity",
@@ -164,10 +164,10 @@ const HeroSerivce = () => {
       {/* <GradientBackground /> */}
 
       {/* Background gradient transition */}
-      <div className="absolute inset-0 bg-[radial-gradient(150%_90%_at_center,_rgba(88,28,135,0.9)_0%,_rgba(0,0,0,1)_55%)] " />
+      <div className="absolute  inset-0 bg-[radial-gradient(150%_90%_at_50%_80%,_rgba(88,28,135,0.9)_0%,_rgba(0,0,0,1)_55%)] " />
 
       {/* Gooey Gradient Background */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute  inset-0 overflow-hidden">
         <svg className="hidden">
           <defs>
             <filter id="goo">
@@ -202,13 +202,13 @@ const HeroSerivce = () => {
             aria-hidden="true"
             style={{
               "--pos-x": "50%",
-              "--pos-y": "40%",
+              "--pos-y": "70%",
               "--blob1-x": "45%",
-              "--blob1-y": "35%",
+              "--blob1-y": "68%",
               "--blob2-x": "55%",
-              "--blob2-y": "45%",
-              "--blob3-x": "100%",
-              "--blob3-y": "40%",
+              "--blob2-y": "72%",
+              "--blob3-x": "50%",
+              "--blob3-y": "75%",
               "--blob-opacity": "0.85",
             }}
           />

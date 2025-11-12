@@ -1,80 +1,162 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
-import { FiMenu, FiX } from "react-icons/fi";
 
-const Navbar = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+/**
+ * Compact-to-expanded Osmo-like Navbar
+ * - Initially minimal width: hamburger + centered logo + contact button
+ * - On hamburger open: navbar expands horizontally + shows mega menu
+ * - Black background, sticky, subtle blur
+ *
+ * NOTE: Adjust container widths (w-*) as needed.
+ */
 
-  // Helper array for navigation links to keep the code clean
-  const navLinks = [
-    { href: "#home", label: "Home" },
-    { href: "/service", label: "Service" },
-    { href: "#contact", label: "Contact" },
-  ];
+export default function Navbar({
+  logoSrc = "/images/socialMedia/Logo_Icon.svg",
+  logoSrc2 = "/images/socialMedia/Main_Logo.svg",
+  logoAlt = "Logo",
+  orgName = "Brand",
+  cta = { label: "Let’s Connect", href: "/contact" },
+  menu = [
+    {
+      title: "Products",
+      items: [
+        { label: "Product A", href: "/product-a" },
+        { label: "Product B", href: "/product-b" },
+      ],
+    },
+    {
+      title: "Resources",
+      items: [
+        { label: "Docs", href: "/docs" },
+        { label: "Blog", href: "/blog" },
+      ],
+    },
+  ],
+}) {
+  const [open, setOpen] = useState(false);
 
   return (
-    <>
-      <header className="fixed top-0     w-full bg-transparent  z-50 ">
-        <nav className="  px-6  bg-white text-black mx-auto flex justify-between items-center shadow-xl">
-          <Image
-            src={"/images/Screenshot 2025-10-25 101941-Photoroom.png"}
-            width={180}
-            height={180}
-            alt="logo"
-          />
-
-          <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                className="text-black hover:text-purple-600 transition-colors duration-300"
+    <div className=" w-full fixed top-2 z-99 bg-transparent">
+      <header className="  z-50 flex justify-center bg-transparent ">
+        {/* wrapper that expands when open */}
+        <motion.div
+          animate={{ width: open ? "90%" : "40%" }}
+          transition={{ type: "spring", stiffness: 260, damping: 26 }}
+          className="overflow-hidden bg-black/80  rounded-lg"
+        >
+          <div className="flex h-16 items-center justify-between px-4">
+            {/* Hamburger */}
+            <button
+              onClick={() => setOpen((s) => !s)}
+              aria-label="Toggle menu"
+              className="flex items-center justify-center p-2 text-white hover:bg-white/10 rounded-md"
+            >
+              <svg
+                className="h-6 w-6"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
               >
-                {link.label}
-              </a>
-            ))}
+                <motion.path
+                  initial={false}
+                  animate={open ? "open" : "closed"}
+                  variants={{
+                    closed: { d: "M3 6h18M3 12h18M3 18h18" },
+                    open: { d: "M6 6l12 12M6 18L18 6" },
+                  }}
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+
+            {/* Logo + reveal org name */}
+            {/* Logo swap */}
+            <Link
+              href="/"
+              className="relative flex items-center justify-center gap-2 w-32"
+              aria-label="Home"
+            >
+              <motion.div
+                initial={{ opacity: 1 }}
+                animate={{ opacity: open ? 0 : 1 }}
+                transition={{ duration: 0.25 }}
+                className="absolute"
+              >
+                <Image
+                  src={logoSrc}
+                  alt={logoAlt}
+                  width={28}
+                  height={28}
+                  className="object-contain"
+                />
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: open ? 1 : 0 }}
+                transition={{ duration: 0.25 }}
+              >
+                <Image
+                  src={logoSrc2}
+                  alt={logoAlt}
+                  width={300}
+                  height={300}
+                  className="object-contain"
+                />
+              </motion.div>
+            </Link>
+
+            {/* CTA */}
+            <Link
+              href={cta.href}
+              className="text-sm font-medium text-[#fafafa] bg-[#844de9]  px-4 py-2 rounded-full  hover:bg-[#844de9]/80"
+            >
+              {cta.label}
+            </Link>
           </div>
 
-          <button className="hidden md:block bg-purple-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-purple-700 transition-colors duration-300 ease-in-out">
-            Let's Connect
-          </button>
-
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden text-white z-50"
-            aria-label="Toggle menu"
-          >
-            {isMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
-          </button>
-        </nav>
+          {/* Mega Menu dropdown */}
+          <AnimatePresence>
+            {open && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.35, delay: 0.15 }}
+                className="border-t border-white/10 bg-black/95 md:px-8 px-4"
+              >
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 py-6 text-white">
+                  {menu.map((section) => (
+                    <div key={section.title}>
+                      <h4 className="text-sm font-semibold mb-3 text-white/70">
+                        {section.title}
+                      </h4>
+                      <ul className="space-y-2">
+                        {section.items.map((item) => (
+                          <li key={item.href}>
+                            <Link
+                              href={item.href}
+                              className="text-white/80 hover:text-white text-sm"
+                            >
+                              {item.label}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
       </header>
-
-      {/* Mobile Menu Overlay */}
-      <div
-        className={`md:hidden fixed inset-0 bg-white z-40 transform transition-transform duration-300 ease-in-out ${
-          isMenuOpen ? "translate-x-0" : "translate-x-full"
-        }`}
-      >
-        <div className="flex flex-col items-center justify-center h-full space-y-10">
-          {navLinks.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className="text-2xl text-zinc-800 hover:text-purple-600"
-              onClick={() => setIsMenuOpen(false)} // Close menu on link click
-            >
-              {link.label}
-            </a>
-          ))}
-          <button className="bg-purple-600 text-white px-8 py-3 rounded-full font-semibold text-lg">
-            Let's Connect
-          </button>
-        </div>
-      </div>
-    </>
+    </div>
   );
-};
-
-export default Navbar;
+}

@@ -1,55 +1,99 @@
 "use client";
 import DotGrid from "../../components/service/DotGrid";
 import Navbar from "../../components/Navbar";
-
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import OtherSolutions from "../../components/service/OtherSolution";
 import HeroSerivce from "../../components/service/HeroSerivce";
-import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+
 gsap.registerPlugin(ScrollTrigger);
 
 const Service = () => {
-  const gradientRef = useRef(null);
-  const HORIZONTAL_STRETCH = 130; // Constant value for full width coverage
+  const gradientRef1 = useRef(null);
+  const gradientRef2 = useRef(null);
+  const HORIZONTAL_STRETCH = 130; // consistent for full width coverage
+
+  // Helper to create gradient with variable curve depth
+  const createGradientStyle = (colors, ellipseY) => {
+    return `radial-gradient(ellipse ${HORIZONTAL_STRETCH}% ${ellipseY}% at 50% 0%, ${colors.join(
+      ", "
+    )})`;
+  };
 
   useEffect(() => {
-    if (!gradientRef.current) return;
+    // ===== First Gradient Animation (existing one) =====
+    if (gradientRef1.current) {
+      const colors1 = [
+        "#060010 0%",
+        "#060010 30%",
+        "#060010 45%",
+        "#22579C 60%",
+        "#4A8AE6 70%",
+        "transparent 95%",
+      ];
 
-    // Helper function to create the background string with variable Ellipse Y dimension
-    // Y dimension (ellipseY) controls the vertical curve depth/stretch.
-    const createGradientStyle = (ellipseY) => {
-      // Keep the X dimension at 130% as requested for full width coverage
-      return `radial-gradient(ellipse ${HORIZONTAL_STRETCH}% ${ellipseY}% at 50% 0%, #060010 0%, #060010 30%, #060010 45%, #22579C 60%, #4A8AE6 70%, transparent 95%)`;
-    };
+      gsap.set(gradientRef1.current, {
+        background: createGradientStyle(colors1, 10),
+      });
 
-    // Set the initial state of the element to 10% vertical stretch (flattened curve)
-    gsap.set(gradientRef.current, {
-      background: createGradientStyle(10),
-    });
+      const tl1 = gsap.timeline({
+        scrollTrigger: {
+          trigger: gradientRef1.current,
+          scrub: 1,
+          start: "top bottom",
+          end: "center top",
+        },
+      });
 
-    // Setup a GSAP Timeline for the multi-step animation
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: gradientRef.current,
-        scrub: 1,
-        start: "top bottom", // Start when the top of the element hits the bottom of the viewport
-        end: "center center", // End when the bottom of the element leaves the top of the viewport
-        // markers: true, // Uncomment for debugging
-      },
-    });
+      tl1
+        .to(gradientRef1.current, {
+          background: createGradientStyle(colors1, 100),
+          ease: "power1.inOut",
+        })
+        .to(gradientRef1.current, {
+          background: createGradientStyle(colors1, 10),
+          ease: "power1.inOut",
+        });
+    }
 
-    // Define the animation steps on the timeline
-    tl.to(gradientRef.current, {
-      // Step 1: Stretch the vertical curve from 10% up to 100% (fully curved)
-      background: createGradientStyle(100),
-      ease: "power1.inOut",
-    }).to(gradientRef.current, {
-      // Step 2: Flatten the vertical curve from 100% back down to 10% (flattened)
-      background: createGradientStyle(10),
-      ease: "power1.inOut",
-    });
+    // ===== Second Gradient Animation (after OtherSolutions) =====
+    if (gradientRef2.current) {
+      // Color pattern based on uploaded image (light top → blue mid → dark bottom)
+      const colors2 = [
+        "transparent 0%",
+        "rgba(255,255,255,1) 20%", // starts pure white to match previous background
+        "rgba(255,255,255,0) 35%",
+        "#DCEBFA  40%", // white top
+        "#7fb8f9 50%", // sky blue
+        "#0094ff 60%", // bright blue center
+        "#003a6e 75%", // deep navy
+        "#000000 100%",
+      ];
+
+      gsap.set(gradientRef2.current, {
+        background: createGradientStyle(colors2, 10),
+      });
+
+      const tl2 = gsap.timeline({
+        scrollTrigger: {
+          trigger: gradientRef2.current,
+          scrub: 1,
+          start: "top bottom",
+          end: "center top",
+        },
+      });
+
+      tl2
+        .to(gradientRef2.current, {
+          background: createGradientStyle(colors2, 100),
+          ease: "power1.inOut",
+        })
+        .to(gradientRef2.current, {
+          background: createGradientStyle(colors2, 10),
+          ease: "power1.inOut",
+        });
+    }
   }, []);
 
   return (
@@ -57,6 +101,7 @@ const Service = () => {
       <Navbar />
 
       <HeroSerivce />
+
       <DotGrid
         dotSize={5}
         gap={15}
@@ -70,14 +115,27 @@ const Service = () => {
         className="relative h-screen w-full"
       />
 
-      {/* Gradient Transition Section - curved wave shape matching image */}
+      {/* First Gradient Section */}
       <div
-        ref={gradientRef}
-        className="relative w-full h-[100vh] overflow-hidden bg-white"
+        ref={gradientRef1}
+        className="relative w-full h-[65vh] overflow-hidden"
       >
         <div className="absolute inset-0" />
       </div>
+
       <OtherSolutions />
+
+      {/* Second Gradient Section (based on uploaded image colors) */}
+      <div
+        ref={gradientRef2}
+        className="relative w-full h-[80vh] overflow-hidden"
+      >
+        <div className="absolute inset-0" />
+      </div>
+
+      <div className="w-full border h-[500px] self-center bg-black">
+        <h1 className="text-7xl text-center text-white">Video</h1>
+      </div>
     </>
   );
 };
