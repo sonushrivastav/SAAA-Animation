@@ -1,20 +1,15 @@
 @import 'tailwindcss';
 
+/* Register the custom font */
 @font-face {
-    font-family: Georgia, 'Times New Roman', Times, serif;
-    src: url('/fonts/Lausanne.otf') format('opentype');
-    font-weight: 200;
+    font-family: 'GriftBlack';
+    src: url('/fonts/grift-regular.otf') format('opentype');
+    font-weight: 400;
     font-style: normal;
     font-display: swap;
 }
 
-:root {
-}
-/* h1 {
-    -webkit-font-smoothing: antialiased;
-    transform-style: preserve-3d;
-} */
-
+/* Root + theme variables */
 @theme inline {
     --color-background: var(--background);
     --color-foreground: var(--foreground);
@@ -22,6 +17,7 @@
     --font-mono: var(--font-geist-mono);
 }
 
+/* Optional dark mode variables */
 @media (prefers-color-scheme: dark) {
     :root {
         /* --background: #0a0a0a; */
@@ -29,10 +25,12 @@
     }
 }
 
+/* Global styles */
 html,
 body {
     height: auto;
     overflow-x: hidden;
     overflow-y: auto;
-    font-family: 'TWKLausanne', sans-serif;
+    font-family: 'GriftBlack' ;
+    font-weight: 400;
 }
