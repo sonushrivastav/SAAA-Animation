@@ -104,10 +104,10 @@ const Service = () => {
 
       <DotGrid
         dotSize={5}
-        gap={15}
+        gap={10}
         baseColor="#271E37"
         activeColor="#5227FF"
-        proximity={120}
+        proximity={100}
         shockRadius={250}
         shockStrength={5}
         resistance={750}
@@ -133,7 +133,7 @@ const Service = () => {
         <div className="absolute inset-0" />
       </div>
 
-      <div className="w-full border h-[500px] self-center bg-black">
+      <div className="w-full  h-[500px] self-center bg-black">
         <h1 className="text-7xl text-center text-white">Video</h1>
       </div>
     </>

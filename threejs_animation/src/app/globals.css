@@ -141,3 +141,45 @@ body {
   backface-visibility: hidden;
   perspective: 1000px;
 }
+
+@keyframes spin-slow {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.animate-spin-slow {
+  animation: spin-slow 25s linear infinite;
+}
+
+@keyframes move-vertical {
+  0% {
+    transform: translateY(-15%);
+  }
+  50% {
+    transform: translateY(15%);
+  }
+  100% {
+    transform: translateY(-15%);
+  }
+}
+.animate-move-vertical {
+  animation: move-vertical 22s ease-in-out infinite;
+}
+
+@keyframes move-horizontal {
+  0% {
+    transform: translateX(-15%);
+  }
+  50% {
+    transform: translateX(15%);
+  }
+  100% {
+    transform: translateX(-15%);
+  }
+}
+.animate-move-horizontal {
+  animation: move-horizontal 18s ease-in-out infinite;
+}

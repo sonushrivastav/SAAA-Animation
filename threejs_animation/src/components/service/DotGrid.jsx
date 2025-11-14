@@ -90,6 +90,7 @@ const DotGrid = ({
   const canvasRef = useRef(null);
   const dotsRef = useRef([]);
   const rootRef = useRef(null);
+  const titleRef = useRef(null);
   const cardRefs = useRef([]);
   const pointerRef = useRef({
     x: 0,
@@ -353,12 +354,24 @@ const DotGrid = ({
     cardRefs.current = cardRefs.current.slice(0, cards.length);
 
     const ctx = gsap.context(() => {
+      const stackOffset = 25;
+      const totalStackHeight = stackOffset * (cards.length - 1);
       // Basic starting state: every card centered, slightly down, invisible, low scale
-      gsap.set(cardRefs.current, {
-        y: window.innerHeight,
+      gsap.set(cardRefs.current[0], {
+        y: 25 + totalStackHeight,
         scale: 1,
-        transformOrigin: "60% 60%",
-        zIndex: (i) => i, // top card highest z
+        transformOrigin: "center center",
+        zIndex: 1, // top card highest z
+      });
+
+      // Other cards start below viewport in reverse z-order
+      cardRefs.current.slice(1).forEach((card, idx) => {
+        gsap.set(card, {
+          y: window.innerHeight,
+          scale: 1,
+          transformOrigin: "center center",
+          zIndex: idx + 2,
+        });
       });
 
       // Create timeline to control stacking
@@ -367,43 +380,52 @@ const DotGrid = ({
           trigger: rootRef.current,
           start: "top top",
           // Pin for enough distance: one viewport per card + a little extra
-          end: () => `+=${window.innerHeight * cards.length}`,
+          end: () => `+=${window.innerHeight * (cards.length + 0.5)}`,
           pin: true,
           scrub: 1,
           anticipatePin: 1,
         },
       });
 
-      cards.forEach((_, i) => {
-        const el = cardRefs.current[i];
-        // label for in
+      // move title upward and stick before first card appears
+      tl.to(titleRef.current, {
+        y: -80, // adjust upward distance (you can tweak)
+        opacity: 1,
+        ease: "power2.out",
+        duration: 0.8,
+      });
+
+      // Animate first card to center position
+      tl.to(
+        cardRefs.current[0],
+        {
+          y: 0 - stackOffset * (cards.length - 1),
+          scale: 1 - (cards.length - 1) * 0.02,
+          ease: "power2.out",
+          duration: cards.length - 1,
+        },
+        0
+      );
+
+      cards.slice(1).forEach((_, i) => {
+        const cardIndex = i + 1;
+        const el = cardRefs.current[cardIndex];
+        const startTime = cardIndex * 1;
+        const cardsAbove = cards.length - 1 - cardIndex;
+
         tl.to(
           el,
           {
-            y: 0,
+            y: -(stackOffset * cardsAbove),
+            scale: 1 - cardsAbove * 0.02,
             ease: "power2.out",
-            duration: 1,
+            duration: cards.length - cardIndex,
           },
-          i * 1.2 // overlapping timing for smoothness
+          startTime
         );
-
-        // Push previous card up slightly when next appears
-        if (i > 0) {
-          for (let j = 0; j < i; j++) {
-            const prevCard = cardRefs.current[j];
-            tl.to(
-              prevCard,
-              {
-                y: -120 * (i - j), // Stack with offset
-                scale: 0.9 - (i - j) * 0.1, // Slight scale down
-                ease: "power2.out",
-                duration: 1,
-              },
-              i * 1.2 // Same timing as current card
-            );
-          }
-        }
       });
+      // Add extra scroll space at the end before unpinning
+      tl.to({}, { duration: 0.5 });
     }, rootRef);
 
     return () => ctx.revert();
@@ -417,10 +439,10 @@ const DotGrid = ({
     >
       <div
         ref={wrapperRef}
-        className="sticky top-0  h-screen w-full flex flex-col gap-12 py-24 px-48"
+        className="sticky top-0  h-[105vh] w-full flex flex-col gap-12 py-24 px-48"
       >
         {/* Header */}
-        <div className="relative z-10 ">
+        <div ref={titleRef} className="relative z-10 ">
           <h2 className="text-4xl font-semibold text-white tracking-tight">
             What we do
           </h2>
@@ -428,7 +450,7 @@ const DotGrid = ({
 
         <canvas
           ref={canvasRef}
-          className="absolute inset-0 w-full h-full pointer-events-none "
+          className="absolute inset-0 w-full  h-full pointer-events-none "
         />
 
         {/* Cards container — stacking absolutely for perfect overlay */}
