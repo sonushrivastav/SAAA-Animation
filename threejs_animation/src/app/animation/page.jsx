@@ -32,42 +32,47 @@ const Animation = () => {
     const flowingParticlesMaterialRef = useRef();
     // --- Flying Texts Setup ---
     const flyingTextRef = useRef(null);
-    const texts = ['Text 1', 'Text 2', 'Text 3', 'Text 4', 'Text 5', 'Text 6', 'Text 7'];
+    const texts = [
+        'You’re visible everywhere, but remembered nowhere?',
+        'Your website and UI/UX look great in reviews, not in results.',
+        'Investors are interested, but not invested',
+    ];
     const SERVICE_DATA = [
         {
-            title: 'Service 1',
-            subtext: 'Brand establishment and digital identity creation.',
-            className: 'text-purple-600',
-        },
-        {
-            title: 'Service 2',
-            subtext: 'Comprehensive digital marketing strategies.',
-            className: 'text-red-500',
-        },
-        {
-            title: 'Service 3',
-            subtext: 'Creative execution and dynamic content development.',
+            title: 'Branding/ Designing',
+            subtext: 'Giving your ideas a form people can see, trust, and remember.',
             className: 'text-yellow-500',
         },
         {
-            title: 'Service 4',
-            subtext: 'Performance marketing, conversion tracking, and optimization.',
+            title: 'UI/UX Design',
+            subtext: 'Crafted interfaces that feel effortless and intuitive.',
+            className: 'text-red-500',
+        },
+        {
+            title: 'Web Development',
+            subtext: ' Building the home your brand deserves online.',
+            className: 'text-yellow-500',
+        },
+        {
+            title: 'Digital Marketing',
+            subtext: 'Turning campaigns into constellations that people follow.',
+            className: 'text-purple-600',
+        },
+
+        {
+            title: 'Investor Relations',
+            subtext: 'We help your finances find their true orbit.',
             className: 'text-green-500',
         },
         {
-            title: 'Service 5',
-            subtext: 'Deep analytics, insights, and data-driven decision making.',
+            title: 'Financial Advisory',
+            subtext: 'Turning your milestones into meaningful narratives.',
             className: 'text-blue-500',
         },
         {
-            title: 'Service 6',
-            subtext: 'Scaling solutions globally and entering new markets.',
+            title: 'Legal advice',
+            subtext: ' Simplifying what’s binding, strengthening what’s bold.',
             className: 'text-indigo-500',
-        },
-        {
-            title: 'Service 7',
-            subtext: 'Future-proofing your business through innovation and tech integration.',
-            className: 'text-pink-500',
         },
     ];
 
@@ -105,7 +110,7 @@ const Animation = () => {
             smoothWheel: true,
             smoothTouch: true,
             touchMultiplier: 0.9,
-            wheelMultiplier: 0.7,
+            wheelMultiplier: 0.5,
         });
 
         lenis.on('scroll', ScrollTrigger.update);
@@ -204,7 +209,7 @@ const Animation = () => {
                     spiralGroup.add(modelClone);
 
                     // Set initial position (offset to the left)
-                    spiralGroup.position.set(-0.5, -0.5, 0);
+                    spiralGroup.position.set(-1, -0.5, 0);
                     spiralGroup.rotation.set(-0.1, 0.2, -0.2);
 
                     // Store initial state for floating animation
@@ -533,7 +538,6 @@ const Animation = () => {
 
             // --- STEP 1: Move logo to center ---
             // tl.addLabel("initial");
-            const TEXT1_START_EARLY = 1.5;
             // Animate each spiral individually to center with rotation
             spirals.forEach((spiral, index) => {
                 const delay = index * 0.3;
@@ -565,105 +569,28 @@ const Animation = () => {
                 );
             });
 
-            const TOTAL_ROTATION_DURATION = 5; // matches spiral rotation duration
-            const STEPS = 4; // number of steps/pauses
-            const STEP_MOVE_DISTANCE = -50; // pixels to move each step
-            const PAUSE_DURATION = TOTAL_ROTATION_DURATION / (STEPS * 2);
-
-            // Text1 stepping animation synchronized with logo rotation
-            for (let i = 0; i < STEPS; i++) {
-                const stepDelay = i === 0 ? `<-${TEXT1_START_EARLY}` : '>'; // first step starts with rotation, others follow
-
-                // Move upward
-                tl.to(
-                    '.initial-text',
-                    {
-                        y: STEP_MOVE_DISTANCE * (i + 1), // cumulative upward movement
-                        duration: PAUSE_DURATION,
-                        ease: 'power1.inOut',
-                    },
-                    stepDelay
-                );
-
-                // Pause/hold position
-                tl.to(
-                    '.initial-text',
-                    {
-                        duration: PAUSE_DURATION * 0.8, // slightly shorter pause
-                        ease: 'none',
-                    },
-                    '>'
-                );
-            }
-
-            // Final move - text1 goes completely off screen
             tl.to(
                 '.initial-text',
                 {
-                    y: '-100vh', // completely off screen
+                    y: '-20vh',
                     opacity: 0,
-                    duration: 1.5,
-                    ease: 'power2.in',
+                    duration: 3.5,
+                    ease: 'power1.inOut',
                 },
-                '>'
+                '<-3'
             );
-
-            // --- Second text appears and moves up in steps ---
-            // Text2 enters from bottom
-            tl.fromTo(
-                '.second-text',
-                {
-                    y: '20vh', // start from below
-                    opacity: 0,
-                },
-                {
-                    y: 0, // move to center
-                    opacity: 1,
-                    duration: 1.5,
-                    ease: 'power2.out',
-                },
-                '>+0.5'
-            );
-
-            // Text2 stepping animation (similar to text1)
-            const TEXT2_STEPS = 5; // can be different number of steps
-            const TEXT2_STEP_DISTANCE = -60;
-            const TEXT2_STEP_DURATION = 0.8;
-
-            for (let i = 0; i < TEXT2_STEPS; i++) {
-                // Move upward
-                tl.to(
-                    '.second-text',
-                    {
-                        y: TEXT2_STEP_DISTANCE * (i + 1),
-                        duration: TEXT2_STEP_DURATION,
-                        ease: 'power1.inOut',
-                    },
-                    '>'
-                );
-
-                // Pause/hold
-                tl.to(
-                    '.second-text',
-                    {
-                        duration: TEXT2_STEP_DURATION * 0.7,
-                        ease: 'none',
-                    },
-                    '>'
-                );
-            }
-
-            // Final move - text2 goes completely off screen
             tl.to(
                 '.second-text',
                 {
-                    y: '-100vh',
-                    opacity: 0,
-                    duration: 1.8,
-                    ease: 'power2.in',
+                    y: '15vh',
+                    opacity: 1,
+                    duration: 3.5,
+                    ease: 'power1.inOut',
                 },
-                '>'
+                '>+1'
             );
+            // tl.addLabel('rotation');
+            tl.to('.second-text', { opacity: 0, duration: 3.5, ease: 'power1.inOut' }, '>');
 
             // --- STEP 4: Particle explosion ---
 
@@ -732,7 +659,7 @@ const Animation = () => {
 
             flyingTexts.forEach((el, i) => {
                 const startTime = i === 0 ? '>' : `>-=${textDuration * overlap + 0.5}`;
-                console.log(startTime);
+                console.log(`for ${i} time is ${startTime}`);
 
                 const labelName = `flyingText-${i}`;
                 tl.addLabel(labelName, startTime);
@@ -746,9 +673,9 @@ const Animation = () => {
                             scale: 1.1,
                             y: 0,
                             ease: 'power2.out',
-                            duration: textDuration * 0.6,
+                            duration: textDuration,
                         },
-                        labelName
+                        `>-${labelName}`
                     );
 
                     tl.to(
@@ -763,7 +690,7 @@ const Animation = () => {
                         `>${textDuration * 0.4}`
                     );
                 } else {
-                    // 🔸 Normal animation for first 6 flying texts
+                    // 🔸 Normal animation for first 2 flying texts
                     tl.fromTo(
                         el,
                         { opacity: 0, scale: 0.1 },
@@ -781,9 +708,9 @@ const Animation = () => {
                         labelName
                     );
                 }
-                // 🌌 Change Starfield direction after 6th flying text
-                if (i === 5) {
-                    // index 5 = 6th text
+                // 🌌 Change Starfield direction after 2nd flying text
+                if (i === 1) {
+                    // index 1 = 2nd text
                     tl.to(
                         window.starfieldUniforms.uDirection.value,
                         {
@@ -793,7 +720,7 @@ const Animation = () => {
                             duration: 2,
                             ease: 'power2.inOut',
                         },
-                        `>${textDuration * 0.4}` // during fade transition to 7th
+                        `>-${textDuration * 0.2}`
                     );
                 }
                 // ✅ After final flying text disappears → start starfield morph
@@ -862,7 +789,7 @@ const Animation = () => {
             // --- STEP 7: Logo + service text synchronized animation ---
 
             const serviceCount = SERVICE_DATA.length;
-            const TRANSITION_DURATION = 2.5;
+            const TRANSITION_DURATION = 4.5;
 
             // reset all texts and logo
             gsap.set('.service-text', { opacity: 0 });
@@ -873,8 +800,8 @@ const Animation = () => {
                 '.service-0',
                 {
                     opacity: 1,
-                    duration: 1.8,
-                    ease: 'power2.inOut',
+                    duration: 2.12,
+                    ease: 'power1.inOut',
                     onStart: () => setActiveServiceIndex(0),
                 },
                 '>-1'
@@ -884,24 +811,30 @@ const Animation = () => {
                 const label = `service-${i}`;
                 tl.addLabel(label, `>+1.2`);
 
-                // fade out previous text
+                // --- fade + slide previous text DOWN ---
                 tl.to(
                     `.service-${i - 1}`,
                     {
                         opacity: 0,
-                        duration: 1,
-                        ease: 'power2.inOut',
+                        y: '30vh', // slide down
+                        duration: 2.1,
+                        ease: 'power1.inOut',
                     },
                     `>+${TRANSITION_DURATION * 0.8}`
-                ); // start mid-way for smooth crossfade
+                );
 
-                // fade in next text and update logo slice simultaneously
-                tl.to(
+                // --- fade + slide next text UP ---
+                tl.fromTo(
                     `.service-${i}`,
                     {
+                        opacity: 0,
+                        y: '30vh', // start above
+                    },
+                    {
                         opacity: 1,
-                        duration: 1,
-                        ease: 'power2.inOut',
+                        y: 0,
+                        duration: 2.1,
+                        ease: 'power1.inOut',
                         onStart: () => setActiveServiceIndex(i),
                         onReverseComplete: () => {
                             requestAnimationFrame(() => {
@@ -909,8 +842,8 @@ const Animation = () => {
                             });
                         },
                     },
-                    '<'
-                ); // overlap for smooth simultaneous transition
+                    '<' // overlap for smooth transition
+                );
             }
 
             // 5️⃣ cleanup when scrolling past last service
@@ -1033,19 +966,22 @@ const Animation = () => {
                 </Canvas>
             </div>
 
-            <canvas ref={canvasRef} className="fixed top-0 left-0 outline-none z-10" />
+            <div>
+                <canvas ref={canvasRef} className="fixed top-0 left-0 outline-none z-10" />
+            </div>
 
             {/* ✅ This container will hold all the text content */}
-            <div className="fixed inset-0 z-20 pointer-events-none flex items-center justify-center">
-                <div className="w-full max-w-6xl mx-auto px-8">
-                    <div className="flex justify-between items-center w-full">
+            <div className="fixed inset-0 z-20 pointer-events-none flex items-center justify-center ">
+                <div className="w-full  mx-auto px-4 ">
+                    <div className="flex justify-between items-center w-full ">
                         {/* ✅ Placeholder for the logo space on the left */}
-                        <div className="w-1/2"></div>
+                        <div className="w-[40%] "></div>
 
                         {/* ✅ Initial text on the right */}
-                        <div className="w-1/2 initial-text">
-                            <h1 className="text-5xl md:text-7xl font-bold leading-tight text-black  ">
-                                One small step for your brand.
+                        <div className="w-[60%] initial-text ">
+                            <h1 className="text-5xl md:text-7xl font-bold leading-tight text-[#0f0f0f]  ">
+                                What you envision, <br />
+                                We help you become.
                             </h1>
                         </div>
                     </div>
@@ -1053,14 +989,13 @@ const Animation = () => {
             </div>
 
             {/* ✅ Second text that appears on top */}
-            <div className="fixed inset-x-0 top-[15%] z-20 pointer-events-none opacity-0 second-text text-center">
-                <h1 className="text-5xl md:text-7xl font-bold leading-tight text-black">
-                    One <span className="text-purple-400">giant leap</span> towards the <br /> hall
-                    of fame.
+            <div className="fixed inset-x-0 top-[0%] z-20 pointer-events-none opacity-0 second-text text-center">
+                <h1 className="text-5xl md:text-7xl font-bold leading-tight text-[#0f0f0f]">
+                    Every need of your brand, under one roof, powered by one partner.
                 </h1>
             </div>
 
-            <div className="scroll-container h-[1800vh]"></div>
+            <div className="scroll-container h-[1400vh]"></div>
 
             <div className="starfield-layer fixed inset-0 z-30 opacity-0 pointer-events-none">
                 <StarfieldBackground />
@@ -1070,13 +1005,13 @@ const Animation = () => {
                 >
                     {texts.map((t, i) => (
                         <div key={i} className="absolute text-wrapper">
-                            <h1 className="text-8xl font-bold text-white">{t}</h1>
+                            <h1 className="text-5xl font-bold text-[#fafafa] ">{t}</h1>
                         </div>
                     ))}
                 </div>
             </div>
 
-            <div className="next-section   text-white fixed inset-0  flex items-center justify-center opacity-0 z-15 ">
+            <div className="next-section   text-white fixed inset-0  flex items-center justify-center opacity-1 z-15 ">
                 <div className="service-logo fixed inset-0 opacity-1 ">
                     <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
                         <color attach="background" args={['#0f0f0f']} />/
@@ -1123,7 +1058,7 @@ const Animation = () => {
                 </div>
             </div>
 
-            <div className="statSection opacity-0 z-0">
+            <div className="statSection opacity-0 z-100">
                 <StatsSection />
             </div>
             <Footer />
