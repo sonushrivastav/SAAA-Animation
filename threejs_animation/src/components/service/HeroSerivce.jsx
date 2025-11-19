@@ -2,6 +2,7 @@
 import React, { useEffect, useRef } from "react";
 import AnimatedGradient from "./GradientBackground";
 import GooeyGradient from "./GradientBackground";
+import ThreeGlass from "./FloatingGlass";
 
 const FloatingSphere = ({ text, className = "", delay = 0 }) => {
   return (
@@ -19,16 +20,16 @@ const FloatingSphere = ({ text, className = "", delay = 0 }) => {
 };
 const HeroSerivce = () => {
   return (
-    <section className="relative h-screen w-full flex flex-col items-center justify-center  overflow-hidden bg-black">
+    <section className="relative h-screen w-full flex flex-col items-center justify-center  overflow-hidden bg-[#0f0f0f]">
       {/* Background gradient transition */}
-      {/* <div className="absolute  inset-0 bg-[radial-gradient(150%_90%_at_50%_80%,_rgba(88,28,135,0.9)_0%,_rgba(0,0,0,1)_55%)] " /> */}
+      {/* <div className="absolute  inset-0 bg-[radial-gradient(150%_90%_at_50%_65%,_rgba(88,28,135,0.9)_0%,_rgba(0,0,0,1)_55%)] " /> */}
       {/* <div className="absolute inset-0 bg-[radial-gradient(130%_70%_at_50%_75%,_rgba(90,0,255,0.9)_0%,_rgba(132,77,233,0.9)_45%,_rgba(0,0,0,1)_85%)]" /> */}
 
       {/* <AnimatedGradient /> */}
       <GooeyGradient />
 
       {/* Floating Elements */}
-      <FloatingSphere
+      {/* <FloatingSphere
         text="3D element : #"
         className="top-24 left-[30%]"
         delay={0.2}
@@ -47,7 +48,45 @@ const HeroSerivce = () => {
         text="3D element : #"
         className="bottom-[19%] right-[24%]"
         delay={1.1}
-      />
+      /> */}
+
+      <div className="absolute inset-0 pointer-events-none z-10">
+        <div className="absolute top-[10%] left-[29%] w-48 h-48">
+          <ThreeGlass
+            motionVariant={0}
+            speed={1.2}
+            amplitude={0.06}
+            mouseInfluence={true}
+          />
+        </div>
+
+        <div className="absolute top-[50%] left-60 w-48 h-48">
+          <ThreeGlass
+            motionVariant={1}
+            speed={0.9}
+            amplitude={0.08}
+            mouseInfluence={true}
+          />
+        </div>
+
+        <div className="absolute top-[65%] right-[25%] w-48 h-48">
+          <ThreeGlass
+            motionVariant={2}
+            speed={1.4}
+            amplitude={0.07}
+            mouseInfluence={true}
+          />
+        </div>
+
+        <div className="absolute top-[25%] right-[20%] w-48 h-48">
+          <ThreeGlass
+            motionVariant={3}
+            speed={0.8}
+            amplitude={0.05}
+            mouseInfluence={true}
+          />
+        </div>
+      </div>
 
       {/* Text Content */}
       <div className="absolute z-10 text-center text-white px-8 max-w-3xl">

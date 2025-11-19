@@ -105,7 +105,7 @@ const Service = () => {
       <DotGrid
         dotSize={5}
         gap={10}
-        baseColor="#271E37"
+        baseColor="#0f0f0f"
         activeColor="#5227FF"
         proximity={100}
         shockRadius={250}

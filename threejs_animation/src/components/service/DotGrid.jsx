@@ -6,6 +6,7 @@ import ScrollStack, {
   ScrollStackItem,
 } from "../../components/service/ScrollStack";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import ThreeGlass from "./FloatingGlass";
 gsap.registerPlugin(ScrollTrigger, InertiaPlugin);
 
 const Card = React.forwardRef(({ title, items, description }, ref) => {
@@ -36,14 +37,12 @@ const Card = React.forwardRef(({ title, items, description }, ref) => {
       {/* Right placeholder (3D model area) */}
       <div className="w-2/5 flex items-center justify-center p-6 text-center">
         <div>
-          <p className="font-semibold text-white text-sm mb-2">
-            3D Model (Glass Morphism)
-          </p>
-          <p className="text-gray-500 text-xs break-words leading-relaxed">
-            ref: https://in.pinterest.com/
-            <br />
-            pin/33284484741592100/
-          </p>
+          <ThreeGlass
+            motionVariant={0}
+            speed={1.2}
+            amplitude={0.06}
+            mouseInfluence={true}
+          />
         </div>
       </div>
     </div>
@@ -74,7 +73,7 @@ function hexToRgb(hex) {
 const DotGrid = ({
   dotSize = 16,
   gap = 32,
-  baseColor = "#5227FF",
+  baseColor = "#0f0f0f",
   activeColor = "#5227FF",
   proximity = 150,
   speedTrigger = 100,
