@@ -24,7 +24,7 @@ export default function Navbar({
         {
             title: 'Products',
             items: [
-                { label: 'Home', href: '/' },
+                { label: 'Home', href: '/animation' },
                 { label: 'Service', href: '/service' },
                 { label: 'Social Media', href: '/socialmedia' },
             ],
@@ -79,9 +79,10 @@ export default function Navbar({
                         {/* Logo + reveal org name */}
                         {/* Logo swap */}
                         <Link
-                            href="/"
+                            href="/animation"
                             className="relative flex items-center justify-center gap-2 w-32"
                             aria-label="Home"
+                            onClick={() => setOpen(false)}
                         >
                             <motion.div
                                 initial={{ opacity: 1 }}
@@ -116,6 +117,7 @@ export default function Navbar({
                         {/* CTA */}
                         <Link
                             href={cta.href}
+                            onClick={() => setOpen(false)}
                             className="text-sm font-medium text-[#fafafa] bg-[#844de9]  px-4 py-2 rounded-full  hover:bg-[#844de9]/80"
                         >
                             {cta.label}
@@ -132,10 +134,10 @@ export default function Navbar({
                                 transition={{ duration: 0.35, delay: 0.15 }}
                                 className="border-t border-white/10 bg-black/95 md:px-8 px-4"
                             >
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 py-6 text-white">
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 py-6 text-[#fafafa]">
                                     {menu.map(section => (
                                         <div key={section.title}>
-                                            <h4 className="text-sm font-semibold mb-3 text-white/70">
+                                            <h4 className="text-lg font-semibold mb-3 text-[#fafafa]">
                                                 {section.title}
                                             </h4>
                                             <ul className="space-y-2">
@@ -143,6 +145,7 @@ export default function Navbar({
                                                     <li key={item.href}>
                                                         <Link
                                                             href={item.href}
+                                                            onClick={() => setOpen(false)}
                                                             className="text-white/80 hover:text-white text-sm"
                                                         >
                                                             {item.label}

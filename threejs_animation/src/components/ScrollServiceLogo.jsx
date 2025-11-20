@@ -92,7 +92,7 @@ export const spiralConfigs = [
 
 // ---------- Component ----------
 export default function ParticlesMorphPerSlice({
-    glbPath = '/models/T3d.glb',
+    glbPath = '/models/model.glb',
     particleCount = 10000,
     size = 12,
     initialActiveIndex = 0,
@@ -102,6 +102,35 @@ export default function ParticlesMorphPerSlice({
     const mouse = useRef(new THREE.Vector2(0, 0));
     const materialsRef = useRef([]);
     const pointsGroupRef = useRef();
+    const slicesRef = useRef(null);
+
+    slicesRef.current = [];
+
+    scene.traverse(child => {
+        if (child.isMesh) {
+            slicesRef.current.push(child);
+            // console.log(child.name);
+        }
+    });
+
+    const order = {
+        Curve001: 2,
+        Curve002: 1,
+        Curve_1: 3,
+        Curve003: 4,
+        Curve004: 5,
+        Curve005: 6,
+        Curve006: 7,
+    };
+
+    slicesRef.current.sort((a, b) => {
+        return order[a.name] - order[b.name];
+    });
+
+    slicesRef.current.forEach(slice => {
+        slice.position.set(0, 0, 0);
+        slice.rotation.set(0, 0, 0);
+    });
 
     // desired visual transform that used to be applied to each primitive
     const VISUAL_POSITION = new THREE.Vector3(-2, -2, 0);
@@ -118,39 +147,31 @@ export default function ParticlesMorphPerSlice({
         return () => window.removeEventListener('mousemove', handleMove);
     }, []);
 
-    // Build slices from GLB
+    // Build slices from GLB (updated to use meshes' baked transforms)
     const slices = useMemo(() => {
         const samplers = [];
-        scene.traverse(child => {
-            if (child.isMesh) {
+        slicesRef.current.forEach(child => {
+            if (child) {
                 child.updateWorldMatrix(true, false);
                 try {
                     const sampler = new MeshSurfaceSampler(child).build();
-                    samplers.push({ sampler, matrixWorld: child.matrixWorld.clone() });
-                } catch (err) {}
+                    samplers.push({
+                        sampler,
+                        matrixWorld: child.matrixWorld.clone(),
+                        name: child.name,
+                    });
+                } catch (err) {
+                    console.log('err', err);
+                }
             }
         });
 
-        const slicesCount = spiralConfigs.length;
+        console.log('samplde', samplers);
+
+        // Use the number of meshes found in the GLB as slices (fallback to spiralConfigs if none)
+        const slicesCount = Math.max(1, samplers.length);
         const perSlice = Math.floor(particleCount / slicesCount);
         const remainder = particleCount - perSlice * slicesCount;
-        const spiralMatrices = spiralConfigs.map(cfg => {
-            const m = new THREE.Matrix4();
-            const s = new THREE.Vector3(cfg.s, cfg.s, cfg.s);
-            const q = new THREE.Quaternion().setFromEuler(
-                new THREE.Euler(cfg.r[0], cfg.r[1], cfg.r[2])
-            );
-            m.compose(new THREE.Vector3(...cfg.p), q, s);
-            return m;
-        });
-
-        // Prepare visual transform matrix that'll be applied only to target positions
-        const visualMatrix = new THREE.Matrix4();
-        visualMatrix.compose(
-            VISUAL_POSITION,
-            new THREE.Quaternion().setFromEuler(VISUAL_ROTATION),
-            VISUAL_SCALE
-        );
 
         let samplerIdx = 0;
         const samplersCount = Math.max(1, samplers.length);
@@ -163,7 +184,7 @@ export default function ParticlesMorphPerSlice({
             const aRandom = new Float32Array(count);
             const temp = new THREE.Vector3();
 
-            // ------- START: centered star-grid / layered arrangement (replaces random positions) -------
+            // ------- START: centered star-grid / layered arrangement (same as before) -------
             const spacing = 2.55; // distance between grid points in x/y
             const layerSpacing = 1.2; // spacing between z layers
             const jitterRange = 0.45; // random jitter applied to z
@@ -202,15 +223,13 @@ export default function ParticlesMorphPerSlice({
             }
             // ------- END initial grid -------
 
-            // target positions: sample model + spiral matrix + bake visual transform
+            // target positions: sample model using the mesh's world matrix only
             let wrote = 0;
             while (wrote < count) {
                 const samplerObj = samplers[samplerIdx % samplersCount];
                 samplerIdx++;
-                samplerObj.sampler.sample(temp); // sample model in its world space
-                temp.applyMatrix4(samplerObj.matrixWorld); // transform to world
-                temp.applyMatrix4(spiralMatrices[sIdx]); // apply slice spiral local transform
-                temp.applyMatrix4(visualMatrix); // ===== bake visual transform into TARGET
+                samplerObj.sampler.sample(temp); // sample model in its local surface
+                temp.applyMatrix4(samplerObj.matrixWorld); // transform to world space (mesh baked transform)
                 aTargetPos.set([temp.x, temp.y, temp.z], wrote * 3);
                 wrote++;
             }
@@ -293,7 +312,7 @@ export default function ParticlesMorphPerSlice({
 
     // RENDER: primitives have identity transforms — visual transform baked into aTargetPos only
     return (
-        <group ref={pointsGroupRef} position={[0, 0, 0]} rotation={[0, 0, 0]} scale={[1, 1, 1]}>
+        <group ref={pointsGroupRef} position={[0, 0, 0]} rotation={[0, 0, 0]} scale={[10, 10, 8]}>
             {meshesPerSlice.map((m, idx) => (
                 <primitive key={idx} object={m.points} />
             ))}

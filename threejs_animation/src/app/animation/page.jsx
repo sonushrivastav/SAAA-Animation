@@ -12,7 +12,6 @@ import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
 import Footer from '../../components/Footer';
-import Navbar from '../../components/Navbar';
 import FlowingParticles from '../../components/ParticleBackground';
 import ParticlesMorphPerSlice from '../../components/ScrollServiceLogo';
 import StarfieldBackground from '../../components/StarfieldBackground';
@@ -25,6 +24,7 @@ const Animation = () => {
     const canvasRef = useRef(null);
     const [showStarfield, setShowStarfield] = useState(false);
     const scrollLogoRef = useRef(null);
+    const slicesRef = useRef(null);
 
     const [activeServiceIndex, setActiveServiceIndex] = useState(0);
 
@@ -172,96 +172,77 @@ const Animation = () => {
         let particlesMaterial = null;
         let logoGroup = null;
         const individualSpirals = [];
-        let animationState = { isInitialState: true };
+        const logoMaterials = [];
+        // let animationState = { isInitialState: true };
 
         loader.load(
-            '/models/T3d.glb',
+            '/models/model.glb',
             gltf => {
-                const sourceScene = gltf.scene;
-                logoGroup = new THREE.Group();
-                logoGroup.scale.set(1.6, 1.6, 0.15);
+                const rawModel = gltf.scene;
 
-                // ✅ Set initial position to the left, as per the first image.
-                // logoGroup.position.set(-3, -0.5, 0);
-                // logoGroup.rotation.set(-0.1, 0.2, -0.2);
+                // const modelGroup = new THREE.Group();
+                scene.add(rawModel);
+                // modelGroup.add(rawModel);
+                rawModel.scale.set(10, 10, 2);
+                rawModel.position.set(-1.5, -1.5, 2);
+                rawModel.rotation.set(0, 0, 0);
 
-                const allMaterials = [];
+                slicesRef.current = [];
 
-                spiralConfigs.forEach(config => {
-                    // Create a separate group for each spiral
-                    const spiralGroup = new THREE.Group();
-
-                    const modelClone = sourceScene.clone();
-                    modelClone.scale.setScalar(config.s);
-                    modelClone.position.fromArray(config.p);
-                    modelClone.rotation.fromArray(config.r);
-
-                    modelClone.traverse(child => {
-                        if (child.isMesh && child.material) {
-                            const newMaterial = child.material.clone();
-                            newMaterial.transparent = true;
-                            newMaterial.depthWrite = false;
-                            child.material = newMaterial;
-                            allMaterials.push(newMaterial);
-                        }
-                    });
-
-                    spiralGroup.add(modelClone);
-
-                    // Set initial position (offset to the left)
-                    spiralGroup.position.set(-1, -0.5, 0);
-                    spiralGroup.rotation.set(-0.1, 0.2, -0.2);
-
-                    // Store initial state for floating animation
-                    spiralInitialStates.push({
-                        initialY: -0.5,
-                        initialRotX: -0.1,
-                        initialRotZ: -0.2,
-                    });
-
-                    // Store reference to this spiral
-                    individualSpirals.push({
-                        group: spiralGroup,
-                        finalPosition: { x: -0.5, y: -2, z: 2 },
-                        finalRotation: {
-                            x: 0,
-                            y: spiralGroup.rotation.y - Math.PI / 8,
-                            z: spiralGroup.rotation.z - Math.PI / 2,
-                        },
-                    });
-
-                    logoGroup.add(spiralGroup);
+                rawModel.traverse(child => {
+                    if (child.isMesh) {
+                        slicesRef.current.push(child);
+                        child.material.transparent = true;
+                        child.material.depthWrite = false;
+                        logoMaterials.push(child.material);
+                    }
                 });
 
-                scene.add(logoGroup);
+                const order = {
+                    Curve001: 2,
+                    Curve002: 1,
+                    Curve_1: 3,
+                    Curve003: 4,
+                    Curve004: 5,
+                    Curve005: 6,
+                    Curve006: 7,
+                };
 
-                // // Create sampling group that matches the final assembled position
-                // const samplingGroup = new THREE.Group();
-                // samplingGroup.scale.set(1.15, 1.15, 0.15);
+                slicesRef.current.sort((a, b) => {
+                    return order[a.name] - order[b.name];
+                });
 
-                // spiralConfigs.forEach((config) => {
-                //   const modelClone = sourceScene.clone();
-                //   modelClone.scale.setScalar(config.s);
-                //   modelClone.position.fromArray(config.p);
-                //   modelClone.rotation.fromArray(config.r);
-                //   samplingGroup.add(modelClone);
+                slicesRef.current.forEach(slice => {
+                    slice.position.set(0, 0, 0);
+                    slice.rotation.set(0, 0, 0);
+                });
+
+                // slicesRef.current.forEach(slice => {
+                //     slice.position.set(0.15, 0.72, 0.06);
+                //     slice.rotation.set(0, 0, -0.401592653589793);
                 // });
 
-                // // Position the sampling group at the final centered and rotated position
-                // samplingGroup.position.set(-0.5, -2, 2);
-                // samplingGroup.rotation.set(0, -Math.PI / 8, -Math.PI / 2);
+                // spiralInitialStates.push({
+                //     initialY: -0.5,
+                //     initialRotX: -0.1,
+                //     initialRotZ: -0.2,
+                // });
 
-                // Create the particle system from the rotated clone
+                individualSpirals.push({
+                    finalPosition: { x: 0.4, y: 0.2, z: -0.18 },
+                    finalRotation: {
+                        x: 0,
+                        y: -1.53159265358979,
+                        z: 0.0484073464102068,
+                    },
+                });
+
                 createParticleSystem(
-                    logoGroup,
-                    sourceScene,
-                    spiralConfigs,
-                    allMaterials,
-                    individualSpirals,
+                    rawModel,
+
+                    logoMaterials,
                     scene,
-                    camera,
-                    animationState,
-                    spiralInitialStates
+                    camera
                 );
             },
             undefined,
@@ -271,43 +252,17 @@ const Animation = () => {
         );
 
         // createParticleSystem function remains largely unchanged
-        function createParticleSystem(
-            logoGroup,
-            sourceScene,
-            spiralConfigs,
-            materials,
-            spirals,
-            scene,
-            camera,
-            animState
-        ) {
+        function createParticleSystem(rawModel, materials, scene, camera) {
             // Create a temporary sampling group that matches the FINAL assembled state
             const samplingGroup = new THREE.Group();
-            samplingGroup.scale.copy(logoGroup.scale);
 
-            spiralConfigs.forEach((config, index) => {
-                const modelClone = sourceScene.clone();
-                modelClone.scale.setScalar(config.s);
-                modelClone.position.fromArray(config.p);
-                modelClone.rotation.fromArray(config.r);
+            samplingGroup.add(rawModel.clone());
 
-                // Create wrapper to match spiral structure
-                const spiralWrapper = new THREE.Group();
-                spiralWrapper.add(modelClone);
-
-                // Apply FINAL position and rotation
-                spiralWrapper.position.set(
-                    spirals[index].finalPosition.x,
-                    spirals[index].finalPosition.y,
-                    spirals[index].finalPosition.z
-                );
-                spiralWrapper.rotation.set(
-                    spirals[index].finalRotation.x,
-                    spirals[index].finalRotation.y,
-                    spirals[index].finalRotation.z
-                );
-
-                samplingGroup.add(spiralWrapper);
+            samplingGroup.traverse(child => {
+                if (child.isMesh) {
+                    child.position.set(0.25, 0.2, -0.23);
+                    child.rotation.set(-0.181592653589793, -1.53159265358979, 0);
+                }
             });
 
             const geometries = [];
@@ -326,7 +281,7 @@ const Animation = () => {
             const mergedMeshForSampling = new THREE.Mesh(mergedGeometry);
 
             const sampler = new MeshSurfaceSampler(mergedMeshForSampling).build();
-            const numParticles = 18000;
+            const numParticles = 20000;
 
             const particlesGeometry = new THREE.BufferGeometry();
             const positions = new Float32Array(numParticles * 3);
@@ -395,17 +350,11 @@ const Animation = () => {
 
             scene.add(particleSystem);
             if (flowingParticlesMaterialRef.current) {
-                setupScrollAnimation(materials, spirals, particlesMaterial, camera, animState);
+                setupScrollAnimation(materials, particlesMaterial, camera);
             } else {
                 const checkRefInterval = setInterval(() => {
                     if (flowingParticlesMaterialRef.current) {
-                        setupScrollAnimation(
-                            materials,
-                            spirals,
-                            particlesMaterial,
-                            camera,
-                            animState
-                        );
+                        setupScrollAnimation(materials, particlesMaterial, camera);
                         clearInterval(checkRefInterval);
                     }
                 }, 100);
@@ -445,7 +394,7 @@ const Animation = () => {
                      vec3 finalPosition = exploded;
 
                     // circular orbital motion applied during explosion
-                    finalPosition.x += cos(uTime * speed + aRandom.x) * orbitRadius * uProgress;
+                    finalPosition.x += sin(uTime * speed + aRandom.x) * orbitRadius * uProgress;
                     finalPosition.y += sin(uTime * speed + aRandom.y) * orbitRadius * uProgress;
 
                      vec4 mvPosition = modelViewMatrix * vec4(finalPosition, 1.0);
@@ -502,7 +451,7 @@ const Animation = () => {
             });
         }
 
-        function setupScrollAnimation(materials, spirals, particlesMaterial, camera, animState) {
+        function setupScrollAnimation(materials, particlesMaterial, camera) {
             // Make sure starfield starts hidden
             gsap.set('.starfield-layer', { opacity: 0 });
             gsap.set('.text-wrapper', { opacity: 0, scale: 0.1 });
@@ -522,11 +471,6 @@ const Animation = () => {
                     // },
 
                     onUpdate: self => {
-                        if (self.progress > 0) {
-                            animState.isInitialState = false;
-                        } else if (self.progress <= 0.05) {
-                            animState.isInitialState = true;
-                        }
                         gsap.to(flowAnimation.current, {
                             scrollSpeed: self.getVelocity() * 0.005,
                             duration: 0.9,
@@ -539,16 +483,19 @@ const Animation = () => {
             // --- STEP 1: Move logo to center ---
             // tl.addLabel("initial");
             // Animate each spiral individually to center with rotation
-            spirals.forEach((spiral, index) => {
-                const delay = index * 0.3;
+            slicesRef.current.forEach((slice, index) => {
+                let delay = index * 0.3;
+                if (index === slicesRef.length - 1) {
+                    delay = index * 0.02;
+                }
 
                 // Move each spiral to center
                 tl.to(
-                    spiral.group.position,
+                    slice.position,
                     {
-                        x: spiral.finalPosition.x,
-                        y: spiral.finalPosition.y,
-                        z: spiral.finalPosition.z,
+                        x: 0.25,
+                        y: 0.2,
+                        z: -0.23,
                         duration: 5,
                         ease: 'power1.inOut',
                     },
@@ -557,11 +504,11 @@ const Animation = () => {
 
                 // Rotate each spiral into place
                 tl.to(
-                    spiral.group.rotation,
+                    slice.rotation,
                     {
-                        x: spiral.finalRotation.x,
-                        y: spiral.finalRotation.y,
-                        z: spiral.finalRotation.z,
+                        x: -0.181592653589793,
+                        y: -1.53159265358979,
+                        z: 0,
                         duration: 5,
                         ease: 'power1.inOut',
                     },
@@ -595,7 +542,18 @@ const Animation = () => {
             // --- STEP 4: Particle explosion ---
 
             tl.to(particlesMaterial.uniforms.uVisibility, { value: 1, duration: 4 }, '>1');
-            tl.to(materials, { opacity: 0.0, duration: 0.5 }, '<');
+            logoMaterials.forEach(mat => {
+                tl.to(
+                    mat,
+                    {
+                        opacity: 0,
+                        duration: 0.8,
+                        ease: 'power2.out',
+                    },
+                    '<'
+                );
+            });
+
             // tl.addLabel("particleConversion");
             tl.to(
                 particlesMaterial.uniforms.uProgress,
@@ -720,7 +678,7 @@ const Animation = () => {
                             duration: 2,
                             ease: 'power2.inOut',
                         },
-                        `>-${textDuration * 0.2}`
+                        `>-${textDuration * 0.33}`
                     );
                 }
                 // ✅ After final flying text disappears → start starfield morph
@@ -917,29 +875,29 @@ const Animation = () => {
             }
 
             // Float each spiral on its own axis ONLY when in initial state (before scroll)
-            if (animationState.isInitialState && individualSpirals.length > 0) {
-                individualSpirals.forEach((spiral, index) => {
-                    const initialState = spiralInitialStates[index];
-                    if (!initialState) return;
+            // if (animationState.isInitialState && individualSpirals.length > 0) {
+            //     slicesRef.current.forEach((slice, index) => {
+            //         const initialState = spiralInitialStates[index];
+            //         if (!initialState) return;
 
-                    const offset = index * 0.01; // Phase offset for variety
-                    const speed = 0.5 + index * 0.03; // Different speeds per spiral
+            //         const offset = index * 0.01; // Phase offset for variety
+            //         const speed = 0.5 + index * 0.03; // Different speeds per spiral
 
-                    // Gentle floating motion on Y axis
-                    const floatAmplitude = 0.02;
-                    spiral.group.position.y =
-                        initialState.initialY + Math.sin(time * speed + offset) * floatAmplitude;
+            //         // Gentle floating motion on Y axis
+            //         const floatAmplitude = 0.02;
+            //         slice.position.y =
+            //             initialState.initialY + Math.sin(time * speed + offset) * floatAmplitude;
 
-                    // Subtle rotation float
-                    const rotAmplitude = 0.03;
-                    spiral.group.rotation.x =
-                        initialState.initialRotX +
-                        Math.sin(time * speed * 0.7 + offset) * rotAmplitude;
-                    spiral.group.rotation.z =
-                        initialState.initialRotZ +
-                        Math.cos(time * speed * 0.5 + offset) * rotAmplitude;
-                });
-            }
+            //         // Subtle rotation float
+            //         const rotAmplitude = 0.03;
+            //         slice.rotation.x =
+            //             initialState.initialRotX +
+            //             Math.sin(time * speed * 0.7 + offset) * rotAmplitude;
+            //         slice.rotation.z =
+            //             initialState.initialRotZ +
+            //             Math.cos(time * speed * 0.5 + offset) * rotAmplitude;
+            //     });
+            // }
 
             // camera.position.x += (mouseX * 5 - camera.position.x) * 0.02;
             // camera.position.y += (mouseY * 5 - camera.position.y) * 0.02;
@@ -956,7 +914,6 @@ const Animation = () => {
 
     return (
         <main className="relative bg-white  font-sans text-black">
-            <Navbar />
             <div className="fixed inset-0 z-10">
                 <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
                     <FlowingParticles
@@ -1025,7 +982,7 @@ const Animation = () => {
                         />
                         <pointLight position={[-5, -5, 5]} intensity={1.5} color={'#2f00ff'} />
                         <ParticlesMorphPerSlice
-                            glbPath={'/models/T3d.glb'}
+                            glbPath={'/models/model.glb'}
                             particleCount={15000}
                             size={14}
                             streamLength={8}

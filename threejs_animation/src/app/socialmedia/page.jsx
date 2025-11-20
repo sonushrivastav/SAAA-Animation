@@ -3,7 +3,7 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
@@ -57,19 +57,18 @@ const faqData = [
         answer: 'You’ll typically start seeing meaningful engagement and traction within 4–8 weeks of consistent activity and optimization.',
     },
 ];
-
-function initSpiralAnimation() {
+function initSpiralAnimation(slicesRef) {
     const canvas = document.getElementById('spiralCanvas');
     if (!canvas) return;
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
-        75,
+        55,
         window.innerWidth / window.innerHeight,
         0.1,
-        1000
+        100
     );
-    camera.position.set(0, 0, 4);
+    camera.position.set(0, 0, 3.5);
 
     const renderer = new THREE.WebGLRenderer({
         canvas,
@@ -113,51 +112,60 @@ function initSpiralAnimation() {
     const individualSpirals = [];
     const animationState = { isInitialState: true };
 
-    loader.load('/models/T3d.glb', gltf => {
-        const sourceScene = gltf.scene;
-        logoGroup = new THREE.Group();
-        logoGroup.scale.set(2.5, 2.5, 0.15);
-        logoGroup.position.set(-3.9, 0.2, 0);
+    loader.load('/models/model.glb', gltf => {
+        const rawModel = gltf.scene;
 
-        const allMaterials = [];
+        // const modelGroup = new THREE.Group();
+        scene.add(rawModel);
+        // modelGroup.add(rawModel);
+        rawModel.scale.set(16, 18, 5);
+        rawModel.position.set(-2.6, -1.25, 0);
+        rawModel.rotation.set(0, 0, -Math.PI / 2);
 
-        const startPos = { x: 0.8, y: 1.2, z: 0.11 };
-        const startRot = { x: Math.PI / 3, y: 2.5, z: 0.2 };
+        slicesRef.current = [];
 
-        spiralConfigs.forEach((config, index) => {
-            const spiralGroup = new THREE.Group();
-
-            const modelClone = sourceScene.clone();
-            modelClone.scale.setScalar(config.s);
-            spiralGroup.add(modelClone);
-
-            // Apply material clone for transparency
-            modelClone.traverse(child => {
-                if (child.isMesh && child.material) {
-                    const newMaterial = child.material.clone();
-                    newMaterial.transparent = true;
-                    newMaterial.depthWrite = false;
-                    child.material = newMaterial;
-                    allMaterials.push(newMaterial);
-                }
-            });
-
-            // ✅ Initially stacked (same position/rotation)
-            spiralGroup.position.set(startPos.x, startPos.y, startPos.z);
-            spiralGroup.rotation.set(startRot.x, startRot.y, startRot.z);
-
-            // ✅ Target (spiral) final transform from spiralConfigs
-            individualSpirals.push({
-                group: spiralGroup,
-                finalPosition: { x: config.p[0], y: config.p[1], z: config.p[2] },
-                finalRotation: { x: config.r[0], y: config.r[1], z: config.r[2] },
-            });
-
-            logoGroup.add(spiralGroup);
+        rawModel.traverse(child => {
+            if (child.isMesh) {
+                slicesRef.current.push(child);
+                console.log(child.name);
+            }
         });
 
-        scene.add(logoGroup);
-        logoGroup.rotation.set(0, -Math.PI / 12, -Math.PI / 1.95);
+        const order = {
+            Curve001: 2,
+            Curve002: 1,
+            Curve_1: 3,
+            Curve003: 4,
+            Curve004: 5,
+            Curve005: 6,
+            Curve006: 7,
+        };
+
+        slicesRef.current.sort((a, b) => {
+            return order[a.name] - order[b.name];
+        });
+        // Store original GLB transforms
+        const originalTransforms = slicesRef.current.map(slice => ({
+            position: slice.position.clone(),
+            rotation: slice.rotation.clone(),
+        }));
+
+        // INITIAL TRANSFORMS
+        slicesRef.current[0].position.set(0.53, 0, -0.03299); //1st slice
+        slicesRef.current[1].position.set(0.456, 0, 0.075); //2nd slice
+        slicesRef.current[2].position.set(0.323, 0, 0.135); // 3rd slice
+        slicesRef.current[3].position.set(0.239, 0, 0.122); //4th slice
+        slicesRef.current[4].position.set(0.142, 0, 0.107); //5th slice
+        slicesRef.current[5].position.set(0.05, 0, 0.05); // 6th slice
+        slicesRef.current[6].position.set(0, 0, 0); // last slice
+
+        slicesRef.current[0].rotation.set(0, 2.257407, 0); //1st slice
+        slicesRef.current[1].rotation.set(0, 1.76040734641021, 0); //2nd slice
+        slicesRef.current[2].rotation.set(0, 1.22740734641021, 0); // 3rd slice
+        slicesRef.current[3].rotation.set(0, 0.945407346410207, 0); //4th slice
+        slicesRef.current[4].rotation.set(0, 0.633407346410207, 0); //5th slice
+        slicesRef.current[5].rotation.set(0.0, 0.25, 0); // 6th slice
+        slicesRef.current[6].rotation.set(0, 0, 0); // last slice
 
         // ✅ Scroll-triggered GSAP timeline
         const tl = gsap.timeline({
@@ -165,29 +173,43 @@ function initSpiralAnimation() {
         });
 
         // Animate stacked spirals outward into spiral positions
-        individualSpirals.forEach((spiral, index) => {
-            const delay = index * 0.1;
+        slicesRef.current.forEach((slice, i) => {
+            const delay = i * 0.1;
+            const finalPos = {
+                x: slicesRef.current[i].position.x,
+                y: slicesRef.current[i].position.y,
+                z: slicesRef.current[i].position.z,
+            };
 
+            const finalRot = {
+                x: slicesRef.current[i].rotation.x,
+                y: slicesRef.current[i].rotation.y,
+                z: slicesRef.current[i].rotation.z,
+            };
+
+            slice.position.copy(originalTransforms[i].position);
+            slice.rotation.copy(originalTransforms[i].rotation);
             tl.to(
-                spiral.group.position,
+                slice.rotation,
                 {
-                    x: spiral.finalPosition.x + 1.25,
-                    y: spiral.finalPosition.y + 1.4,
-                    z: spiral.finalPosition.z,
-                    duration: 1,
+                    x: finalRot.x,
+                    y: finalRot.y,
+                    z: finalRot.z,
+                    duration: 2.5,
                     ease: 'power2.inOut',
+                    reversed: true,
                 },
                 delay
             );
-
             tl.to(
-                spiral.group.rotation,
+                slice.position,
                 {
-                    x: spiral.finalRotation.x,
-                    y: spiral.finalRotation.y,
-                    z: spiral.finalRotation.z,
-                    duration: 1,
+                    x: finalPos.x,
+                    y: finalPos.y,
+                    z: finalPos.z,
+                    duration: 2.5,
                     ease: 'power2.inOut',
+                    reversed: true,
                 },
                 delay
             );
@@ -218,12 +240,13 @@ function initSpiralAnimation() {
 
 const SocialMediaMarketing = () => {
     const [activeIndex, setActiveIndex] = useState(0);
+    const slicesRef = useRef([]);
 
     const toggleAccordion = index => {
         setActiveIndex(activeIndex === index ? null : index);
     };
     useEffect(() => {
-        initSpiralAnimation();
+        initSpiralAnimation(slicesRef);
     }, []);
     return (
         <div>
@@ -297,11 +320,10 @@ const SocialMediaMarketing = () => {
 
                 {/* Stats Grid Section */}
                 <div className=" relative mt-16  flex flex-col md:flex-row flex-wrap bg-[#1a1a1a] rounded-2xl overflow-hidden border border-[#2a2a2a]">
-                    {/* Card 1 */}
                     <div className="absolute inset-0">
                         <DotGrid
-                            dotSize={4}
-                            gap={15}
+                            dotSize={2}
+                            gap={8}
                             baseColor="#271e37"
                             activeColor="#844de9"
                             proximity={120}
@@ -311,6 +333,8 @@ const SocialMediaMarketing = () => {
                             returnDuration={1.5}
                         />
                     </div>
+
+                    {/* Card 1 */}
                     <div className="relative  p-8  md:p-10 rounded-tl-2xl bg-transparent border-[#555555] border w-[33.33%] h-[400px]">
                         <div className="relative z-1 flex flex-col justify-end h-full">
                             <h2 className="text-5xl md:text-6xl font-bold text-[#fafafa]">100+</h2>
@@ -480,11 +504,11 @@ const SocialMediaMarketing = () => {
                             Schedule A Call
                         </button>
                     </div>
-                    <div className="w-[60%] relative flex items-center justify-center  h-[400px] scroll-container">
+                    <div className="w-[60%]  relative flex items-center justify-center  h-[400px] scroll-container ">
                         <canvas
                             // ref={canvasRef}
                             id="spiralCanvas"
-                            className="absolute inset-0 w-full h-full pointer-events-none "
+                            className=" absolute inset-0 w-full h-full pointer-events-none "
                         ></canvas>
                     </div>
                 </div>

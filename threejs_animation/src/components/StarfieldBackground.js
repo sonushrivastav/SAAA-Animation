@@ -164,7 +164,7 @@ export default function StarfieldBackground({}) {
         window.globalStarPositions = starPositions;
 
         const loader = new THREE.TextureLoader();
-        const star = loader.load('/images/sp2.png');
+        const star = loader.load('/images/testImages/sp2.png');
         const scene = new THREE.Scene();
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
         scene.add(ambientLight);
