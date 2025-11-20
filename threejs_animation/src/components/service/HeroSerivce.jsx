@@ -3,6 +3,8 @@ import React, { useEffect, useRef } from "react";
 import AnimatedGradient from "./GradientBackground";
 import GooeyGradient from "./GradientBackground";
 import ThreeGlass from "./FloatingGlass";
+import Aurora from "./GradientBackground";
+import GradientBackground from "./GradientBackground";
 
 const FloatingSphere = ({ text, className = "", delay = 0 }) => {
   return (
@@ -26,7 +28,8 @@ const HeroSerivce = () => {
       {/* <div className="absolute inset-0 bg-[radial-gradient(130%_70%_at_50%_75%,_rgba(90,0,255,0.9)_0%,_rgba(132,77,233,0.9)_45%,_rgba(0,0,0,1)_85%)]" /> */}
 
       {/* <AnimatedGradient /> */}
-      <GooeyGradient />
+      {/* <GooeyGradient /> */}
+      <GradientBackground />
 
       {/* Floating Elements */}
       {/* <FloatingSphere
@@ -89,7 +92,7 @@ const HeroSerivce = () => {
       </div>
 
       {/* Text Content */}
-      <div className="absolute z-10 text-center text-white px-8 max-w-3xl">
+      <div className="absolute  text-center text-white px-8 max-w-3xl">
         <h2 className="text-2xl md:text-3xl font-semibold leading-relaxed mb-8">
           Every brand deserves more than service providers. You get thinkers,
           creators, and partners who are dedicated to your growth. Each solution
