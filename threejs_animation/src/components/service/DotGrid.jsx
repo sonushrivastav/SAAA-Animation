@@ -35,15 +35,16 @@ const Card = React.forwardRef(({ title, items, description }, ref) => {
       </div>
 
       {/* Right placeholder (3D model area) */}
-      <div className="w-2/5 flex items-center justify-center p-6 text-center">
-        <div>
-          <ThreeGlass
-            motionVariant={0}
-            speed={1.2}
-            amplitude={0.06}
-            mouseInfluence={true}
-          />
-        </div>
+      <div
+        className="w-2/5 flex items-center justify-center p-6 text-center"
+        style={{ pointerEvents: "auto" }}
+      >
+        <ThreeGlass
+          motionVariant={0}
+          speed={1.2}
+          amplitude={0.06}
+          mouseInfluence={true}
+        />
       </div>
     </div>
   );
@@ -355,8 +356,12 @@ const DotGrid = ({
     const ctx = gsap.context(() => {
       const stackOffset = 25;
       const totalStackHeight = stackOffset * (cards.length - 1);
+
+      const getInner = (cardEl) =>
+        cardEl?.querySelector?.(".cardInner") ?? cardEl;
+
       // Basic starting state: every card centered, slightly down, invisible, low scale
-      gsap.set(cardRefs.current[0], {
+      gsap.set(getInner(cardRefs.current[0]), {
         y: 25 + totalStackHeight,
         scale: 1,
         transformOrigin: "center center",
@@ -396,7 +401,7 @@ const DotGrid = ({
 
       // Animate first card to center position
       tl.to(
-        cardRefs.current[0],
+        getInner(cardRefs.current[0]),
         {
           y: 0 - stackOffset * (cards.length - 1),
           scale: 1 - (cards.length - 1) * 0.02,
@@ -408,12 +413,13 @@ const DotGrid = ({
 
       cards.slice(1).forEach((_, i) => {
         const cardIndex = i + 1;
-        const el = cardRefs.current[cardIndex];
+        const cardEl = cardRefs.current[cardIndex];
+        const inner = getInner(cardEl);
         const startTime = cardIndex * 1;
         const cardsAbove = cards.length - 1 - cardIndex;
 
         tl.to(
-          el,
+          inner,
           {
             y: -(stackOffset * cardsAbove),
             scale: 1 - cardsAbove * 0.02,

@@ -17,10 +17,6 @@ uniform vec3 uColorStops[3];
 uniform vec2 uResolution;
 uniform float uBlend;
 
-// Mouse uniforms: normalized (0..1), y flipped in JS before sending
-uniform vec2 uMouse;
-uniform float uMousePower;
-
 out vec4 fragColor;
 
 vec3 permute(vec3 x) {
@@ -87,102 +83,66 @@ struct ColorStop {
 }
 
 void main() {
-  // normalized pixel coords
   vec2 uv = gl_FragCoord.xy / uResolution;
-
-  // ----------------------------
-  // MOUSE-LOCAL FLUID DISTORTION
-  // ----------------------------
-  // mouse supplied in normalized coords (0..1); JS flips y
-  vec2 mouseUV = uMouse;
-  float d = distance(uv, mouseUV);
-
-  // radius of influence (tweakable)
-  float radius = 0.22;
-
-  // mask = 1 near cursor, 0 outside; smooth edge
-  float mouseMask = smoothstep(radius, 0.0, d);
-
-  // direction from mouse to pixel (for push)
-  vec2 dir = uv - mouseUV;
-  // small safety so normalize is stable
-  dir = normalize(dir + 1e-6);
-
-  // swirl component (perpendicular)
-  vec2 perp = vec2(-dir.y, dir.x);
-
-  // time-varying swirl/perturb using snoise for more natural fluid
-  float swirl = snoise((uv + mouseUV) * 6.0 + uTime * 0.7);
-
-  // local displacement magnitude (scaled by uMousePower and mask)
-  float localStrength = mouseMask * uMousePower; // 0..1
-  // create a smooth displacement vector — push + swirl
-  vec2 mouseDisp = dir * localStrength * 0.045 + perp * swirl * localStrength * 0.03;
-
-  // locally boost amplitude so the waves become more pronounced in the influence area
-  float localAmplitude = uAmplitude * (1.0 + localStrength * 2.0);
-
-  // apply mouse displacement early so subsequent noise/waves use displaced coords
-  vec2 uvLocal = uv + mouseDisp;
-  // ----------------------------
-
-  // Original shader logic (using uvLocal and localAmplitude where appropriate)
-  vec2 center = vec2(0.5, 0.2);
-  vec2 radii = vec2(1.7, 1.1);
-
-  // Multi-layered noise for organic wave motion (use uvLocal)
-  float noise1 = snoise(vec2(uvLocal.x * 1.5 + uTime * 0.15, uvLocal.y * 1.5 + uTime * 0.1));
-  float noise2 = snoise(vec2(uvLocal.x * 2.5 - uTime * 0.12, uvLocal.y * 2.5 + uTime * 0.18)) * 0.5;
-  float noise3 = snoise(vec2(uvLocal.x * 3.0 + uTime * 0.08, uvLocal.y * 3.0 - uTime * 0.14)) * 0.3;
-
-  // combine noise and use localAmplitude so mouse area shows stronger wave perturbation
-  float combinedNoise = (noise1 + noise2 + noise3) * localAmplitude;
-
-  // Apply global wave distortion (keeps the base animation)
-  vec2 distortedUV = uvLocal + vec2(
-    snoise(vec2(uvLocal.y * 2.0 + uTime * 0.2, uTime * 0.3)) * 0.08 * localAmplitude,
-    snoise(vec2(uvLocal.x * 2.0 + uTime * 0.25, uTime * 0.2 + 100.0)) * 0.08 * localAmplitude
+  
+  // Radial gradient parameters
+  vec2 center = vec2(0.5, 0.3);
+  vec2 radii = vec2(1.7, 1.0);
+  
+  // Multi-layered noise for organic wave motion
+  float noise1 = snoise(vec2(uv.x * 1.5 + uTime * 0.15, uv.y * 1.5 + uTime * 0.1));
+  float noise2 = snoise(vec2(uv.x * 2.5 - uTime * 0.12, uv.y * 2.5 + uTime * 0.18)) * 0.5;
+  float noise3 = snoise(vec2(uv.x * 3.0 + uTime * 0.08, uv.y * 3.0 - uTime * 0.14)) * 0.3;
+  
+  // Combine noise layers for complex wave motion
+  float combinedNoise = (noise1 + noise2 + noise3) * uAmplitude;
+  
+  // Apply wave distortion to UV coordinates
+  vec2 distortedUV = uv + vec2(
+    snoise(vec2(uv.y * 2.0 + uTime * 0.2, uTime * 0.3)) * 0.08 * uAmplitude,
+    snoise(vec2(uv.x * 2.0 + uTime * 0.25, uTime * 0.2 + 100.0)) * 0.08 * uAmplitude
   );
-
-  // Animate center position (unchanged)
+  
+  // Animate center position with smooth circular motion
   float centerNoiseX = snoise(vec2(uTime * 0.12, 0.0)) * 0.15;
   float centerNoiseY = snoise(vec2(0.0, uTime * 0.15 + 50.0)) * 0.12;
   vec2 animatedCenter = center + vec2(centerNoiseX, centerNoiseY) * uAmplitude;
-
+  
+  // Calculate distance from animated center using distorted UV
   vec2 diff = (distortedUV - animatedCenter) / radii;
   float dist = length(diff);
-
+  
+  // Smooth gradient factor with wave influence
   float waveInfluence = combinedNoise * 0.15;
-  float gradientFactor = smoothstep(0.0, 0.6, dist + waveInfluence);
-
+  float gradientFactor = smoothstep(0.0, 0.55, dist + waveInfluence);
+  
   // Color interpolation
   ColorStop colors[3];
   colors[0] = ColorStop(uColorStops[0], 0.0);
   colors[1] = ColorStop(uColorStops[1], 0.5);
   colors[2] = ColorStop(uColorStops[2], 1.0);
-
+  
   vec3 rampColor;
   COLOR_RAMP(colors, gradientFactor, rampColor);
-
+  
   // Smooth elliptical mask that follows the distortion
   float maskDist = length((distortedUV - animatedCenter) / radii);
   float ellipseMask = 1.0 - smoothstep(0.4, 0.65, maskDist);
-
+  
   // Enhanced glow effect
   float glow = exp(-maskDist * 2.0) * 0.4;
-
-  // Combine everything: NO added black highlight — just the original color but with local perturbation
+  
+  // Combine everything
   vec3 finalColor = rampColor * (ellipseMask + glow);
-
   float alpha = ellipseMask * (1.0 - gradientFactor * 0.7);
-
+  
   fragColor = vec4(finalColor, alpha);
 }
 `;
 
 export default function GradientBackground(props) {
   const {
-    colorStops = ["#5A00FF", "#5A00FF", "#000000"],
+    colorStops = ["#5A00FF", "#5A00FF"],
     amplitude = 1.0,
     blend = 0.98,
   } = props;
@@ -238,95 +198,33 @@ export default function GradientBackground(props) {
         uColorStops: { value: colorStopsArray },
         uResolution: { value: [ctn.offsetWidth, ctn.offsetHeight] },
         uBlend: { value: blend },
-
-        // mouse uniforms start neutral
-        uMouse: { value: [0.5, 0.5] },
-        uMousePower: { value: 0.0 },
       },
     });
 
     const mesh = new Mesh(gl, { geometry, program });
     ctn.appendChild(gl.canvas);
 
-    // Mouse handling state (normalized coords)
-    let mouse = [0.5, 0.5]; // smoothed
-    let targetMouse = [0.5, 0.5]; // immediate
-    let mousePower = 0.0; // smoothed power
-    let lastTargetMouse = [0.5, 0.5];
-    let lastMoveAt = performance.now();
-
-    function onMouseMove(e) {
-      const rect = ctn.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width;
-      const y = 1 - (e.clientY - rect.top) / rect.height; // flip Y for shader
-      targetMouse[0] = Math.max(0, Math.min(1, x));
-      targetMouse[1] = Math.max(0, Math.min(1, y));
-
-      // approximate speed from last target pos
-      const dx = targetMouse[0] - lastTargetMouse[0];
-      const dy = targetMouse[1] - lastTargetMouse[1];
-      const moveSpeed = Math.sqrt(dx * dx + dy * dy);
-
-      // bump immediate power proportional to move speed (tuned)
-      mousePower = Math.min(1.0, mousePower + moveSpeed * 30.0);
-
-      lastTargetMouse[0] = targetMouse[0];
-      lastTargetMouse[1] = targetMouse[1];
-      lastMoveAt = performance.now();
-    }
-
-    function onMouseLeave() {
-      // accelerate decay when leaving
-      lastMoveAt = performance.now() - 1000;
-    }
-
-    ctn.addEventListener("mousemove", onMouseMove);
-    ctn.addEventListener("mouseleave", onMouseLeave);
-
     let animateId = 0;
     const update = (t) => {
       animateId = requestAnimationFrame(update);
       const { time = t * 0.01, speed = 1.0 } = propsRef.current;
-
       program.uniforms.uTime.value = time * speed * 0.1;
       program.uniforms.uAmplitude.value = propsRef.current.amplitude ?? 1.0;
       program.uniforms.uBlend.value = propsRef.current.blend ?? blend;
-
       const stops = propsRef.current.colorStops ?? colorStops;
       program.uniforms.uColorStops.value = stops.map((hex) => {
         const c = new Color(hex);
         return [c.r, c.g, c.b];
       });
-
-      // smooth mouse position (inertia)
-      mouse[0] += (targetMouse[0] - mouse[0]) * 0.14;
-      mouse[1] += (targetMouse[1] - mouse[1]) * 0.14;
-
-      // mouse power smoothing + decay when idle
-      const now = performance.now();
-      const idleMs = now - lastMoveAt;
-      // decay factor increases with idle time
-      const decay = 1.0 - Math.min(0.98, idleMs / 1500.0);
-      mousePower *= decay;
-      // small relaxation toward 0 to avoid stuck tiny values
-      mousePower += (0.0 - mousePower) * 0.02;
-      mousePower = Math.max(0.0, Math.min(1.0, mousePower));
-
-      // set uniforms
-      program.uniforms.uMouse.value = [mouse[0], mouse[1]];
-      program.uniforms.uMousePower.value = mousePower;
-
       renderer.render({ scene: mesh });
     };
-
     animateId = requestAnimationFrame(update);
+
     resize();
 
     return () => {
       cancelAnimationFrame(animateId);
       window.removeEventListener("resize", resize);
-      ctn.removeEventListener("mousemove", onMouseMove);
-      ctn.removeEventListener("mouseleave", onMouseLeave);
       if (ctn && gl.canvas.parentNode === ctn) {
         ctn.removeChild(gl.canvas);
       }
