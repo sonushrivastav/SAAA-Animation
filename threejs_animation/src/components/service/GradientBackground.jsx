@@ -16,6 +16,9 @@ uniform float uAmplitude;
 uniform vec3 uColorStops[3];
 uniform vec2 uResolution;
 uniform float uBlend;
+uniform vec2 uMouse;
+uniform vec2 uMouseVelocity;
+uniform float uMouseInfluence;
 
 out vec4 fragColor;
 
@@ -85,6 +88,36 @@ struct ColorStop {
 void main() {
   vec2 uv = gl_FragCoord.xy / uResolution;
   
+  // Mouse blob that follows cursor - creates moving gradient center
+  vec2 toMouse = uv - uMouse;
+  float mouseDistRaw = length(toMouse * vec2(uResolution.x / uResolution.y, 1.0));
+  
+  // Blob influence area - larger for smooth gradient shift
+  float blobRadius = 0.4;
+  float blobFalloff = smoothstep(blobRadius, 0.0, mouseDistRaw);
+  
+  // Create flowing distortion that follows mouse movement
+  vec2 mouseDirection = mouseDistRaw > 0.001 ? normalize(toMouse) : vec2(0.0);
+  
+  // Wave patterns that create fluid space shifts
+  float wavePattern1 = sin(mouseDistRaw * 12.0 - uTime * 3.0 + dot(uMouseVelocity, vec2(1.0))) * 0.5 + 0.5;
+  float wavePattern2 = cos(mouseDistRaw * 8.0 + uTime * 2.5) * 0.5 + 0.5;
+  
+  // Velocity-based distortion - creates trailing effect
+  vec2 velocityInfluence = uMouseVelocity * blobFalloff * 0.08;
+  
+  // Main displacement - pushes gradient away creating hollow space
+  float hollowStrength = blobFalloff * (0.3 + wavePattern1 * 0.15);
+  vec2 mouseDisplacement = mouseDirection * hollowStrength * uMouseInfluence;
+  
+  // Add swirling motion perpendicular to mouse direction
+  vec2 perpDirection = vec2(-mouseDirection.y, mouseDirection.x);
+  float swirlPattern = sin(mouseDistRaw * 10.0 + uTime * 2.0) * blobFalloff;
+  mouseDisplacement += perpDirection * swirlPattern * 0.12 * uMouseInfluence;
+  
+  // Add velocity-based trailing distortion
+  mouseDisplacement += velocityInfluence * wavePattern2;
+  
   // Radial gradient parameters
   vec2 center = vec2(0.5, 0.3);
   vec2 radii = vec2(1.7, 1.0);
@@ -97,11 +130,11 @@ void main() {
   // Combine noise layers for complex wave motion
   float combinedNoise = (noise1 + noise2 + noise3) * uAmplitude;
   
-  // Apply wave distortion to UV coordinates
+  // Apply wave distortion to UV coordinates with mouse displacement
   vec2 distortedUV = uv + vec2(
     snoise(vec2(uv.y * 2.0 + uTime * 0.2, uTime * 0.3)) * 0.08 * uAmplitude,
     snoise(vec2(uv.x * 2.0 + uTime * 0.25, uTime * 0.2 + 100.0)) * 0.08 * uAmplitude
-  );
+  ) + mouseDisplacement;
   
   // Animate center position with smooth circular motion
   float centerNoiseX = snoise(vec2(uTime * 0.12, 0.0)) * 0.15;
@@ -142,14 +175,25 @@ void main() {
 
 export default function GradientBackground(props) {
   const {
-    colorStops = ["#5A00FF", "#5A00FF"],
+    colorStops = ["#5A00FF", "#5A00FF", "#000000"],
     amplitude = 1.0,
     blend = 0.98,
+    mouseInfluence = 1.0,
   } = props;
   const propsRef = useRef(props);
   propsRef.current = props;
 
   const ctnDom = useRef(null);
+  const mouseRef = useRef({
+    x: 0.5,
+    y: 0.5,
+    targetX: 0.5,
+    targetY: 0.5,
+    prevX: 0.5,
+    prevY: 0.5,
+    velocityX: 0,
+    velocityY: 0,
+  });
 
   useEffect(() => {
     const ctn = ctnDom.current;
@@ -165,6 +209,8 @@ export default function GradientBackground(props) {
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     gl.canvas.style.backgroundColor = "transparent";
+    gl.canvas.style.width = "100%";
+    gl.canvas.style.height = "100%";
 
     let program;
 
@@ -179,15 +225,26 @@ export default function GradientBackground(props) {
     }
     window.addEventListener("resize", resize);
 
+    // Mouse move handler
+    const handleMouseMove = (e) => {
+      const rect = gl.canvas.getBoundingClientRect();
+      mouseRef.current.targetX = (e.clientX - rect.left) / rect.width;
+      mouseRef.current.targetY = 1.0 - (e.clientY - rect.top) / rect.height;
+    };
+
+    gl.canvas.addEventListener("mousemove", handleMouseMove);
+
     const geometry = new Triangle(gl);
     if (geometry.attributes.uv) {
       delete geometry.attributes.uv;
     }
 
-    const colorStopsArray = colorStops.map((hex) => {
-      const c = new Color(hex);
-      return [c.r, c.g, c.b];
-    });
+    const colorStopsArray = (propsRef.current.colorStops || colorStops).map(
+      (hex) => {
+        const c = new Color(hex);
+        return [c.r, c.g, c.b];
+      }
+    );
 
     program = new Program(gl, {
       vertex: VERT,
@@ -198,6 +255,9 @@ export default function GradientBackground(props) {
         uColorStops: { value: colorStopsArray },
         uResolution: { value: [ctn.offsetWidth, ctn.offsetHeight] },
         uBlend: { value: blend },
+        uMouse: { value: [0.5, 0.5] },
+        uMouseVelocity: { value: [0.0, 0.0] },
+        uMouseInfluence: { value: mouseInfluence },
       },
     });
 
@@ -211,11 +271,35 @@ export default function GradientBackground(props) {
       program.uniforms.uTime.value = time * speed * 0.1;
       program.uniforms.uAmplitude.value = propsRef.current.amplitude ?? 1.0;
       program.uniforms.uBlend.value = propsRef.current.blend ?? blend;
+      program.uniforms.uMouseInfluence.value =
+        propsRef.current.mouseInfluence ?? mouseInfluence;
       const stops = propsRef.current.colorStops ?? colorStops;
       program.uniforms.uColorStops.value = stops.map((hex) => {
         const c = new Color(hex);
         return [c.r, c.g, c.b];
       });
+
+      // Smooth mouse position interpolation for fluid blob motion (like the TypeScript code)
+      const lerpFactor = 0.05; // Slower lerp = smoother blob following (20 in original = 1/20 = 0.05)
+      mouseRef.current.x +=
+        (mouseRef.current.targetX - mouseRef.current.x) * lerpFactor;
+      mouseRef.current.y +=
+        (mouseRef.current.targetY - mouseRef.current.y) * lerpFactor;
+
+      // Calculate velocity for trailing effect
+      mouseRef.current.velocityX = mouseRef.current.x - mouseRef.current.prevX;
+      mouseRef.current.velocityY = mouseRef.current.y - mouseRef.current.prevY;
+
+      // Store previous position
+      mouseRef.current.prevX = mouseRef.current.x;
+      mouseRef.current.prevY = mouseRef.current.y;
+
+      program.uniforms.uMouse.value = [mouseRef.current.x, mouseRef.current.y];
+      program.uniforms.uMouseVelocity.value = [
+        mouseRef.current.velocityX * 20.0, // Amplify for visible effect
+        mouseRef.current.velocityY * 20.0,
+      ];
+
       renderer.render({ scene: mesh });
     };
     animateId = requestAnimationFrame(update);
@@ -225,12 +309,13 @@ export default function GradientBackground(props) {
     return () => {
       cancelAnimationFrame(animateId);
       window.removeEventListener("resize", resize);
+      gl.canvas.removeEventListener("mousemove", handleMouseMove);
       if (ctn && gl.canvas.parentNode === ctn) {
         ctn.removeChild(gl.canvas);
       }
       gl.getExtension("WEBGL_lose_context")?.loseContext();
     };
-  }, [amplitude, blend, colorStops]);
+  }, [amplitude, blend, colorStops, mouseInfluence]);
 
   return (
     <div className="w-full h-full ">

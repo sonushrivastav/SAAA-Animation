@@ -1066,7 +1066,6 @@ const Animation = () => {
 
   return (
     <main className="relative bg-white  font-sans text-black">
-      <Navbar />
       <div className="fixed inset-0 z-10">
         <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
           <FlowingParticles

@@ -100,8 +100,6 @@ const Service = () => {
 
   return (
     <>
-      <Navbar />
-
       {/* <HeroSerivce /> */}
 
       {/* 
