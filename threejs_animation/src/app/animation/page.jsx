@@ -1176,7 +1176,6 @@ const Animation = () => {
       <div className="statSection opacity-0 z-0">
         <StatsSection />
       </div>
-      <Footer />
     </main>
   );
 };
