@@ -424,7 +424,9 @@ export default function StarfieldBackground({}) {
 
             // 🌠 Axis-agnostic wrapping
             const total = window.starfieldTotalDepth || totalDepth;
+
             const half = total / 2;
+            // console.log('half', half);
 
             if (Math.abs(dir.z) >= Math.abs(dir.x) && Math.abs(dir.z) >= Math.abs(dir.y)) {
                 if (stars.position.z > half) stars.position.z -= total;
@@ -474,8 +476,8 @@ export default function StarfieldBackground({}) {
         <>
             <Leva hidden />
 
-            <div className="fixed inset-0 z-0 bg-[#0f0f0f] ">
-                <canvas ref={canvasRef} className="w-full h-full" />
+            <div className=" pointer-events-none ">
+                <canvas ref={canvasRef} className="w-full h-full pointer-events-none" />
             </div>
         </>
     );

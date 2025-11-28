@@ -1,4 +1,5 @@
 'use client';
+import { Environment } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { Bloom, EffectComposer } from '@react-three/postprocessing';
 import Lenis from '@studio-freight/lenis';
@@ -11,7 +12,6 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
-import Footer from '../../components/Footer';
 import FlowingParticles from '../../components/ParticleBackground';
 import ParticlesMorphPerSlice from '../../components/ScrollServiceLogo';
 import StarfieldBackground from '../../components/StarfieldBackground';
@@ -26,7 +26,7 @@ const Animation = () => {
     const scrollLogoRef = useRef(null);
     const slicesRef = useRef(null);
 
-    const [activeServiceIndex, setActiveServiceIndex] = useState(0);
+    const [activeServiceIndex, setActiveServiceIndex] = useState(6);
 
     const flowAnimation = useRef({ scrollSpeed: 0 });
     const flowingParticlesMaterialRef = useRef();
@@ -110,7 +110,7 @@ const Animation = () => {
             smoothWheel: true,
             smoothTouch: true,
             touchMultiplier: 0.9,
-            wheelMultiplier: 0.5,
+            wheelMultiplier: 0.4,
         });
 
         lenis.on('scroll', ScrollTrigger.update);
@@ -183,8 +183,8 @@ const Animation = () => {
                 // const modelGroup = new THREE.Group();
                 scene.add(rawModel);
                 // modelGroup.add(rawModel);
-                rawModel.scale.set(10, 10, 2);
-                rawModel.position.set(-1.5, -1.5, 2);
+                rawModel.scale.set(17, 17, 4);
+                rawModel.position.set(-2.3, -2.4, 0);
                 rawModel.rotation.set(0, 0, 0);
 
                 slicesRef.current = [];
@@ -260,7 +260,7 @@ const Animation = () => {
 
             samplingGroup.traverse(child => {
                 if (child.isMesh) {
-                    child.position.set(0.25, 0.2, -0.23);
+                    child.position.set(0.21, 0.1, -0.22);
                     child.rotation.set(-0.181592653589793, -1.53159265358979, 0);
                 }
             });
@@ -281,7 +281,7 @@ const Animation = () => {
             const mergedMeshForSampling = new THREE.Mesh(mergedGeometry);
 
             const sampler = new MeshSurfaceSampler(mergedMeshForSampling).build();
-            const numParticles = 20000;
+            const numParticles = 30000;
 
             const particlesGeometry = new THREE.BufferGeometry();
             const positions = new Float32Array(numParticles * 3);
@@ -387,8 +387,8 @@ const Animation = () => {
                     vec3 exploded = position + explodeDir * 2.0 * aRandom.z * uProgress;
 
                      // ---------- floating orbit-based motion ----------
-                    float orbitRadius = 0.2 + fract(aRandom.y) * 0.0;
-                    float speed = 0.2 + fract(aRandom.z) * 0.1;
+                    float orbitRadius = 0.2 + fract(aRandom.y) * 0.8;
+                    float speed = 0.2 + fract(aRandom.z) * 0.9;
 
                       // base exploded position
                      vec3 finalPosition = exploded;
@@ -404,9 +404,9 @@ const Animation = () => {
                     vDepth = mvPosition.z;
                     vec4 viewPos = modelViewMatrix * vec4(exploded, 1.0);
                     float dist = abs(viewPos.z);
-                    float baseSize = 1.0;
+                    float baseSize = 1.5;
                     float towardCamera = step(0.0, -explodeDir.z);
-                    float sizeByDistance = mix(1.0, (1.0 / (dist * 0.25 + 1.0)), towardCamera);
+                    float sizeByDistance = mix(1.0, (1.0 / (dist * 0.35 + 1.0)), towardCamera);
                     float nearBoost = mix(1.0, 1.8, smoothstep(0.0, 0.0, -viewPos.z));
                     gl_PointSize = baseSize * sizeByDistance * nearBoost * 100.0 / -viewPos.z * uSizeMultiplier;
                 }
@@ -458,7 +458,7 @@ const Animation = () => {
 
             const tl = gsap.timeline({
                 scrollTrigger: {
-                    trigger: '.scroll-container',
+                    trigger: '#scroll-spacer',
                     start: 'top top',
                     end: '100% bottom',
                     scrub: 0.82, // smooth scroll-scrub
@@ -493,9 +493,9 @@ const Animation = () => {
                 tl.to(
                     slice.position,
                     {
-                        x: 0.25,
-                        y: 0.2,
-                        z: -0.23,
+                        x: 0.21,
+                        y: 0.1,
+                        z: -0.22,
                         duration: 5,
                         ease: 'power1.inOut',
                     },
@@ -596,6 +596,7 @@ const Animation = () => {
                 { value: 0, duration: 0.7, ease: 'power2.inOut' },
                 '<'
             );
+
             tl.addLabel('starfieldFadeIn', '>-1');
             // --- STEP 5: Fade in starfield (always mounted layer, no jump) ---
             tl.to(
@@ -605,7 +606,7 @@ const Animation = () => {
                     duration: 3,
                     ease: 'power2.inOut',
                 },
-                '>-4'
+                '>-3.5'
             );
             // tl.addLabel('flyingText');
 
@@ -690,6 +691,7 @@ const Animation = () => {
                     opacity: 0,
                     duration: 2,
                     ease: 'power2.inOut',
+                    onComplete: () => gsap.set('.starfield-layer', { pointerEvents: 'none' }),
                 },
                 '>-1'
             );
@@ -747,76 +749,72 @@ const Animation = () => {
             // --- STEP 7: Logo + service text synchronized animation ---
 
             const serviceCount = SERVICE_DATA.length;
-            const TRANSITION_DURATION = 4.5;
+            const TRANSITION_DURATION = 2.5;
 
             // reset all texts and logo
             gsap.set('.service-text', { opacity: 0 });
             gsap.set('.service-logo', { opacity: 1 });
-            setActiveServiceIndex(0);
+
+            // start from the LAST one
+            setActiveServiceIndex(serviceCount - 1);
 
             tl.to(
-                '.service-0',
+                `.service-${serviceCount - 1}`,
                 {
                     opacity: 1,
                     duration: 2.12,
                     ease: 'power1.inOut',
-                    onStart: () => setActiveServiceIndex(0),
+                    onStart: () => setActiveServiceIndex(serviceCount - 1),
                 },
                 '>-1'
             );
 
-            for (let i = 1; i < serviceCount; i++) {
+            // loop backwards
+            for (let i = serviceCount - 2; i >= 0; i--) {
                 const label = `service-${i}`;
                 tl.addLabel(label, `>+1.2`);
 
-                // --- fade + slide previous text DOWN ---
+                // fade out next (previous in index)
                 tl.to(
-                    `.service-${i - 1}`,
+                    `.service-${i + 1}`,
                     {
                         opacity: 0,
-                        y: '30vh', // slide down
                         duration: 2.1,
                         ease: 'power1.inOut',
                     },
                     `>+${TRANSITION_DURATION * 0.8}`
                 );
 
-                // --- fade + slide next text UP ---
-                tl.fromTo(
+                // fade in previous (lower index)
+                tl.to(
                     `.service-${i}`,
                     {
-                        opacity: 0,
-                        y: '30vh', // start above
-                    },
-                    {
                         opacity: 1,
-                        y: 0,
                         duration: 2.1,
                         ease: 'power1.inOut',
                         onStart: () => setActiveServiceIndex(i),
                         onReverseComplete: () => {
                             requestAnimationFrame(() => {
-                                setActiveServiceIndex(i - 1 >= 0 ? i - 1 : 0);
+                                setActiveServiceIndex(
+                                    i + 1 < serviceCount ? i + 1 : serviceCount - 1
+                                );
                             });
                         },
                     },
-                    '<' // overlap for smooth transition
+                    '<'
                 );
             }
 
-            // 5️⃣ cleanup when scrolling past last service
-            // tl.addLabel('serviceEnd', '>+1');
+            // Cleanup when scrolling past the first service
             tl.to(
                 {},
                 {
                     duration: 0.1,
                     onComplete: () => {
-                        // gsap.set('.service-text', { opacity: 0 });
-                        setActiveServiceIndex(serviceCount - 1);
+                        setActiveServiceIndex(0);
                     },
                     onReverseComplete: () => {
-                        // gsap.set('.service-text', { opacity: 0 });
-                        // setActiveServiceIndex(0);
+                        // setActiveServiceIndex(serviceCount - 1);
                     },
                 },
                 'serviceEnd'
@@ -839,25 +837,76 @@ const Animation = () => {
             tl.to(
                 '.next-section',
                 {
-                    y: -550,
+                    y: '-100vh',
                     opacity: 0,
-                    duration: 4,
+                    duration: 2,
                     ease: 'power2.inOut',
+                    onComplete: () => gsap.set('.next-section', { pointerEvents: 'none' }),
                 },
                 '<'
             );
-
-            tl.addLabel('statsReveal', '>+0.5');
+            gsap.set('.statSection', { pointerEvents: 'auto' });
+            // tl.addLabel('statsReveal', '>+0.5');
             tl.to(
                 '.statSection',
                 {
                     opacity: 1,
-                    duration: 3,
+                    duration: 5,
                     ease: 'power3.out',
                 },
                 '<-3'
             );
+
+            // after ALL tl.to() lines
+            // ----------------------------------------------------
+            ScrollTrigger.refresh(); // keep this here
+
+            const applyMorphLater = setInterval(() => {
+                if (window.particleMorphUniforms) {
+                    window.particleMorphUniforms.forEach(u => {
+                        u.uMorph.value = morphState.value;
+                    });
+                    clearInterval(applyMorphLater);
+                }
+            }, 50);
+
+            // === INSERT SYNC CODE HERE ===
+            requestAnimationFrame(() => {
+                const morphTween = tl
+                    .getChildren(false, true, false)
+                    .find(t => t.vars?.onUpdate && t.vars.onUpdate.toString().includes('uMorph'));
+
+                if (!morphTween) return;
+
+                const t = tl.time();
+                const start = morphTween.startTime();
+                const end = start + morphTween.duration();
+                const localProgress = (t - start) / (end - start);
+                const progress = Math.min(1, Math.max(0, localProgress));
+
+                morphState.value = progress;
+
+                if (window.particleMorphUniforms) {
+                    window.particleMorphUniforms.forEach(u => {
+                        u.uMorph.value = morphState.value;
+                    });
+                }
+            });
+            // ----------------------------------------------------
         }
+
+        // compute how many viewport heights you need for the whole animation.
+        // Tune `numScreens` to how many "screens" worth of scroll your timeline needs.
+        const numScreens = 12; // <— adjust to match animation length
+        const scrollSpacer = document.getElementById('scroll-spacer');
+        if (scrollSpacer) {
+            scrollSpacer.style.height = `${window.innerHeight * numScreens}px`;
+        }
+
+        // Optional: on resize, update spacer
+        window.addEventListener('resize', () => {
+            if (scrollSpacer) scrollSpacer.style.height = `${window.innerHeight * numScreens}px`;
+        });
 
         let mouseX = 0;
         let mouseY = 0;
@@ -913,112 +962,99 @@ const Animation = () => {
     }, []);
 
     return (
-        <main className="relative bg-white  font-sans text-black">
-            <div className="fixed inset-0 z-10">
-                <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
-                    <FlowingParticles
-                        flowAnimation={flowAnimation}
-                        materialRef={flowingParticlesMaterialRef}
+        <main className="  bg-[#fafafa] font-sans text-black">
+            <div id="scroll-spacer" className="w-full scroll-spacer " />
+            <div className="w-full h-full relative">
+                <div className="initial-animation fixed inset-0 z-[10] pointer-events-none ">
+                    <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
+                        <FlowingParticles
+                            flowAnimation={flowAnimation}
+                            materialRef={flowingParticlesMaterialRef}
+                        />
+                    </Canvas>
+                    <canvas
+                        ref={canvasRef}
+                        className="absolute top-0 h-full w-full  pointer-events-none"
                     />
-                </Canvas>
-            </div>
+                    <div className="absolute right-40 top-[38%]  initial-text ">
+                        <h1 className="text-5xl md:text-7xl font-bold leading-tight text-[#0f0f0f] hover:text-red-400 ">
+                            What you envision, <br />
+                            We help you become.
+                        </h1>
+                    </div>
+                    <div className="absolute  top-[0%]  pointer-events-none opacity-0 second-text text-center">
+                        <h1 className="text-5xl md:text-7xl font-bold leading-tight text-[#0f0f0f]">
+                            Every need of your brand, under one roof, powered by one partner.
+                        </h1>
+                    </div>
+                </div>
 
-            <div>
-                <canvas ref={canvasRef} className="fixed top-0 left-0 outline-none z-10" />
-            </div>
+                <div className="starfield-layer fixed inset-0 z-[25] opacity-0 pointer-events-none bg-[#0f0f0f]">
+                    <StarfieldBackground />
+                    <div
+                        ref={flyingTextRef}
+                        className="absolute top-0 h-full w-full    pointer-events-none z-[25]"
+                    >
+                        {texts.map((t, i) => (
+                            <div
+                                key={i}
+                                className="absolute top-[47%] text-wrapper w-full text-center "
+                            >
+                                <h1 className="text-5xl font-bold text-[#fafafa] ">{t}</h1>
+                            </div>
+                        ))}
+                    </div>
+                </div>
 
-            {/* ✅ This container will hold all the text content */}
-            <div className="fixed inset-0 z-20 pointer-events-none flex items-center justify-center ">
-                <div className="w-full  mx-auto px-4 ">
-                    <div className="flex justify-between items-center w-full ">
-                        {/* ✅ Placeholder for the logo space on the left */}
-                        <div className="w-[40%] "></div>
+                <div className="next-section pointer-events-none   text-white fixed inset-0  flex items-center justify-center opacity-0 z-[20] ">
+                    <div className="service-logo h-full w-full  opacity-0 ">
+                        <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
+                            <color attach="background" args={['#0f0f0f']} />
+                            <ambientLight intensity={0.8} />
+                            <spotLight
+                                position={[5, 5, 5]}
+                                angle={0.3}
+                                penumbra={1}
+                                intensity={2}
+                                color={'#9c4df4'}
+                            />
+                            <pointLight position={[-5, -5, 5]} intensity={1.5} color={'#2f00ff'} />
+                            <ParticlesMorphPerSlice
+                                glbPath={'/models/model.glb'}
+                                particleCount={12500}
+                                size={20}
+                                initialActiveIndex={3}
+                                activeIndex={activeServiceIndex}
+                            />
+                            <EffectComposer>
+                                <Bloom
+                                    intensity={0.8} // brightness of glow
+                                    luminanceThreshold={0.6} // lower = more glow
+                                    luminanceSmoothing={0.9}
+                                    blendFunction={BlendFunction.ADD}
+                                />
+                            </EffectComposer>
+                            <Environment preset="city" />
+                        </Canvas>
+                    </div>
 
-                        {/* ✅ Initial text on the right */}
-                        <div className="w-[60%] initial-text ">
-                            <h1 className="text-5xl md:text-7xl font-bold leading-tight text-[#0f0f0f]  ">
-                                What you envision, <br />
-                                We help you become.
-                            </h1>
-                        </div>
+                    {/* Service Texts beside logo */}
+                    <div className="absolute right-[12%] w-[400px] h-[250px] flex items-center justify-center text-left   service-texts  ">
+                        {SERVICE_DATA.map((service, i) => (
+                            <div
+                                key={i}
+                                className={`absolute top-0 h-full w-full transition-opacity duration-700 service-text service-${i} opacity-0  flex flex-col items-start justify-center `}
+                            >
+                                <h2 className={`text-6xl font-bold `}>{service.title}</h2>
+                                <p className="text-xl mt-2">{service.subtext}</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
-
-            {/* ✅ Second text that appears on top */}
-            <div className="fixed inset-x-0 top-[0%] z-20 pointer-events-none opacity-0 second-text text-center">
-                <h1 className="text-5xl md:text-7xl font-bold leading-tight text-[#0f0f0f]">
-                    Every need of your brand, under one roof, powered by one partner.
-                </h1>
-            </div>
-
-            <div className="scroll-container h-[1400vh]"></div>
-
-            <div className="starfield-layer fixed inset-0 z-30 opacity-0 pointer-events-none">
-                <StarfieldBackground />
-                <div
-                    ref={flyingTextRef}
-                    className="fixed inset-0 flex items-center justify-center text-center pointer-events-none z-50"
-                >
-                    {texts.map((t, i) => (
-                        <div key={i} className="absolute text-wrapper">
-                            <h1 className="text-5xl font-bold text-[#fafafa] ">{t}</h1>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            <div className="next-section   text-white fixed inset-0  flex items-center justify-center opacity-1 z-15 ">
-                <div className="service-logo fixed inset-0 opacity-1 ">
-                    <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
-                        <color attach="background" args={['#0f0f0f']} />/
-                        <ambientLight intensity={0.8} />
-                        <spotLight
-                            position={[5, 5, 5]}
-                            angle={0.3}
-                            penumbra={1}
-                            intensity={2}
-                            color={'#9c4df4'}
-                        />
-                        <pointLight position={[-5, -5, 5]} intensity={1.5} color={'#2f00ff'} />
-                        <ParticlesMorphPerSlice
-                            glbPath={'/models/model.glb'}
-                            particleCount={15000}
-                            size={14}
-                            streamLength={8}
-                            streamRatio={0.4}
-                            initialActiveIndex={0}
-                            activeIndex={activeServiceIndex}
-                        />
-                        <EffectComposer>
-                            <Bloom
-                                intensity={1.2} // brightness of glow
-                                luminanceThreshold={0.2} // lower = more glow
-                                luminanceSmoothing={0.8}
-                                blendFunction={BlendFunction.ADD}
-                            />
-                        </EffectComposer>
-                    </Canvas>
-                </div>
-
-                {/* Service Texts beside logo */}
-                <div className="absolute right-[10%] w-[400px] h-[200px] flex items-center justify-center text-left  space-y-6 service-texts ">
-                    {SERVICE_DATA.map((service, i) => (
-                        <div
-                            key={i}
-                            className={`absolute inset-0 transition-opacity duration-700 service-text service-${i} opacity-0 flex flex-col items-start justify-center`}
-                        >
-                            <h2 className={`text-6xl font-bold `}>{service.title}</h2>
-                            <p className="text-xl mt-2">{service.subtext}</p>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            <div className="statSection opacity-0 z-100">
+            <div className="statSection relative opacity-0 z-[50] pointer-events-auto">
                 <StatsSection />
             </div>
-            <Footer />
         </main>
     );
 };

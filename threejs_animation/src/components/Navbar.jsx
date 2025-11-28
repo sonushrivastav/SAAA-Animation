@@ -3,16 +3,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
-
-/**
- * Compact-to-expanded Osmo-like Navbar
- * - Initially minimal width: hamburger + centered logo + contact button
- * - On hamburger open: navbar expands horizontally + shows mega menu
- * - Black background, sticky, subtle blur
- *
- * NOTE: Adjust container widths (w-*) as needed.
- */
+import { useEffect, useRef, useState } from 'react';
 
 export default function Navbar({
     logoSrc = '/images/socialMedia/Logo_Icon.svg',
@@ -39,12 +30,24 @@ export default function Navbar({
     ],
 }) {
     const [open, setOpen] = useState(false);
+    const wrapperRef = useRef(null);
+    useEffect(() => {
+        const handleClickOutside = e => {
+            if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+                setOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     return (
         <div className=" w-full fixed top-2 z-99 bg-transparent">
             <header className="  z-50 flex justify-center bg-transparent ">
                 {/* wrapper that expands when open */}
                 <motion.div
+                    ref={wrapperRef}
                     animate={{ width: open ? '90%' : '40%' }}
                     transition={{ type: 'spring', stiffness: 260, damping: 26 }}
                     className="overflow-hidden bg-black/80  rounded-lg"

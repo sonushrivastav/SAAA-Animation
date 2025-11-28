@@ -1,16 +1,10 @@
-import {
-    Environment,
-    MeshTransmissionMaterial,
-    OrbitControls,
-    Text,
-    useGLTF,
-} from '@react-three/drei';
+import { Environment, OrbitControls, Text, useGLTF } from '@react-three/drei';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useControls } from 'leva';
 import { useRef } from 'react';
 
 function Model() {
-    const { nodes } = useGLTF('/models/new3.glb');
+    const { nodes } = useGLTF('/models/new4.glb');
     console.log(nodes);
 
     const torus = useRef(null);
@@ -57,7 +51,7 @@ function Model() {
                 <MeshTransmissionMaterial {...materialProps} />
             </mesh> */}
             <mesh ref={torus} {...nodes.Text002} scale={[2, 2, 2]} position={[0, 0, 0]}>
-                <MeshTransmissionMaterial {...materialProps} transparent={true} opacity={1} />
+                <meshPhysicalMaterial transparent={true} opacity={1} />
             </mesh>
         </group>
     );
@@ -69,7 +63,7 @@ export default function NewScene() {
             <OrbitControls />
             <Model />
             <directionalLight intensity={2} position={[0, 2, 3]} />
-            <Environment background={true} preset="city" />
+            <Environment background={false} preset="city" />
         </Canvas>
     );
 }

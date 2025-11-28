@@ -95,7 +95,7 @@ export default function ContactForm() {
                         onChange={handleChange}
                         className={`w-full  border ${
                             errors.email ? 'border-red-500' : 'border-[#9C9C9C]'
-                        } bg-[#fafafa] focus:ring-1 focus:ring-[#844de9] rounded-md p-3 placeholder-[#9c9c9c]`}
+                        } bg-[#fafafa] focus:ring-1 focus:ring-[#844de9] rounded-md p-3 outline-none text-[#0f0f0f] placeholder-[#9c9c9c]`}
                     />
                     {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
                 </div>
@@ -109,7 +109,7 @@ export default function ContactForm() {
                         onChange={handleChange}
                         className={`w-full border ${
                             errors.number ? 'border-red-500' : 'border-[#9C9C9C]'
-                        } bg-[#fafafa] focus:ring-1 focus:ring-[#844de9] rounded-md p-3 placeholder-[#9c9c9c]`}
+                        } bg-[#fafafa] focus:ring-1 focus:ring-[#844de9] rounded-md p-3 outline-none text-[#0f0f0f] placeholder-[#9c9c9c]`}
                     />
                     {errors.number && <p className="text-red-500 text-sm">{errors.number}</p>}
                 </div>
@@ -123,7 +123,7 @@ export default function ContactForm() {
                     onChange={handleChange}
                     className={`w-full border ${
                         errors.interest ? 'border-red-500' : 'border-[#9C9C9C]'
-                    } bg-[#fafafa] focus:ring-1 focus:ring-[#844de9] rounded-md p-3 placeholder-[#9c9c9c]`}
+                    } bg-[#fafafa] focus:ring-1 focus:ring-[#844de9] rounded-md p-3 outline-none text-[#0f0f0f] placeholder-[#9c9c9c]`}
                 >
                     <option value="">Interested in*</option>
                     <option value="services">Option 1</option>
@@ -142,7 +142,7 @@ export default function ContactForm() {
                     onChange={handleChange}
                     className={`w-full border ${
                         errors.message ? 'border-red-500' : 'border-[#9C9C9C]'
-                    } bg-[#fafafa] focus:ring-1 focus:ring-[#844de9] rounded-md p-3 placeholder-[#9c9c9c]`}
+                    } bg-[#fafafa] focus:ring-1 focus:ring-[#844de9] rounded-md p-3 outline-none text-[#0f0f0f] placeholder-[#9c9c9c]`}
                 ></textarea>
                 {errors.message && <p className="text-red-500 text-sm">{errors.message}</p>}
             </div>
