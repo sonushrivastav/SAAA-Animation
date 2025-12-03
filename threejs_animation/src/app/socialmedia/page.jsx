@@ -7,8 +7,8 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
-import DotGrid from '../../components/service/DotGrid';
 import ContactForm from '../../components/socialMedia/ContactForm';
+import DotGrid from '../../components/socialMedia/DotGrid';
 import OtherServices from '../../components/socialMedia/OtherServices';
 gsap.registerPlugin(ScrollTrigger);
 
@@ -68,7 +68,7 @@ function initSpiralAnimation(slicesRef) {
         0.1,
         100
     );
-    camera.position.set(0, 0, 3.5);
+    camera.position.set(0, 0, 3.15);
 
     const renderer = new THREE.WebGLRenderer({
         canvas,
@@ -97,20 +97,7 @@ function initSpiralAnimation(slicesRef) {
         scene.environment = hdrMap;
     });
 
-    const spiralConfigs = [
-        { s: 5, p: [-1.1, 1.1, 0], r: [Math.PI / 2.12, 0.0, 0.0] },
-        { s: 5, p: [-1.4, 0.7, 0], r: [Math.PI / 2.1, 0.4, 0.0] },
-        { s: 4.8, p: [-1.5, 0.25, 0], r: [Math.PI / 2.2, 0.8, 0.0] },
-        { s: 4.6, p: [-1.4, -0.2, 0], r: [Math.PI / 2.4, 1.2, 0.0] },
-        { s: 4.3, p: [-1.1, -0.54, 0], r: [Math.PI / 2.6, 1.65, 0.0] },
-        { s: 3.8, p: [-0.75, -0.7, 0], r: [Math.PI / 3, 2.1, 0.0] },
-        { s: 3.5, p: [-0.46, -0.8, -0.11], r: [Math.PI / 3, 2.5, 0.0] },
-    ];
-
     const loader = new GLTFLoader();
-    let logoGroup = null;
-    const individualSpirals = [];
-    const animationState = { isInitialState: true };
 
     loader.load('/models/model.glb', gltf => {
         const rawModel = gltf.scene;
@@ -120,7 +107,7 @@ function initSpiralAnimation(slicesRef) {
         // modelGroup.add(rawModel);
         rawModel.scale.set(16, 18, 5);
         rawModel.position.set(-2.6, -1.25, 0);
-        rawModel.rotation.set(0, 0, -Math.PI / 2);
+        rawModel.rotation.set(0, 0.15, -Math.PI / 2);
 
         slicesRef.current = [];
 
@@ -248,6 +235,68 @@ const SocialMediaMarketing = () => {
     useEffect(() => {
         initSpiralAnimation(slicesRef);
     }, []);
+
+    const StatCard = ({ stat, label, hasContent, roundedClass }) => {
+        const [isHovered, setIsHovered] = useState(false);
+
+        return (
+            <div
+                className={`relative p-8 md:p-10 ${roundedClass} bg-transparent transition-colors duration-300 w-full md:w-[33.33%] h-[400px] ${
+                    hasContent
+                        ? `border ${isHovered ? 'border-[#fafafa]' : 'border-[#555555]'}`
+                        : isHovered
+                        ? 'border border-[#555555]'
+                        : 'border border-[#555555]'
+                }`}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+            >
+                {/* Dot Grid - only show when conditions are met */}
+                <div className="absolute inset-0 overflow-hidden">
+                    {(!hasContent || (hasContent && isHovered)) && (
+                        <DotGrid
+                            dotSize={2}
+                            gap={8}
+                            baseColor={!hasContent ? '#271e37' : '#271e37'}
+                            activeColor={!hasContent && isHovered ? '#fafafa' : '#844de9'}
+                            proximity={120}
+                            shockRadius={250}
+                            shockStrength={5}
+                            resistance={750}
+                            returnDuration={1.5}
+                        />
+                    )}
+                </div>
+
+                {/* Content */}
+                {hasContent && (
+                    <div className="relative z-10 flex flex-col justify-end h-full">
+                        <h2
+                            className={`text-5xl md:text-6xl font-bold transition-colors duration-300 ${
+                                isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
+                            }`}
+                        >
+                            {stat}
+                        </h2>
+                        <p
+                            className={`text-sm md:text-base mt-2 transition-colors duration-300 ${
+                                isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
+                            }`}
+                        >
+                            {label}
+                        </p>
+                        <span
+                            className={`absolute top-[-15px] right-[-8px] text-5xl font-bold transition-colors duration-300 ${
+                                isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
+                            }`}
+                        >
+                            #
+                        </span>
+                    </div>
+                )}
+            </div>
+        );
+    };
     return (
         <div>
             <section className="relative w-full overflow-hidden bg-[#FAFAFA] min-h-screen flex items-center justify-center">
@@ -311,7 +360,7 @@ const SocialMediaMarketing = () => {
 
             {/* Key Figures Section */}
 
-            <section className="w-full min-h-screen bg-[#0f0f0f] text-[#fafafa] md:px-32 py-24">
+            <section className="w-full min-h-screen bg-[#0f0f0f] text-[#fafafa] px-10 py-12 md:px-32 md:py-24">
                 <h2 className="text-4xl md:text-5xl   font-semibold  md:leading-[65px]">
                     Here are some{' '}
                     <div className="bg-[#844de9] inline px-2  rounded-md">key figures</div> that
@@ -319,78 +368,43 @@ const SocialMediaMarketing = () => {
                 </h2>
 
                 {/* Stats Grid Section */}
-                <div className=" relative mt-16  flex flex-col md:flex-row flex-wrap bg-[#1a1a1a] rounded-2xl overflow-hidden border border-[#2a2a2a]">
-                    <div className="absolute inset-0">
-                        <DotGrid
-                            dotSize={2}
-                            gap={8}
-                            baseColor="#271e37"
-                            activeColor="#844de9"
-                            proximity={120}
-                            shockRadius={250}
-                            shockStrength={5}
-                            resistance={750}
-                            returnDuration={1.5}
-                        />
-                    </div>
-
-                    {/* Card 1 */}
-                    <div className="relative  p-8  md:p-10 rounded-tl-2xl bg-transparent border-[#555555] border w-[33.33%] h-[400px]">
-                        <div className="relative z-1 flex flex-col justify-end h-full">
-                            <h2 className="text-5xl md:text-6xl font-bold text-[#fafafa]">100+</h2>
-                            <p className="text-sm md:text-base text-[#cccccc] mt-2">
-                                accounts managed
-                            </p>
-                            <span className="absolute top-[-15] right-[-8] text-[#fafafa] text-5xl font-bold">
-                                #
-                            </span>
-                        </div>
-                    </div>
+                <div className=" relative mt-16  flex flex-col md:flex-row flex-wrap bg-[#1a1a1a] rounded-2xl overflow-hidden ">
+                    <StatCard
+                        stat="100+"
+                        label="accounts managed"
+                        hasContent={true}
+                        roundedClass="rounded-tl-2xl"
+                    />
 
                     {/* Card 2 */}
-                    <div className="relative bg-transparent border-[#555555] border  p-8  w-[33.33%] h-[400px]">
-                        <div className="relative z-1 flex flex-col justify-end h-full">
-                            <h2 className="text-5xl md:text-6xl font-bold text-[#fafafa]">1 Cr+</h2>
-                            <p className="text-sm md:text-base text-[#cccccc] mt-2">
-                                total reach generated
-                            </p>
-                            <span className="absolute top-[-15] right-[-8] text-[#fafafa] text-5xl font-bold">
-                                #
-                            </span>
-                        </div>
-                    </div>
+                    <StatCard
+                        stat="1 Cr+"
+                        label="total reach generated"
+                        hasContent={true}
+                        roundedClass=""
+                    />
 
                     {/* Card 3 */}
-                    <div className="relative bg-transparent border-[#555555] border  p-8 md:p-10 rounded-tr-2xl w-[33.33%] h-[400px]"></div>
+                    <StatCard hasContent={false} roundedClass="rounded-tr-2xl" />
 
                     {/* Card 4 */}
-                    <div className="relative bg-transparent border-[#555555] border  p-8 md:p-10 rounded-bl-2xl w-[33.33%] h-[400px]"></div>
+                    <StatCard hasContent={false} roundedClass="rounded-bl-2xl" />
 
                     {/* Card 5 */}
-                    <div className="relative bg-transparent border-[#555555] border  p-8 md:p-10 w-[33.33%] h-[400px]">
-                        <div className="relative z-1 flex flex-col justify-end h-full">
-                            <h2 className="text-5xl md:text-6xl font-bold text-[#fafafa]">150%</h2>
-                            <p className="text-sm md:text-base text-[#cccccc] mt-2">
-                                follower growth achieved
-                            </p>
-                            <span className="absolute top-[-15] right-[-8] text-[#fafafa] text-5xl font-bold">
-                                #
-                            </span>
-                        </div>
-                    </div>
+                    <StatCard
+                        stat="150%"
+                        label="follower growth achieved"
+                        hasContent={true}
+                        roundedClass=""
+                    />
 
                     {/* Card 6 */}
-                    <div className="relative bg-transparent border-[#555555] border  p-8 md:p-10 rounded-br-2xl w-[33.33%] h-[400px]">
-                        <div className="relative z-1 flex flex-col justify-end h-full">
-                            <h2 className="text-5xl md:text-6xl font-bold text-[#fafafa]">4%</h2>
-                            <p className="text-sm md:text-base text-[#cccccc] mt-2">
-                                average increase in engagement
-                            </p>
-                            <span className="absolute top-[-15] right-[-8] text-[#fafafa] text-5xl font-bold">
-                                #
-                            </span>
-                        </div>
-                    </div>
+                    <StatCard
+                        stat="4%"
+                        label="average increase in engagement"
+                        hasContent={true}
+                        roundedClass="rounded-br-2xl"
+                    />
                 </div>
 
                 {/* Platforms we manage */}
@@ -421,7 +435,7 @@ const SocialMediaMarketing = () => {
 
             {/* case stuides */}
 
-            <section className="w-full min-h-screen bg-[#fafafa] md:px-32 py-24 ">
+            <section className="w-full min-h-screen bg-[#fafafa] px-10 py-12 md:px-32 md:py-24 ">
                 <h1 className="text-4xl md:text-5xl   font-semibold  md:leading-[65px]">
                     Case{' '}
                     <div className="bg-[#844de9] inline px-2  rounded-md text-[#fafafa]">
@@ -516,7 +530,7 @@ const SocialMediaMarketing = () => {
 
             {/* Accordian section */}
 
-            <section className="relative bg-[#0f0f0f] flex min-h-screen md:px-32 py-24">
+            <section className="relative bg-[#0f0f0f] flex min-h-screen px-10 py-12 md:px-32 md:py-24">
                 <div className="absolute inset-0 z-1">
                     <DotGrid
                         dotSize={5}
@@ -594,7 +608,7 @@ const SocialMediaMarketing = () => {
 
             {/* Other Related */}
 
-            <section className="flex flex-col  bg-[#fafafa]  md:px-32 py-24">
+            <section className="flex flex-col  bg-[#fafafa]  px-10 py-12 md:px-32 md:py-24">
                 <h1 className="text-4xl md:text-5xl text-[#0f0f0f]   font-semibold  md:leading-[65px] ">
                     Other Related{' '}
                     <div className="bg-[#844de9] inline px-2  rounded-md text-[#fafafa]">

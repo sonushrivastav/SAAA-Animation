@@ -3,15 +3,17 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useEffect, useRef } from 'react';
 import DotGrid from '../../components/servicePage/DotGrid';
-import ThreeGlass from '../../components/servicePage/FloatingGlass';
-import GradientBackground from '../../components/servicePage/GradientBackground';
+import HeroSerivce from '../../components/servicePage/HeroSerivce';
 import OtherSolutions from '../../components/servicePage/OtherSolution';
 
-gsap.registerPlugin(ScrollTrigger);
+if (typeof window !== 'undefined') {
+    gsap.registerPlugin(ScrollTrigger);
+}
 
 const Service = () => {
     const gradientRef1 = useRef(null);
     const gradientRef2 = useRef(null);
+    const dotGridContainerRef = useRef(null);
     const HORIZONTAL_STRETCH = 130; // consistent for full width coverage
 
     // Helper to create gradient with variable curve depth
@@ -90,89 +92,28 @@ const Service = () => {
                 ease: 'power1.inOut',
             });
         }
+        return () => {
+            ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+        };
     }, []);
 
     return (
         <>
-            {/* <HeroSerivce /> */}
+            <HeroSerivce />
 
             {/*
         COMBINED HERO + DOTGRID WRAPPER
         This wrapper spans both sections so the gradient can extend across them
       */}
-            <div className="relative">
-                {/*
-          GRADIENT BACKGROUND - Spans hero + part of DotGrid
-          Height: 100vh (hero) + 40vh (overlap into DotGrid) = 140vh
-          Position: absolute, starts at top
-          z-index: 1 - above DotGrid background, below content
-        */}
-                <div
-                    className="absolute top-0 left-0 w-full "
-                    style={{
-                        height: '112vh', // Extends 40vh into DotGrid section
-                        zIndex: 1,
-                    }}
-                >
-                    <GradientBackground />
-                </div>
-
-                {/* HERO SECTION - Content Only (no overflow-hidden) */}
-                <section className="relative h-screen w-full flex flex-col items-center justify-center bg-[#0f0f0f]">
-                    {/* Floating 3D Elements */}
-                    <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 10 }}>
-                        <div className="absolute top-[10%] left-[29%] ">
-                            <ThreeGlass
-                                motionVariant={0}
-                                speed={1.2}
-                                amplitude={0.06}
-                                mouseInfluence={true}
-                            />
-                        </div>
-
-                        <div className="absolute top-[50%] left-60 w-48 h-48">
-                            <ThreeGlass
-                                motionVariant={1}
-                                speed={0.9}
-                                amplitude={0.08}
-                                mouseInfluence={true}
-                            />
-                        </div>
-
-                        <div className="absolute top-[65%] right-[25%] w-48 h-48">
-                            <ThreeGlass
-                                motionVariant={2}
-                                speed={1.4}
-                                amplitude={0.07}
-                                mouseInfluence={true}
-                            />
-                        </div>
-
-                        <div className="absolute top-[25%] right-[20%] w-48 h-48">
-                            <ThreeGlass
-                                motionVariant={3}
-                                speed={0.8}
-                                amplitude={0.05}
-                                mouseInfluence={true}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Text Content */}
-                    <div className="absolute z-3 text-center text-white px-8 max-w-3xl">
-                        <h2 className="text-2xl md:text-3xl font-semibold leading-relaxed mb-8">
-                            Every brand deserves more than service providers. You get thinkers,
-                            creators, and partners who are dedicated to your growth. Each solution
-                            is shaped around your vision, built for today, and ready for what's
-                            next.
-                        </h2>
-                    </div>
-                </section>
-
+            <div
+                ref={dotGridContainerRef}
+                className="relative w-full"
+                style={{ backgroundColor: '#0f0f0f' }}
+            >
                 <DotGrid
                     dotSize={5}
                     gap={10}
-                    baseColor="#0f0f0f"
+                    baseColor="#323234"
                     activeColor="#5227FF"
                     proximity={100}
                     shockRadius={250}
@@ -184,7 +125,15 @@ const Service = () => {
             </div>
 
             {/* First Gradient Section */}
-            <div ref={gradientRef1} className="relative w-full h-[65vh] overflow-hidden">
+            <div
+                ref={gradientRef1}
+                className="relative w-full h-[65vh] overflow-hidden"
+                style={{
+                    backgroundColor: '#0f0f0f',
+                    marginTop: '-1px', // Prevents any gap
+                    zIndex: 1,
+                }}
+            >
                 <div className="absolute inset-0" />
             </div>
 

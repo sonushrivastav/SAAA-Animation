@@ -12,10 +12,10 @@ export default function StatsSection() {
     ];
 
     return (
-        <section className="bg-[#0f0f0f] text-white py-24 flex flex-col items-center justify-center text-center z-99">
+        <section className="bg-[#0f0f0f] text-white py-24 flex flex-col items-center justify-center text-center z-99 px-4">
             {/* Stats Container */}
-            <div className="bg-[#fafafa] text-[#0f0f0f]  shadow-lg p-10 max-w-2xl w-full mx-4">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+            <div className="bg-[#fafafa] text-[#0f0f0f]  shadow-lg p-10 sm:w-[50%]  mx-4">
+                <div className="grid  grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
                     {stats.map((stat, i) => (
                         <div
                             key={i}

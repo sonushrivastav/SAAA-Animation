@@ -25,8 +25,11 @@ const Animation = () => {
     const [showStarfield, setShowStarfield] = useState(false);
     const scrollLogoRef = useRef(null);
     const slicesRef = useRef(null);
+    slicesRef.current = [];
+    let isFloating = true; // floating active when page loads
+    let scrollY = 0;
 
-    const [activeServiceIndex, setActiveServiceIndex] = useState(6);
+    const [activeServiceIndex, setActiveServiceIndex] = useState(0);
 
     const flowAnimation = useRef({ scrollSpeed: 0 });
     const flowingParticlesMaterialRef = useRef();
@@ -173,7 +176,8 @@ const Animation = () => {
         let logoGroup = null;
         const individualSpirals = [];
         const logoMaterials = [];
-        // let animationState = { isInitialState: true };
+        const initialSlicePositions = [];
+        const initialSliceRotations = [];
 
         loader.load(
             '/models/model.glb',
@@ -187,14 +191,14 @@ const Animation = () => {
                 rawModel.position.set(-2.3, -2.4, 0);
                 rawModel.rotation.set(0, 0, 0);
 
-                slicesRef.current = [];
-
                 rawModel.traverse(child => {
                     if (child.isMesh) {
                         slicesRef.current.push(child);
                         child.material.transparent = true;
                         child.material.depthWrite = false;
                         logoMaterials.push(child.material);
+                        initialSlicePositions.push(child.position.clone());
+                        initialSliceRotations.push(child.rotation.clone());
                     }
                 });
 
@@ -626,11 +630,12 @@ const Animation = () => {
                 if (i === flyingTexts.length - 1) {
                     tl.fromTo(
                         el,
-                        { opacity: 0, scale: 0.1 },
+                        { opacity: 0, scale: 0.1, filter: 'blur(6px)' },
                         {
                             opacity: 1,
                             scale: 1.1,
                             y: 0,
+                            filter: 'blur(0px)',
                             ease: 'power2.out',
                             duration: textDuration,
                         },
@@ -652,10 +657,11 @@ const Animation = () => {
                     // 🔸 Normal animation for first 2 flying texts
                     tl.fromTo(
                         el,
-                        { opacity: 0, scale: 0.1 },
+                        { opacity: 0, scale: 0.1, filter: 'blur(6px)' },
                         {
                             opacity: 0,
                             scale: 1.1,
+                            filter: 'blur(0px)',
                             ease: 'power2.inOut',
                             duration: textDuration,
                             onUpdate: function () {
@@ -756,48 +762,63 @@ const Animation = () => {
             gsap.set('.service-logo', { opacity: 1 });
 
             // start from the LAST one
-            setActiveServiceIndex(serviceCount - 1);
+            setActiveServiceIndex(0);
 
-            tl.to(
-                `.service-${serviceCount - 1}`,
+            tl.fromTo(
+                `.service-0`,
+                {
+                    opacity: 0,
+                    y: 100,
+                    filter: 'blur(12px)',
+                },
                 {
                     opacity: 1,
-                    duration: 2.12,
+                    y: 0,
+                    filter: 'blur(0px)',
+                    duration: 1.4,
+                    ease: 'power3.out',
                     ease: 'power1.inOut',
-                    onStart: () => setActiveServiceIndex(serviceCount - 1),
+                    onStart: () => setActiveServiceIndex(0),
                 },
                 '>-1'
             );
 
             // loop backwards
-            for (let i = serviceCount - 2; i >= 0; i--) {
+            for (let i = 1; i < serviceCount; i++) {
                 const label = `service-${i}`;
                 tl.addLabel(label, `>+1.2`);
 
                 // fade out next (previous in index)
                 tl.to(
-                    `.service-${i + 1}`,
+                    `.service-${i - 1}`,
                     {
                         opacity: 0,
-                        duration: 2.1,
-                        ease: 'power1.inOut',
+                        y: 100,
+                        filter: 'blur(10px)',
+                        duration: 1.2,
+                        ease: 'power2.inOut',
                     },
                     `>+${TRANSITION_DURATION * 0.8}`
                 );
 
                 // fade in previous (lower index)
-                tl.to(
+                tl.fromTo(
                     `.service-${i}`,
                     {
+                        opacity: 0,
+                        y: 100,
+                        filter: 'blur(12px)',
+                    },
+                    {
                         opacity: 1,
-                        duration: 2.1,
-                        ease: 'power1.inOut',
+                        y: 0,
+                        filter: 'blur(0px)',
+                        duration: 1.4,
+                        ease: 'power3.out',
                         onStart: () => setActiveServiceIndex(i),
                         onReverseComplete: () => {
                             requestAnimationFrame(() => {
-                                setActiveServiceIndex(
-                                    i + 1 < serviceCount ? i + 1 : serviceCount - 1
-                                );
+                                setActiveServiceIndex(i - 1 >= 0 ? i - 1 : 0);
                             });
                         },
                     },
@@ -811,10 +832,10 @@ const Animation = () => {
                 {
                     duration: 0.1,
                     onComplete: () => {
-                        setActiveServiceIndex(0);
+                        setActiveServiceIndex(serviceCount - 1);
                     },
                     onReverseComplete: () => {
-                        // setActiveServiceIndex(serviceCount - 1);
+                        setActiveServiceIndex(0);
                     },
                 },
                 'serviceEnd'
@@ -834,28 +855,34 @@ const Animation = () => {
             );
 
             // Slight upward movement for smooth exit
-            tl.to(
-                '.next-section',
-                {
-                    y: '-100vh',
-                    opacity: 0,
-                    duration: 2,
-                    ease: 'power2.inOut',
-                    onComplete: () => gsap.set('.next-section', { pointerEvents: 'none' }),
-                },
-                '<'
-            );
+
             gsap.set('.statSection', { pointerEvents: 'auto' });
-            // tl.addLabel('statsReveal', '>+0.5');
-            tl.to(
-                '.statSection',
-                {
-                    opacity: 1,
-                    duration: 5,
-                    ease: 'power3.out',
+
+            gsap.timeline({
+                scrollTrigger: {
+                    trigger: '.statSection',
+                    start: 'top bottom', // when statSection enters viewport
+                    end: 'top top', // until statSection hits top
+                    scrub: 1.2,
                 },
-                '<-3'
-            );
+            })
+                .to(
+                    '.statSection',
+                    {
+                        opacity: 1,
+                        ease: 'none',
+                    },
+                    0
+                )
+                .to(
+                    '.next-section',
+                    {
+                        // y: '-30vh', // slow parallax movement
+                        opacity: 0,
+                        ease: 'none',
+                    },
+                    0
+                );
 
             // after ALL tl.to() lines
             // ----------------------------------------------------
@@ -895,19 +922,6 @@ const Animation = () => {
             // ----------------------------------------------------
         }
 
-        // compute how many viewport heights you need for the whole animation.
-        // Tune `numScreens` to how many "screens" worth of scroll your timeline needs.
-        const numScreens = 12; // <— adjust to match animation length
-        const scrollSpacer = document.getElementById('scroll-spacer');
-        if (scrollSpacer) {
-            scrollSpacer.style.height = `${window.innerHeight * numScreens}px`;
-        }
-
-        // Optional: on resize, update spacer
-        window.addEventListener('resize', () => {
-            if (scrollSpacer) scrollSpacer.style.height = `${window.innerHeight * numScreens}px`;
-        });
-
         let mouseX = 0;
         let mouseY = 0;
         const handleMouseMove = event => {
@@ -916,6 +930,45 @@ const Animation = () => {
         };
         window.addEventListener('mousemove', handleMouseMove);
 
+        // --- FLOAT CONTROL BASED ON SCROLL ---
+        window.addEventListener('scroll', () => {
+            scrollY = window.scrollY;
+
+            if (scrollY > 5 && isFloating) {
+                // Stop floating
+                isFloating = false;
+            }
+
+            if (scrollY <= 5 && !isFloating) {
+                // Restart floating when user returns to top
+                isFloating = true;
+
+                // Reset reference time so animation continues smoothly
+                let baseTime = performance.now() * 0.001;
+            }
+        });
+        function applyFloating(time) {
+            if (slicesRef.current.length === 0) return;
+            if (initialSlicePositions.length !== slicesRef.current.length) return;
+
+            slicesRef.current.forEach((slice, i) => {
+                const basePos = initialSlicePositions[i];
+                const baseRot = initialSliceRotations[i];
+
+                if (!basePos || !baseRot) return;
+
+                const offset = 0.5;
+                const speed = 0.9 + i * 0.1;
+
+                slice.position.x = basePos.x + Math.sin(time * speed + offset) * 0.0035;
+                slice.position.y = basePos.y + Math.cos(time * speed + offset) * 0.0035;
+                slice.position.z = basePos.z + Math.sin(time * 0.5 + offset) * 0.003;
+
+                slice.rotation.x = baseRot.x + Math.sin(time * speed * 0.3 + offset) * 0.008;
+                slice.rotation.y = baseRot.y + Math.cos(time * speed * 0.25 + offset) * 0.008;
+            });
+        }
+
         function animate() {
             const time = performance.now() * 0.001;
 
@@ -923,30 +976,13 @@ const Animation = () => {
                 particlesMaterial.uniforms.uTime.value = time;
             }
 
-            // Float each spiral on its own axis ONLY when in initial state (before scroll)
-            // if (animationState.isInitialState && individualSpirals.length > 0) {
-            //     slicesRef.current.forEach((slice, index) => {
-            //         const initialState = spiralInitialStates[index];
-            //         if (!initialState) return;
-
-            //         const offset = index * 0.01; // Phase offset for variety
-            //         const speed = 0.5 + index * 0.03; // Different speeds per spiral
-
-            //         // Gentle floating motion on Y axis
-            //         const floatAmplitude = 0.02;
-            //         slice.position.y =
-            //             initialState.initialY + Math.sin(time * speed + offset) * floatAmplitude;
-
-            //         // Subtle rotation float
-            //         const rotAmplitude = 0.03;
-            //         slice.rotation.x =
-            //             initialState.initialRotX +
-            //             Math.sin(time * speed * 0.7 + offset) * rotAmplitude;
-            //         slice.rotation.z =
-            //             initialState.initialRotZ +
-            //             Math.cos(time * speed * 0.5 + offset) * rotAmplitude;
-            //     });
-            // }
+            if (
+                isFloating &&
+                slicesRef.current.length > 0 &&
+                initialSlicePositions.length === slicesRef.current.length
+            ) {
+                applyFloating(time);
+            }
 
             // camera.position.x += (mouseX * 5 - camera.position.x) * 0.02;
             // camera.position.y += (mouseY * 5 - camera.position.y) * 0.02;
@@ -963,9 +999,9 @@ const Animation = () => {
 
     return (
         <main className="  bg-[#fafafa] font-sans text-black">
-            <div id="scroll-spacer" className="w-full scroll-spacer " />
+            <div id="scroll-spacer" className="w-full scroll-spacer h-[1050vh] bg-[#0f0f0f]" />
             <div className="w-full h-full relative">
-                <div className="initial-animation fixed inset-0 z-[10] pointer-events-none ">
+                <div className="initial-animation fixed inset-0 z-[10] pointer-events-none bg-[#fafafa]">
                     <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
                         <FlowingParticles
                             flowAnimation={flowAnimation}
@@ -998,15 +1034,17 @@ const Animation = () => {
                         {texts.map((t, i) => (
                             <div
                                 key={i}
-                                className="absolute top-[47%] text-wrapper w-full text-center "
+                                className="absolute top-[45%] sm:top-[47%] px-12   text-wrapper w-full text-center "
                             >
-                                <h1 className="text-5xl font-bold text-[#fafafa] ">{t}</h1>
+                                <h1 className="text-3xl sm:text-5xl font-bold text-[#fafafa] ">
+                                    {t}
+                                </h1>
                             </div>
                         ))}
                     </div>
                 </div>
 
-                <div className="next-section pointer-events-none   text-white fixed inset-0  flex items-center justify-center opacity-0 z-[20] ">
+                <div className="next-section  pointer-events-none bg-[#0f0f0f]   text-white fixed inset-0  flex items-center justify-center opacity-0 z-[20] ">
                     <div className="service-logo h-full w-full  opacity-0 ">
                         <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
                             <color attach="background" args={['#0f0f0f']} />
@@ -1045,15 +1083,17 @@ const Animation = () => {
                                 key={i}
                                 className={`absolute top-0 h-full w-full transition-opacity duration-700 service-text service-${i} opacity-0  flex flex-col items-start justify-center `}
                             >
-                                <h2 className={`text-6xl font-bold `}>{service.title}</h2>
-                                <p className="text-xl mt-2">{service.subtext}</p>
+                                <h2 className={`text-3xl sm:text-5xl font-bold `}>
+                                    {service.title}
+                                </h2>
+                                <p className=" text-lg sm:text-xl mt-2">{service.subtext}</p>
                             </div>
                         ))}
                     </div>
                 </div>
-            </div>
-            <div className="statSection relative opacity-0 z-[50] pointer-events-auto">
-                <StatsSection />
+                <div className="statSection relative opacity-0 z-[50] pointer-events-auto ">
+                    <StatsSection />
+                </div>
             </div>
         </main>
     );
