@@ -14,40 +14,98 @@ uniform float uTime;
 uniform float uSize;
 uniform float uMorph;
 uniform vec2 uMouse;
+
 attribute vec3 aRandomPos;
 attribute vec3 aTargetPos;
 attribute float aRandom;
+attribute vec3 aDir;
+attribute vec3 aVel;
+attribute float aPauseTimer;  // NEW: tracks pause time for each particle
+
 varying float vRandom;
 varying float vDist;
+
+float hash(float n) {
+  return fract(sin(n) * 43758.5453123);
+}
 
 void main() {
   vRandom = aRandom;
 
-  vec3 randPos = aRandomPos;
-  vec3 targetPos = aTargetPos;
-  vec3 base = mix(randPos, targetPos, uMorph);
+  // ----------------------------
+  // 1. Base Morph Position
+  // ----------------------------
+  vec3 base = mix(aRandomPos, aTargetPos, uMorph);
 
+  // Tiny idle wobble
   vec3 wobble = vec3(
     sin(uTime * 0.4 + aRandom * 6.2831),
     cos(uTime * 0.3 + aRandom * 4.2831),
     sin(uTime * 0.25 + aRandom * 8.2831)
-  ) * 0.01;
+  ) * 0.012;
 
   vec3 pos = base + wobble;
 
+  // ----------------------------
+  // 2. Screen-Space Mouse Dist
+  // ----------------------------
   vec4 mvPos = modelViewMatrix * vec4(pos, 1.0);
   vec4 projPos = projectionMatrix * mvPos;
-  vec2 screenPos = projPos.xy / projPos.w;
+  vec2 sp = projPos.xy / projPos.w;
 
-  float dist = distance(screenPos, uMouse);
+  float dist = distance(sp, uMouse);
   vDist = dist;
 
-  float influence = smoothstep(0.24, 0.0, dist) * uMorph;
-  vec2 dir = normalize(uMouse);
-  pos += vec3(dir.x * influence * 0.25, dir.y * influence * 0.25, 0.0);
+  float influence = smoothstep(0.1, 0.0, dist) * uMorph;
 
-  float restore = 0.92 + 0.06 * sin(uTime * 0.2 + aRandom * 5.0);
-  pos = mix(pos, base, restore * (1.0 - influence));
+  vec3 vel = aVel;
+  float pauseTimer = aPauseTimer;
+
+  // force strength based on mouse proximity
+  float force = (0.62 * (1.0 - dist)) * influence;
+
+  // Apply force along each particle's random direction (aDir)
+  vel += aDir * force;
+
+  // Some particles move more on X, some on Y, some both -> ADD Z TOO
+  float r = hash(aRandom * 541.77);
+  if (r > 0.75) {
+    vel.z *= 6.0;
+  } else if (r > 0.5) {
+    vel.x *= 2.8;
+  } else if (r > 0.25) {
+    vel.y *= 5.8;
+  } else {
+    vel.xy *= 3.1;
+  }
+
+  // Dampen velocity so it doesn't explode
+  vel *= 0.99;
+  vel.z += (1.0 - dist) * influence * 0.5;
+
+  // NEW: Check if particle should pause
+  float velocityMag = length(vel);
+
+  // If particle has significant velocity and is far from base, start pause timer
+  if (velocityMag > 0.02 && distance(pos, base) > 0.5) {
+    pauseTimer += 1.16; // increment timer (assuming ~60fps)
+  } else {
+    pauseTimer = 0.0; // reset timer when close to base
+  }
+
+  // Apply velocity only if not pausing (pause for 0.5 to 1.5 seconds based on aRandom)
+  float pauseDuration = 5.5 + aRandom * 1.0;
+  if (pauseTimer < pauseDuration) {
+    pos += vel * 0.015;
+  } else {
+    // After pause, apply stronger return force
+    vel *= 1.85; // stronger damping during return
+  }
+
+  // Restore force - stronger after pause period
+  float restoreStrength = pauseTimer > pauseDuration ? 0.88 : 0.95;
+  float restore = restoreStrength - influence * 0.9;
+  pos = mix(pos, base, restore);
 
   vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
   gl_PointSize = uSize * (1.0 / -mvPosition.z);
@@ -92,7 +150,7 @@ export const spiralConfigs = [
 
 // ---------- Component ----------
 export default function ParticlesMorphPerSlice({
-  glbPath = "/models/T3d.glb",
+  glbPath = "/models/model.glb",
   particleCount = 10000,
   size = 12,
   initialActiveIndex = 0,
@@ -102,8 +160,35 @@ export default function ParticlesMorphPerSlice({
   const mouse = useRef(new THREE.Vector2(0, 0));
   const materialsRef = useRef([]);
   const pointsGroupRef = useRef();
+  const slicesRef = useRef(null);
 
-  // desired visual transform that used to be applied to each primitive
+  slicesRef.current = [];
+
+  scene.traverse((child) => {
+    if (child.isMesh) {
+      slicesRef.current.push(child);
+    }
+  });
+
+  const order = {
+    Curve001: 2,
+    Curve002: 1,
+    Curve_1: 3,
+    Curve003: 4,
+    Curve004: 5,
+    Curve005: 6,
+    Curve006: 7,
+  };
+
+  slicesRef.current.sort((a, b) => {
+    return order[a.name] - order[b.name];
+  });
+
+  slicesRef.current.forEach((slice) => {
+    slice.position.set(0, 0, 0);
+    slice.rotation.set(0, 0, 0);
+  });
+
   const VISUAL_POSITION = new THREE.Vector3(-2, -2, 0);
   const VISUAL_ROTATION = new THREE.Euler(0, 0.2, -Math.PI / 3.5);
   const VISUAL_SCALE = new THREE.Vector3(1.8, 1.8, 1.7);
@@ -121,39 +206,27 @@ export default function ParticlesMorphPerSlice({
   // Build slices from GLB
   const slices = useMemo(() => {
     const samplers = [];
-    scene.traverse((child) => {
-      if (child.isMesh) {
+    slicesRef.current.forEach((child) => {
+      if (child) {
         child.updateWorldMatrix(true, false);
         try {
           const sampler = new MeshSurfaceSampler(child).build();
-          samplers.push({ sampler, matrixWorld: child.matrixWorld.clone() });
-        } catch (err) {}
+          samplers.push({
+            sampler,
+            matrixWorld: child.matrixWorld.clone(),
+            name: child.name,
+          });
+        } catch (err) {
+          console.log("err", err);
+        }
       }
     });
 
-    const slicesCount = spiralConfigs.length;
+    const slicesCount = Math.max(1, samplers.length);
     const perSlice = Math.floor(particleCount / slicesCount);
     const remainder = particleCount - perSlice * slicesCount;
-    const spiralMatrices = spiralConfigs.map((cfg) => {
-      const m = new THREE.Matrix4();
-      const s = new THREE.Vector3(cfg.s, cfg.s, cfg.s);
-      const q = new THREE.Quaternion().setFromEuler(
-        new THREE.Euler(cfg.r[0], cfg.r[1], cfg.r[2])
-      );
-      m.compose(new THREE.Vector3(...cfg.p), q, s);
-      return m;
-    });
-
-    // Prepare visual transform matrix that'll be applied only to target positions
-    const visualMatrix = new THREE.Matrix4();
-    visualMatrix.compose(
-      VISUAL_POSITION,
-      new THREE.Quaternion().setFromEuler(VISUAL_ROTATION),
-      VISUAL_SCALE
-    );
 
     let samplerIdx = 0;
-    const samplersCount = Math.max(1, samplers.length);
     const out = [];
 
     for (let sIdx = 0; sIdx < slicesCount; sIdx++) {
@@ -163,14 +236,13 @@ export default function ParticlesMorphPerSlice({
       const aRandom = new Float32Array(count);
       const temp = new THREE.Vector3();
 
-      // ------- START: centered star-grid / layered arrangement (replaces random positions) -------
-      const spacing = 2.55; // distance between grid points in x/y
-      const layerSpacing = 1.2; // spacing between z layers
-      const jitterRange = 0.45; // random jitter applied to z
+      const spacing = 0.3;
+      const layerSpacing = 0.8;
+      const jitterRange = 1.55;
 
       let generated = [];
-      let n = 1; // XY radius
-      let m = 0; // Z layers on each side
+      let n = 1;
+      let m = 0;
 
       while (generated.length / 3 < count) {
         generated = [];
@@ -198,19 +270,15 @@ export default function ParticlesMorphPerSlice({
         const py = generated[srcIndex * 3 + 1];
         const pz = generated[srcIndex * 3 + 2];
         aRandomPos.set([px, py, pz], i * 3);
-        // aRandom[i] = Math.random();
+        aRandom[i] = Math.random();
       }
-      // ------- END initial grid -------
 
-      // target positions: sample model + spiral matrix + bake visual transform
       let wrote = 0;
       while (wrote < count) {
-        const samplerObj = samplers[samplerIdx % samplersCount];
+        const samplerObj = samplers[sIdx];
         samplerIdx++;
-        samplerObj.sampler.sample(temp); // sample model in its world space
-        temp.applyMatrix4(samplerObj.matrixWorld); // transform to world
-        temp.applyMatrix4(spiralMatrices[sIdx]); // apply slice spiral local transform
-        temp.applyMatrix4(visualMatrix); // ===== bake visual transform into TARGET
+        samplerObj.sampler.sample(temp);
+        temp.applyMatrix4(samplerObj.matrixWorld);
         aTargetPos.set([temp.x, temp.y, temp.z], wrote * 3);
         wrote++;
       }
@@ -221,14 +289,13 @@ export default function ParticlesMorphPerSlice({
     return out;
   }, [scene, particleCount]);
 
-  // Create geometries + materials (no primitive-level transforms)
+  // Create geometries + materials
   const meshesPerSlice = useMemo(() => {
     const items = [];
     for (let i = 0; i < slices.length; i++) {
       const { aRandomPos, aTargetPos, aRandom } = slices[i];
 
       const geometry = new THREE.BufferGeometry();
-      // INITIAL geometry positions are stored in 'position' attribute -> this is the centered grid
       geometry.setAttribute(
         "position",
         new THREE.BufferAttribute(aRandomPos, 3)
@@ -237,12 +304,38 @@ export default function ParticlesMorphPerSlice({
         "aRandomPos",
         new THREE.BufferAttribute(aRandomPos, 3)
       );
-      // TARGET positions baked with the visual transform are stored in aTargetPos
       geometry.setAttribute(
         "aTargetPos",
         new THREE.BufferAttribute(aTargetPos, 3)
       );
       geometry.setAttribute("aRandom", new THREE.BufferAttribute(aRandom, 3));
+
+      const aDir = new Float32Array(aRandomPos.length);
+      const aVel = new Float32Array(aRandomPos.length);
+      const aPauseTimer = new Float32Array(aRandomPos.length / 3); // NEW: pause timer attribute
+
+      geometry.setAttribute("aVel", new THREE.BufferAttribute(aVel, 3));
+      geometry.getAttribute("aVel").setUsage(THREE.DynamicDrawUsage);
+
+      geometry.setAttribute(
+        "aPauseTimer",
+        new THREE.BufferAttribute(aPauseTimer, 1)
+      ); // NEW
+      geometry.getAttribute("aPauseTimer").setUsage(THREE.DynamicDrawUsage);
+
+      for (let i = 0; i < aDir.length; i += 3) {
+        const rx = Math.random() * 2 - 1;
+        const ry = Math.random() * 2 - 1;
+        const rz = Math.random() * 2 - 1;
+
+        const v = new THREE.Vector3(rx, ry, rz).normalize();
+
+        aDir[i] = v.x;
+        aDir[i + 1] = v.y;
+        aDir[i + 2] = v.z;
+      }
+
+      geometry.setAttribute("aDir", new THREE.BufferAttribute(aDir, 3));
 
       const mat = new THREE.ShaderMaterial({
         vertexShader,
@@ -281,13 +374,13 @@ export default function ParticlesMorphPerSlice({
       const isActive = i === idx;
       gsap.to(mat.uniforms.uAlpha, {
         value: isActive ? 1.0 : 0.15,
-        duration: 1.2,
-        ease: "power2.out",
+        duration: 1.3,
+        ease: "none",
       });
       gsap.to(mat.uniforms.uActiveMix, {
         value: isActive ? 1.0 : 0.0,
-        duration: 1.2,
-        ease: "power2.out",
+        duration: 1.3,
+        ease: "none",
       });
     });
   }, [activeIndex, initialActiveIndex]);
@@ -301,13 +394,12 @@ export default function ParticlesMorphPerSlice({
     });
   });
 
-  // RENDER: primitives have identity transforms — visual transform baked into aTargetPos only
   return (
     <group
       ref={pointsGroupRef}
-      position={[0, 0, 0]}
-      rotation={[0, 0, 0]}
-      scale={[1, 1, 1]}
+      position={[-3, -2.7, 0]}
+      rotation={[0, 0, -0.6]}
+      scale={[17, 17, 8]}
     >
       {meshesPerSlice.map((m, idx) => (
         <primitive key={idx} object={m.points} />

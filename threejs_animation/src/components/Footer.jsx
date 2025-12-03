@@ -1,53 +1,31 @@
-import Image from "next/image";
-
 export default function Footer() {
   return (
-    // <footer className="bg-white      text-black py-10 px-6 md:px-20 border-t border-gray-200">
-    //     <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-    //         {/* Left: Logo */}
-    //         <div className="flex items-center space-x-3">
-    //             {/* Logo Icon (replace with your image if you have one) */}
-    //             <Image
-    //                 src={'/images/Screenshot 2025-10-25 101941-Photoroom.png'}
-    //                 width={200}
-    //                 height={200}
-    //                 alt="logo"
-    //             />
-    //         </div>
-
-    //         {/* Right: Footer Links */}
-    //         <div className="text-gray-700 text-center md:text-right text-sm md:text-base">
-    //             Footer / Sitemap / quick links
-    //         </div>
-    //     </div>
-    // </footer>
-
-    <footer className="w-full bg-[#0F0F0F] text-[#FAFAFA] px-6 md:px-16 py-12 ">
+    <footer className="w-full relative bg-[#0F0F0F] text-[#FAFAFA] px-6 md:px-16 py-12 z-[55]">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
         {/* Logo Section */}
         <div className="flex flex-col gap-4">
           <img
-            src="/images/MainLogopurpleblack.svg"
+            src="/images/footerLogo.svg"
             alt="SAAA Consultants Logo"
             className="w-56 object-contain"
           />
         </div>
 
         {/* Navigation */}
-        <div className="flex flex-col gap-3 text-lg">
-          <a href="/" className="hover:text-purple-400 transition">
+        <div className="flex item-start flex-col gap-3 text-lg">
+          <a href="#" className="hover:text-[#844de9] transition ">
             HOME
           </a>
-          <a href="/about" className="hover:text-purple-400 transition">
+          <a href="#" className="hover:text-[#844de9] transition">
             ABOUT
           </a>
-          <a href="/service" className="hover:text-purple-400 transition">
+          <a href="#" className="hover:text-[#844de9] transition">
             SERVICES
           </a>
-          <a href="/work" className="hover:text-purple-400 transition">
+          <a href="#" className="hover:text-[#844de9] transition">
             WORK
           </a>
-          <a href="/contact" className="hover:text-purple-400 transition">
+          <a href="#" className="hover:text-[#844de9] transition">
             CONTACT
           </a>
         </div>

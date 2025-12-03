@@ -1,22 +1,22 @@
 "use client";
+import { Environment } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
+import { Bloom, EffectComposer } from "@react-three/postprocessing";
 import Lenis from "@studio-freight/lenis";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { BlendFunction } from "postprocessing";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { MeshSurfaceSampler } from "three/addons/math/MeshSurfaceSampler.js";
 import * as BufferGeometryUtils from "three/addons/utils/BufferGeometryUtils.js";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
-import Footer from "../../components/Footer";
-import Navbar from "../../components/Navbar";
 import FlowingParticles from "../../components/ParticleBackground";
+import ParticlesMorphPerSlice from "../../components/ScrollServiceLogo";
 import StarfieldBackground from "../../components/StarfieldBackground";
 import StatsSection from "../../components/Stats";
-import ParticlesMorphPerSlice from "../../components/ScrollServiceLogo";
-import { Bloom, EffectComposer } from "@react-three/postprocessing";
-import { BlendFunction } from "postprocessing";
+
 // ✅ It's good practice to register the plugin once
 gsap.registerPlugin(ScrollTrigger);
 
@@ -24,6 +24,10 @@ const Animation = () => {
   const canvasRef = useRef(null);
   const [showStarfield, setShowStarfield] = useState(false);
   const scrollLogoRef = useRef(null);
+  const slicesRef = useRef(null);
+  slicesRef.current = [];
+  let isFloating = true; // floating active when page loads
+  let scrollY = 0;
 
   const [activeServiceIndex, setActiveServiceIndex] = useState(0);
 
@@ -32,50 +36,46 @@ const Animation = () => {
   // --- Flying Texts Setup ---
   const flyingTextRef = useRef(null);
   const texts = [
-    "Text 1",
-    "Text 2",
-    "Text 3",
-    "Text 4",
-    "Text 5",
-    "Text 6",
-    "Text 7",
+    "You’re visible everywhere, but remembered nowhere?",
+    "Your website and UI/UX look great in reviews, not in results.",
+    "Investors are interested, but not invested",
   ];
   const SERVICE_DATA = [
     {
-      title: "Service 1",
-      subtext: "Brand establishment and digital identity creation.",
-      className: "text-purple-600",
-    },
-    {
-      title: "Service 2",
-      subtext: "Comprehensive digital marketing strategies.",
-      className: "text-red-500",
-    },
-    {
-      title: "Service 3",
-      subtext: "Creative execution and dynamic content development.",
+      title: "Branding/ Designing",
+      subtext: "Giving your ideas a form people can see, trust, and remember.",
       className: "text-yellow-500",
     },
     {
-      title: "Service 4",
-      subtext: "Performance marketing, conversion tracking, and optimization.",
+      title: "UI/UX Design",
+      subtext: "Crafted interfaces that feel effortless and intuitive.",
+      className: "text-red-500",
+    },
+    {
+      title: "Web Development",
+      subtext: " Building the home your brand deserves online.",
+      className: "text-yellow-500",
+    },
+    {
+      title: "Digital Marketing",
+      subtext: "Turning campaigns into constellations that people follow.",
+      className: "text-purple-600",
+    },
+
+    {
+      title: "Investor Relations",
+      subtext: "We help your finances find their true orbit.",
       className: "text-green-500",
     },
     {
-      title: "Service 5",
-      subtext: "Deep analytics, insights, and data-driven decision making.",
+      title: "Financial Advisory",
+      subtext: "Turning your milestones into meaningful narratives.",
       className: "text-blue-500",
     },
     {
-      title: "Service 6",
-      subtext: "Scaling solutions globally and entering new markets.",
+      title: "Legal advice",
+      subtext: " Simplifying what’s binding, strengthening what’s bold.",
       className: "text-indigo-500",
-    },
-    {
-      title: "Service 7",
-      subtext:
-        "Future-proofing your business through innovation and tech integration.",
-      className: "text-pink-500",
     },
   ];
 
@@ -113,7 +113,7 @@ const Animation = () => {
       smoothWheel: true,
       smoothTouch: true,
       touchMultiplier: 0.9,
-      wheelMultiplier: 0.7,
+      wheelMultiplier: 0.4,
     });
 
     lenis.on("scroll", ScrollTrigger.update);
@@ -169,103 +169,84 @@ const Animation = () => {
       { s: 3.8, p: [-0.46, -0.8, -0.11], r: [Math.PI / 3, 2.5, 0.0] },
     ];
 
-    // Store initial positions/rotations for floating animation
     const spiralInitialStates = [];
 
     const loader = new GLTFLoader();
     let particlesMaterial = null;
     let logoGroup = null;
     const individualSpirals = [];
-    let animationState = { isInitialState: true };
+    const logoMaterials = [];
+    const initialSlicePositions = [];
+    const initialSliceRotations = [];
 
     loader.load(
-      "/models/T3d.glb",
+      "/models/model.glb",
       (gltf) => {
-        const sourceScene = gltf.scene;
-        logoGroup = new THREE.Group();
-        logoGroup.scale.set(1.6, 1.6, 0.15);
+        const rawModel = gltf.scene;
 
-        // ✅ Set initial position to the left, as per the first image.
-        // logoGroup.position.set(-3, -0.5, 0);
-        // logoGroup.rotation.set(-0.1, 0.2, -0.2);
+        // const modelGroup = new THREE.Group();
+        scene.add(rawModel);
+        // modelGroup.add(rawModel);
+        rawModel.scale.set(17, 17, 4);
+        rawModel.position.set(-2.3, -2.4, 0);
+        rawModel.rotation.set(0, 0, 0);
 
-        const allMaterials = [];
-
-        spiralConfigs.forEach((config) => {
-          // Create a separate group for each spiral
-          const spiralGroup = new THREE.Group();
-
-          const modelClone = sourceScene.clone();
-          modelClone.scale.setScalar(config.s);
-          modelClone.position.fromArray(config.p);
-          modelClone.rotation.fromArray(config.r);
-
-          modelClone.traverse((child) => {
-            if (child.isMesh && child.material) {
-              const newMaterial = child.material.clone();
-              newMaterial.transparent = true;
-              newMaterial.depthWrite = false;
-              child.material = newMaterial;
-              allMaterials.push(newMaterial);
-            }
-          });
-
-          spiralGroup.add(modelClone);
-
-          // Set initial position (offset to the left)
-          spiralGroup.position.set(-0.5, -0.5, 0);
-          spiralGroup.rotation.set(-0.1, 0.2, -0.2);
-
-          // Store initial state for floating animation
-          spiralInitialStates.push({
-            initialY: -0.5,
-            initialRotX: -0.1,
-            initialRotZ: -0.2,
-          });
-
-          // Store reference to this spiral
-          individualSpirals.push({
-            group: spiralGroup,
-            finalPosition: { x: -0.5, y: -2, z: 2 },
-            finalRotation: {
-              x: 0,
-              y: spiralGroup.rotation.y - Math.PI / 8,
-              z: spiralGroup.rotation.z - Math.PI / 2,
-            },
-          });
-
-          logoGroup.add(spiralGroup);
+        rawModel.traverse((child) => {
+          if (child.isMesh) {
+            slicesRef.current.push(child);
+            child.material.transparent = true;
+            child.material.depthWrite = false;
+            logoMaterials.push(child.material);
+            initialSlicePositions.push(child.position.clone());
+            initialSliceRotations.push(child.rotation.clone());
+          }
         });
 
-        scene.add(logoGroup);
+        const order = {
+          Curve001: 2,
+          Curve002: 1,
+          Curve_1: 3,
+          Curve003: 4,
+          Curve004: 5,
+          Curve005: 6,
+          Curve006: 7,
+        };
 
-        // // Create sampling group that matches the final assembled position
-        // const samplingGroup = new THREE.Group();
-        // samplingGroup.scale.set(1.15, 1.15, 0.15);
+        slicesRef.current.sort((a, b) => {
+          return order[a.name] - order[b.name];
+        });
 
-        // spiralConfigs.forEach((config) => {
-        //   const modelClone = sourceScene.clone();
-        //   modelClone.scale.setScalar(config.s);
-        //   modelClone.position.fromArray(config.p);
-        //   modelClone.rotation.fromArray(config.r);
-        //   samplingGroup.add(modelClone);
+        slicesRef.current.forEach((slice) => {
+          slice.position.set(0, 0, 0);
+          slice.rotation.set(0, 0, 0);
+        });
+
+        // slicesRef.current.forEach(slice => {
+        //     slice.position.set(0.15, 0.72, 0.06);
+        //     slice.rotation.set(0, 0, -0.401592653589793);
         // });
 
-        // // Position the sampling group at the final centered and rotated position
-        // samplingGroup.position.set(-0.5, -2, 2);
-        // samplingGroup.rotation.set(0, -Math.PI / 8, -Math.PI / 2);
+        // spiralInitialStates.push({
+        //     initialY: -0.5,
+        //     initialRotX: -0.1,
+        //     initialRotZ: -0.2,
+        // });
 
-        // Create the particle system from the rotated clone
+        individualSpirals.push({
+          finalPosition: { x: 0.4, y: 0.2, z: -0.18 },
+          finalRotation: {
+            x: 0,
+            y: -1.53159265358979,
+            z: 0.0484073464102068,
+          },
+        });
+
         createParticleSystem(
-          logoGroup,
-          sourceScene,
-          spiralConfigs,
-          allMaterials,
-          individualSpirals,
+          rawModel,
+
+          logoMaterials,
           scene,
-          camera,
-          animationState,
-          spiralInitialStates
+          camera
         );
       },
       undefined,
@@ -275,43 +256,17 @@ const Animation = () => {
     );
 
     // createParticleSystem function remains largely unchanged
-    function createParticleSystem(
-      logoGroup,
-      sourceScene,
-      spiralConfigs,
-      materials,
-      spirals,
-      scene,
-      camera,
-      animState
-    ) {
+    function createParticleSystem(rawModel, materials, scene, camera) {
       // Create a temporary sampling group that matches the FINAL assembled state
       const samplingGroup = new THREE.Group();
-      samplingGroup.scale.copy(logoGroup.scale);
 
-      spiralConfigs.forEach((config, index) => {
-        const modelClone = sourceScene.clone();
-        modelClone.scale.setScalar(config.s);
-        modelClone.position.fromArray(config.p);
-        modelClone.rotation.fromArray(config.r);
+      samplingGroup.add(rawModel.clone());
 
-        // Create wrapper to match spiral structure
-        const spiralWrapper = new THREE.Group();
-        spiralWrapper.add(modelClone);
-
-        // Apply FINAL position and rotation
-        spiralWrapper.position.set(
-          spirals[index].finalPosition.x,
-          spirals[index].finalPosition.y,
-          spirals[index].finalPosition.z
-        );
-        spiralWrapper.rotation.set(
-          spirals[index].finalRotation.x,
-          spirals[index].finalRotation.y,
-          spirals[index].finalRotation.z
-        );
-
-        samplingGroup.add(spiralWrapper);
+      samplingGroup.traverse((child) => {
+        if (child.isMesh) {
+          child.position.set(0.21, 0.1, -0.22);
+          child.rotation.set(-0.181592653589793, -1.53159265358979, 0);
+        }
       });
 
       const geometries = [];
@@ -333,7 +288,7 @@ const Animation = () => {
       const mergedMeshForSampling = new THREE.Mesh(mergedGeometry);
 
       const sampler = new MeshSurfaceSampler(mergedMeshForSampling).build();
-      const numParticles = 18000;
+      const numParticles = 30000;
 
       const particlesGeometry = new THREE.BufferGeometry();
       const positions = new Float32Array(numParticles * 3);
@@ -417,23 +372,11 @@ const Animation = () => {
 
       scene.add(particleSystem);
       if (flowingParticlesMaterialRef.current) {
-        setupScrollAnimation(
-          materials,
-          spirals,
-          particlesMaterial,
-          camera,
-          animState
-        );
+        setupScrollAnimation(materials, particlesMaterial, camera);
       } else {
         const checkRefInterval = setInterval(() => {
           if (flowingParticlesMaterialRef.current) {
-            setupScrollAnimation(
-              materials,
-              spirals,
-              particlesMaterial,
-              camera,
-              animState
-            );
+            setupScrollAnimation(materials, particlesMaterial, camera);
             clearInterval(checkRefInterval);
           }
         }, 100);
@@ -464,16 +407,16 @@ const Animation = () => {
 
                     vec3 explodeDir = normalize(vec3(0, (aRandom.y + 2.0) * 0.1, 1.0)) * (aRandom.z * 0.4) * uProgress;
                     vec3 exploded = position + explodeDir * 2.0 * aRandom.z * uProgress;
- 
+
                      // ---------- floating orbit-based motion ----------
-                    float orbitRadius = 0.2 + fract(aRandom.y) * 0.0;
-                    float speed = 0.2 + fract(aRandom.z) * 0.1;
+                    float orbitRadius = 0.2 + fract(aRandom.y) * 0.8;
+                    float speed = 0.2 + fract(aRandom.z) * 0.9;
 
                       // base exploded position
                      vec3 finalPosition = exploded;
 
                     // circular orbital motion applied during explosion
-                    finalPosition.x += cos(uTime * speed + aRandom.x) * orbitRadius * uProgress;
+                    finalPosition.x += sin(uTime * speed + aRandom.x) * orbitRadius * uProgress;
                     finalPosition.y += sin(uTime * speed + aRandom.y) * orbitRadius * uProgress;
 
                      vec4 mvPosition = modelViewMatrix * vec4(finalPosition, 1.0);
@@ -483,9 +426,9 @@ const Animation = () => {
                     vDepth = mvPosition.z;
                     vec4 viewPos = modelViewMatrix * vec4(exploded, 1.0);
                     float dist = abs(viewPos.z);
-                    float baseSize = 1.0;
+                    float baseSize = 1.5;
                     float towardCamera = step(0.0, -explodeDir.z);
-                    float sizeByDistance = mix(1.0, (1.0 / (dist * 0.25 + 1.0)), towardCamera);
+                    float sizeByDistance = mix(1.0, (1.0 / (dist * 0.35 + 1.0)), towardCamera);
                     float nearBoost = mix(1.0, 1.8, smoothstep(0.0, 0.0, -viewPos.z));
                     gl_PointSize = baseSize * sizeByDistance * nearBoost * 100.0 / -viewPos.z * uSizeMultiplier;
                 }
@@ -497,7 +440,7 @@ const Animation = () => {
                 uniform vec3 uLightColor;
                 varying float vProgress;
                 varying vec3 vColor;
-                
+
 
                 void main() {
                     vec2 centeredCoord = gl_PointCoord - vec2(0.5);
@@ -530,20 +473,14 @@ const Animation = () => {
       });
     }
 
-    function setupScrollAnimation(
-      materials,
-      spirals,
-      particlesMaterial,
-      camera,
-      animState
-    ) {
+    function setupScrollAnimation(materials, particlesMaterial, camera) {
       // Make sure starfield starts hidden
       gsap.set(".starfield-layer", { opacity: 0 });
       gsap.set(".text-wrapper", { opacity: 0, scale: 0.1 });
 
       const tl = gsap.timeline({
         scrollTrigger: {
-          trigger: ".scroll-container",
+          trigger: "#scroll-spacer",
           start: "top top",
           end: "100% bottom",
           scrub: 0.82, // smooth scroll-scrub
@@ -556,11 +493,6 @@ const Animation = () => {
           // },
 
           onUpdate: (self) => {
-            if (self.progress > 0) {
-              animState.isInitialState = false;
-            } else if (self.progress <= 0.05) {
-              animState.isInitialState = true;
-            }
             gsap.to(flowAnimation.current, {
               scrollSpeed: self.getVelocity() * 0.005,
               duration: 0.9,
@@ -572,18 +504,20 @@ const Animation = () => {
 
       // --- STEP 1: Move logo to center ---
       // tl.addLabel("initial");
-      const TEXT1_START_EARLY = 1.5;
       // Animate each spiral individually to center with rotation
-      spirals.forEach((spiral, index) => {
-        const delay = index * 0.3;
+      slicesRef.current.forEach((slice, index) => {
+        let delay = index * 0.3;
+        if (index === slicesRef.length - 1) {
+          delay = index * 0.02;
+        }
 
         // Move each spiral to center
         tl.to(
-          spiral.group.position,
+          slice.position,
           {
-            x: spiral.finalPosition.x,
-            y: spiral.finalPosition.y,
-            z: spiral.finalPosition.z,
+            x: 0.21,
+            y: 0.1,
+            z: -0.22,
             duration: 5,
             ease: "power1.inOut",
           },
@@ -592,11 +526,11 @@ const Animation = () => {
 
         // Rotate each spiral into place
         tl.to(
-          spiral.group.rotation,
+          slice.rotation,
           {
-            x: spiral.finalRotation.x,
-            y: spiral.finalRotation.y,
-            z: spiral.finalRotation.z,
+            x: -0.181592653589793,
+            y: -1.53159265358979,
+            z: 0,
             duration: 5,
             ease: "power1.inOut",
           },
@@ -604,103 +538,30 @@ const Animation = () => {
         );
       });
 
-      const TOTAL_ROTATION_DURATION = 5; // matches spiral rotation duration
-      const STEPS = 4; // number of steps/pauses
-      const STEP_MOVE_DISTANCE = -50; // pixels to move each step
-      const PAUSE_DURATION = TOTAL_ROTATION_DURATION / (STEPS * 2);
-
-      // Text1 stepping animation synchronized with logo rotation
-      for (let i = 0; i < STEPS; i++) {
-        const stepDelay = i === 0 ? `<-${TEXT1_START_EARLY}` : ">"; // first step starts with rotation, others follow
-
-        // Move upward
-        tl.to(
-          ".initial-text",
-          {
-            y: STEP_MOVE_DISTANCE * (i + 1), // cumulative upward movement
-            duration: PAUSE_DURATION,
-            ease: "power1.inOut",
-          },
-          stepDelay
-        );
-
-        // Pause/hold position
-        tl.to(
-          ".initial-text",
-          {
-            duration: PAUSE_DURATION * 0.8, // slightly shorter pause
-            ease: "none",
-          },
-          ">"
-        );
-      }
-
-      // Final move - text1 goes completely off screen
       tl.to(
         ".initial-text",
         {
-          y: "-100vh", // completely off screen
+          y: "-20vh",
           opacity: 0,
-          duration: 1.5,
-          ease: "power2.in",
+          duration: 3.5,
+          ease: "power1.inOut",
         },
-        ">"
+        "<-3"
       );
-
-      // --- Second text appears and moves up in steps ---
-      // Text2 enters from bottom
-      tl.fromTo(
-        ".second-text",
-        {
-          y: "20vh", // start from below
-          opacity: 0,
-        },
-        {
-          y: 0, // move to center
-          opacity: 1,
-          duration: 1.5,
-          ease: "power2.out",
-        },
-        ">+0.5"
-      );
-
-      // Text2 stepping animation (similar to text1)
-      const TEXT2_STEPS = 5; // can be different number of steps
-      const TEXT2_STEP_DISTANCE = -60;
-      const TEXT2_STEP_DURATION = 0.8;
-
-      for (let i = 0; i < TEXT2_STEPS; i++) {
-        // Move upward
-        tl.to(
-          ".second-text",
-          {
-            y: TEXT2_STEP_DISTANCE * (i + 1),
-            duration: TEXT2_STEP_DURATION,
-            ease: "power1.inOut",
-          },
-          ">"
-        );
-
-        // Pause/hold
-        tl.to(
-          ".second-text",
-          {
-            duration: TEXT2_STEP_DURATION * 0.7,
-            ease: "none",
-          },
-          ">"
-        );
-      }
-
-      // Final move - text2 goes completely off screen
       tl.to(
         ".second-text",
         {
-          y: "-100vh",
-          opacity: 0,
-          duration: 1.8,
-          ease: "power2.in",
+          y: "15vh",
+          opacity: 1,
+          duration: 3.5,
+          ease: "power1.inOut",
         },
+        ">+1"
+      );
+      // tl.addLabel('rotation');
+      tl.to(
+        ".second-text",
+        { opacity: 0, duration: 3.5, ease: "power1.inOut" },
         ">"
       );
 
@@ -711,7 +572,18 @@ const Animation = () => {
         { value: 1, duration: 4 },
         ">1"
       );
-      tl.to(materials, { opacity: 0.0, duration: 0.5 }, "<");
+      logoMaterials.forEach((mat) => {
+        tl.to(
+          mat,
+          {
+            opacity: 0,
+            duration: 0.8,
+            ease: "power2.out",
+          },
+          "<"
+        );
+      });
+
       // tl.addLabel("particleConversion");
       tl.to(
         particlesMaterial.uniforms.uProgress,
@@ -754,6 +626,7 @@ const Animation = () => {
         { value: 0, duration: 0.7, ease: "power2.inOut" },
         "<"
       );
+
       tl.addLabel("starfieldFadeIn", ">-1");
       // --- STEP 5: Fade in starfield (always mounted layer, no jump) ---
       tl.to(
@@ -763,7 +636,7 @@ const Animation = () => {
           duration: 3,
           ease: "power2.inOut",
         },
-        ">-3.8"
+        ">-3.5"
       );
       // tl.addLabel('flyingText');
 
@@ -775,7 +648,7 @@ const Animation = () => {
 
       flyingTexts.forEach((el, i) => {
         const startTime = i === 0 ? ">" : `>-=${textDuration * overlap + 0.5}`;
-        console.log(startTime);
+        console.log(`for ${i} time is ${startTime}`);
 
         const labelName = `flyingText-${i}`;
         tl.addLabel(labelName, startTime);
@@ -783,15 +656,16 @@ const Animation = () => {
         if (i === flyingTexts.length - 1) {
           tl.fromTo(
             el,
-            { opacity: 0, scale: 0.1 },
+            { opacity: 0, scale: 0.1, filter: "blur(6px)" },
             {
               opacity: 1,
               scale: 1.1,
               y: 0,
+              filter: "blur(0px)",
               ease: "power2.out",
-              duration: textDuration * 0.6,
+              duration: textDuration,
             },
-            labelName
+            `>-${labelName}`
           );
 
           tl.to(
@@ -806,13 +680,14 @@ const Animation = () => {
             `>${textDuration * 0.4}`
           );
         } else {
-          // 🔸 Normal animation for first 6 flying texts
+          // 🔸 Normal animation for first 2 flying texts
           tl.fromTo(
             el,
-            { opacity: 0, scale: 0.1 },
+            { opacity: 0, scale: 0.1, filter: "blur(6px)" },
             {
               opacity: 0,
               scale: 1.1,
+              filter: "blur(0px)",
               ease: "power2.inOut",
               duration: textDuration,
               onUpdate: function () {
@@ -824,9 +699,9 @@ const Animation = () => {
             labelName
           );
         }
-        // 🌌 Change Starfield direction after 6th flying text
-        if (i === 5) {
-          // index 5 = 6th text
+        // 🌌 Change Starfield direction after 2nd flying text
+        if (i === 1) {
+          // index 1 = 2nd text
           tl.to(
             window.starfieldUniforms.uDirection.value,
             {
@@ -836,9 +711,10 @@ const Animation = () => {
               duration: 2,
               ease: "power2.inOut",
             },
-            `>${textDuration * 0.4}` // during fade transition to 7th
+            `>-${textDuration * 0.33}`
           );
         }
+        // ✅ After final flying text disappears → start starfield morph
       });
 
       tl.to(
@@ -847,6 +723,8 @@ const Animation = () => {
           opacity: 0,
           duration: 2,
           ease: "power2.inOut",
+          onComplete: () =>
+            gsap.set(".starfield-layer", { pointerEvents: "none" }),
         },
         ">-1"
       );
@@ -909,41 +787,61 @@ const Animation = () => {
       // reset all texts and logo
       gsap.set(".service-text", { opacity: 0 });
       gsap.set(".service-logo", { opacity: 1 });
+
+      // start from the LAST one
       setActiveServiceIndex(0);
 
-      tl.to(
-        ".service-0",
+      tl.fromTo(
+        `.service-0`,
+        {
+          opacity: 0,
+          y: 100,
+          filter: "blur(12px)",
+        },
         {
           opacity: 1,
-          duration: 1.8,
-          ease: "power2.inOut",
+          y: 0,
+          filter: "blur(0px)",
+          duration: 1.4,
+          ease: "power3.out",
+          ease: "power1.inOut",
           onStart: () => setActiveServiceIndex(0),
         },
         ">-1"
       );
 
+      // loop backwards
       for (let i = 1; i < serviceCount; i++) {
         const label = `service-${i}`;
         tl.addLabel(label, `>+1.2`);
 
-        // fade out previous text
+        // fade out next (previous in index)
         tl.to(
           `.service-${i - 1}`,
           {
             opacity: 0,
-            duration: 1,
+            y: 100,
+            filter: "blur(10px)",
+            duration: 1.2,
             ease: "power2.inOut",
           },
           `>+${TRANSITION_DURATION * 0.8}`
-        ); // start mid-way for smooth crossfade
+        );
 
-        // fade in next text and update logo slice simultaneously
-        tl.to(
+        // fade in previous (lower index)
+        tl.fromTo(
           `.service-${i}`,
           {
+            opacity: 0,
+            y: 100,
+            filter: "blur(12px)",
+          },
+          {
             opacity: 1,
-            duration: 1,
-            ease: "power2.inOut",
+            y: 0,
+            filter: "blur(0px)",
+            duration: 1.4,
+            ease: "power3.out",
             onStart: () => setActiveServiceIndex(i),
             onReverseComplete: () => {
               requestAnimationFrame(() => {
@@ -952,22 +850,19 @@ const Animation = () => {
             },
           },
           "<"
-        ); // overlap for smooth simultaneous transition
+        );
       }
 
-      // 5️⃣ cleanup when scrolling past last service
-      // tl.addLabel('serviceEnd', '>+1');
+      // Cleanup when scrolling past the first service
       tl.to(
         {},
         {
           duration: 0.1,
           onComplete: () => {
-            // gsap.set('.service-text', { opacity: 0 });
             setActiveServiceIndex(serviceCount - 1);
           },
           onReverseComplete: () => {
-            // gsap.set('.service-text', { opacity: 0 });
-            // setActiveServiceIndex(0);
+            setActiveServiceIndex(0);
           },
         },
         "serviceEnd"
@@ -987,27 +882,75 @@ const Animation = () => {
       );
 
       // Slight upward movement for smooth exit
-      tl.to(
-        ".next-section",
-        {
-          y: -550,
-          opacity: 0,
-          duration: 4,
-          ease: "power2.inOut",
-        },
-        "<"
-      );
 
-      tl.addLabel("statsReveal", ">+0.5");
-      tl.to(
-        ".statSection",
-        {
-          opacity: 1,
-          duration: 3,
-          ease: "power3.out",
-        },
-        "<-3"
-      );
+      gsap.set(".statSection", { pointerEvents: "auto" });
+
+      gsap
+        .timeline({
+          scrollTrigger: {
+            trigger: ".statSection",
+            start: "top bottom", // when statSection enters viewport
+            end: "top top", // until statSection hits top
+            scrub: 1.2,
+          },
+        })
+        .to(
+          ".statSection",
+          {
+            opacity: 1,
+            ease: "none",
+          },
+          0
+        )
+        .to(
+          ".next-section",
+          {
+            // y: '-30vh', // slow parallax movement
+            opacity: 0,
+            ease: "none",
+          },
+          0
+        );
+
+      // after ALL tl.to() lines
+      // ----------------------------------------------------
+      ScrollTrigger.refresh(); // keep this here
+
+      const applyMorphLater = setInterval(() => {
+        if (window.particleMorphUniforms) {
+          window.particleMorphUniforms.forEach((u) => {
+            u.uMorph.value = morphState.value;
+          });
+          clearInterval(applyMorphLater);
+        }
+      }, 50);
+
+      // === INSERT SYNC CODE HERE ===
+      requestAnimationFrame(() => {
+        const morphTween = tl
+          .getChildren(false, true, false)
+          .find(
+            (t) =>
+              t.vars?.onUpdate && t.vars.onUpdate.toString().includes("uMorph")
+          );
+
+        if (!morphTween) return;
+
+        const t = tl.time();
+        const start = morphTween.startTime();
+        const end = start + morphTween.duration();
+        const localProgress = (t - start) / (end - start);
+        const progress = Math.min(1, Math.max(0, localProgress));
+
+        morphState.value = progress;
+
+        if (window.particleMorphUniforms) {
+          window.particleMorphUniforms.forEach((u) => {
+            u.uMorph.value = morphState.value;
+          });
+        }
+      });
+      // ----------------------------------------------------
     }
 
     let mouseX = 0;
@@ -1018,6 +961,47 @@ const Animation = () => {
     };
     window.addEventListener("mousemove", handleMouseMove);
 
+    // --- FLOAT CONTROL BASED ON SCROLL ---
+    window.addEventListener("scroll", () => {
+      scrollY = window.scrollY;
+
+      if (scrollY > 5 && isFloating) {
+        // Stop floating
+        isFloating = false;
+      }
+
+      if (scrollY <= 5 && !isFloating) {
+        // Restart floating when user returns to top
+        isFloating = true;
+
+        // Reset reference time so animation continues smoothly
+        let baseTime = performance.now() * 0.001;
+      }
+    });
+    function applyFloating(time) {
+      if (slicesRef.current.length === 0) return;
+      if (initialSlicePositions.length !== slicesRef.current.length) return;
+
+      slicesRef.current.forEach((slice, i) => {
+        const basePos = initialSlicePositions[i];
+        const baseRot = initialSliceRotations[i];
+
+        if (!basePos || !baseRot) return;
+
+        const offset = 0.5;
+        const speed = 0.9 + i * 0.1;
+
+        slice.position.x = basePos.x + Math.sin(time * speed + offset) * 0.0035;
+        slice.position.y = basePos.y + Math.cos(time * speed + offset) * 0.0035;
+        slice.position.z = basePos.z + Math.sin(time * 0.5 + offset) * 0.003;
+
+        slice.rotation.x =
+          baseRot.x + Math.sin(time * speed * 0.3 + offset) * 0.008;
+        slice.rotation.y =
+          baseRot.y + Math.cos(time * speed * 0.25 + offset) * 0.008;
+      });
+    }
+
     function animate() {
       const time = performance.now() * 0.001;
 
@@ -1025,30 +1009,12 @@ const Animation = () => {
         particlesMaterial.uniforms.uTime.value = time;
       }
 
-      // Float each spiral on its own axis ONLY when in initial state (before scroll)
-      if (animationState.isInitialState && individualSpirals.length > 0) {
-        individualSpirals.forEach((spiral, index) => {
-          const initialState = spiralInitialStates[index];
-          if (!initialState) return;
-
-          const offset = index * 0.01; // Phase offset for variety
-          const speed = 0.5 + index * 0.03; // Different speeds per spiral
-
-          // Gentle floating motion on Y axis
-          const floatAmplitude = 0.02;
-          spiral.group.position.y =
-            initialState.initialY +
-            Math.sin(time * speed + offset) * floatAmplitude;
-
-          // Subtle rotation float
-          const rotAmplitude = 0.03;
-          spiral.group.rotation.x =
-            initialState.initialRotX +
-            Math.sin(time * speed * 0.7 + offset) * rotAmplitude;
-          spiral.group.rotation.z =
-            initialState.initialRotZ +
-            Math.cos(time * speed * 0.5 + offset) * rotAmplitude;
-        });
+      if (
+        isFloating &&
+        slicesRef.current.length > 0 &&
+        initialSlicePositions.length === slicesRef.current.length
+      ) {
+        applyFloating(time);
       }
 
       // camera.position.x += (mouseX * 5 - camera.position.x) * 0.02;
@@ -1065,116 +1031,109 @@ const Animation = () => {
   }, []);
 
   return (
-    <main className="relative bg-white  font-sans text-black">
-      <div className="fixed inset-0 z-10">
-        <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
-          <FlowingParticles
-            flowAnimation={flowAnimation}
-            materialRef={flowingParticlesMaterialRef}
-          />
-        </Canvas>
-      </div>
-
-      <canvas
-        ref={canvasRef}
-        className="fixed top-0 left-0 outline-none z-30"
+    <main className="  bg-[#fafafa] font-sans text-black">
+      <div
+        id="scroll-spacer"
+        className="w-full scroll-spacer h-[1050vh] bg-[#0f0f0f]"
       />
-
-      {/* ✅ This container will hold all the text content */}
-      <div className="fixed inset-0 z-20 pointer-events-none flex items-center justify-center">
-        <div className="w-full max-w-6xl mx-auto px-8">
-          <div className="flex justify-between items-center w-full">
-            {/* ✅ Placeholder for the logo space on the left */}
-            <div className="w-1/2"></div>
-
-            {/* ✅ Initial text on the right */}
-            <div className="w-1/2 initial-text">
-              <h1 className="text-5xl md:text-7xl font-bold leading-tight text-black  ">
-                One small step for your brand.
-              </h1>
-            </div>
+      <div className="w-full h-full relative">
+        <div className="initial-animation fixed inset-0 z-[10] pointer-events-none bg-[#fafafa]">
+          <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
+            <FlowingParticles
+              flowAnimation={flowAnimation}
+              materialRef={flowingParticlesMaterialRef}
+            />
+          </Canvas>
+          <canvas
+            ref={canvasRef}
+            className="absolute top-0 h-full w-full  pointer-events-none"
+          />
+          <div className="absolute right-40 top-[38%]  initial-text ">
+            <h1 className="text-5xl md:text-7xl font-bold leading-tight text-[#0f0f0f] hover:text-red-400 ">
+              What you envision, <br />
+              We help you become.
+            </h1>
+          </div>
+          <div className="absolute  top-[0%]  pointer-events-none opacity-0 second-text text-center">
+            <h1 className="text-5xl md:text-7xl font-bold leading-tight text-[#0f0f0f]">
+              Every need of your brand, under one roof, powered by one partner.
+            </h1>
           </div>
         </div>
-      </div>
 
-      {/* ✅ Second text that appears on top */}
-      <div className="fixed inset-x-0 top-[15%] z-20 pointer-events-none opacity-0 second-text text-center">
-        <h1 className="text-5xl md:text-7xl font-bold leading-tight text-black">
-          One <span className="text-purple-400">giant leap</span> towards the{" "}
-          <br /> hall of fame.
-        </h1>
-      </div>
-
-      <div className="scroll-container h-[1800vh]"></div>
-
-      <div className="starfield-layer fixed inset-0 z-30 opacity-0 pointer-events-none">
-        <StarfieldBackground />
-        <div
-          ref={flyingTextRef}
-          className="fixed inset-0 flex items-center justify-center text-center pointer-events-none z-50"
-        >
-          {texts.map((t, i) => (
-            <div key={i} className="absolute text-wrapper">
-              <h1 className="text-8xl font-bold text-white">{t}</h1>
-            </div>
-          ))}
+        <div className="starfield-layer fixed inset-0 z-[25] opacity-0 pointer-events-none bg-[#0f0f0f]">
+          <StarfieldBackground />
+          <div
+            ref={flyingTextRef}
+            className="absolute top-0 h-full w-full    pointer-events-none z-[25]"
+          >
+            {texts.map((t, i) => (
+              <div
+                key={i}
+                className="absolute top-[45%] sm:top-[47%] px-12   text-wrapper w-full text-center "
+              >
+                <h1 className="text-3xl sm:text-5xl font-bold text-[#fafafa] ">
+                  {t}
+                </h1>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <div className="next-section   text-white fixed inset-0  flex items-center justify-center opacity-0 z-15 ">
-        <div className="service-logo fixed inset-0 opacity-1 ">
-          <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
-            <color attach="background" args={["#0f0f0f"]} />/
-            <ambientLight intensity={0.8} />
-            <spotLight
-              position={[5, 5, 5]}
-              angle={0.3}
-              penumbra={1}
-              intensity={2}
-              color={"#9c4df4"}
-            />
-            <pointLight
-              position={[-5, -5, 5]}
-              intensity={1.5}
-              color={"#2f00ff"}
-            />
-            <ParticlesMorphPerSlice
-              glbPath={"/models/T3d.glb"}
-              particleCount={15000}
-              size={14}
-              streamLength={8}
-              streamRatio={0.4}
-              initialActiveIndex={0}
-              activeIndex={activeServiceIndex}
-            />
-            {/* <ServiceLogoBG /> */}
-            <EffectComposer>
-              <Bloom
-                intensity={1.2} // brightness of glow
-                luminanceThreshold={0.2} // lower = more glow
-                luminanceSmoothing={0.8}
-                blendFunction={BlendFunction.ADD}
+        <div className="next-section  pointer-events-none bg-[#0f0f0f]   text-white fixed inset-0  flex items-center justify-center opacity-0 z-[20] ">
+          <div className="service-logo h-full w-full  opacity-0 ">
+            <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
+              <color attach="background" args={["#0f0f0f"]} />
+              <ambientLight intensity={0.8} />
+              <spotLight
+                position={[5, 5, 5]}
+                angle={0.3}
+                penumbra={1}
+                intensity={2}
+                color={"#9c4df4"}
               />
-            </EffectComposer>
-          </Canvas>
-        </div>
+              <pointLight
+                position={[-5, -5, 5]}
+                intensity={1.5}
+                color={"#2f00ff"}
+              />
+              <ParticlesMorphPerSlice
+                glbPath={"/models/model.glb"}
+                particleCount={12500}
+                size={20}
+                initialActiveIndex={3}
+                activeIndex={activeServiceIndex}
+              />
+              <EffectComposer>
+                <Bloom
+                  intensity={0.8} // brightness of glow
+                  luminanceThreshold={0.6} // lower = more glow
+                  luminanceSmoothing={0.9}
+                  blendFunction={BlendFunction.ADD}
+                />
+              </EffectComposer>
+              <Environment preset="city" />
+            </Canvas>
+          </div>
 
-        {/* Service Texts beside logo */}
-        <div className="absolute right-[10%] w-[400px] h-[200px] flex items-center justify-center text-left  space-y-6 service-texts ">
-          {SERVICE_DATA.map((service, i) => (
-            <div
-              key={i}
-              className={`absolute inset-0 transition-opacity duration-700 service-text service-${i} opacity-0 flex flex-col items-start justify-center`}
-            >
-              <h2 className={`text-6xl font-bold `}>{service.title}</h2>
-              <p className="text-xl mt-2">{service.subtext}</p>
-            </div>
-          ))}
+          {/* Service Texts beside logo */}
+          <div className="absolute right-[12%] w-[400px] h-[250px] flex items-center justify-center text-left   service-texts  ">
+            {SERVICE_DATA.map((service, i) => (
+              <div
+                key={i}
+                className={`absolute top-0 h-full w-full transition-opacity duration-700 service-text service-${i} opacity-0  flex flex-col items-start justify-center `}
+              >
+                <h2 className={`text-3xl sm:text-5xl font-bold `}>
+                  {service.title}
+                </h2>
+                <p className=" text-lg sm:text-xl mt-2">{service.subtext}</p>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
-
-      <div className="statSection opacity-0 z-0">
-        <StatsSection />
+        <div className="statSection relative opacity-0 z-[50] pointer-events-auto ">
+          <StatsSection />
+        </div>
       </div>
     </main>
   );

@@ -2,9 +2,7 @@
 import React, { useRef, useEffect, useCallback, useMemo } from "react";
 import { gsap } from "gsap";
 import { InertiaPlugin } from "gsap/InertiaPlugin";
-import ScrollStack, {
-  ScrollStackItem,
-} from "../../components/service/ScrollStack";
+
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ThreeGlass from "./FloatingGlass";
 gsap.registerPlugin(ScrollTrigger, InertiaPlugin);
@@ -386,8 +384,19 @@ const DotGrid = ({
           // Pin for enough distance: one viewport per card + a little extra
           end: () => `+=${window.innerHeight * (cards.length + 0.5)}`,
           pin: true,
-          scrub: 1,
+          scrub: 0.5,
+          pinSpacing: true,
           anticipatePin: 1,
+          fastScrollEnd: true, // Better handling of fast scrolls
+          preventOverlaps: true, // Prevent animation conflicts
+          onLeave: () => {
+            // Ensure clean state when leaving
+            ScrollTrigger.refresh();
+          },
+          onLeaveBack: () => {
+            // Ensure clean state when scrolling back
+            ScrollTrigger.refresh();
+          },
         },
       });
 
@@ -439,8 +448,8 @@ const DotGrid = ({
   return (
     <section
       ref={rootRef}
-      className={` relative   bg-[#060010] overflow-hidden ${className}`}
-      style={{ height: `${100}vh`, ...style }}
+      className={` relative   bg-[#0f0f0f] overflow-hidden ${className}`}
+      style={{ height: `${100}vh`, backgroundColor: "#0f0f0f", ...style }}
     >
       <div
         ref={wrapperRef}
@@ -456,6 +465,10 @@ const DotGrid = ({
         <canvas
           ref={canvasRef}
           className="absolute inset-0 w-full  h-full pointer-events-none "
+          style={{
+            // Canvas background as fallback
+            backgroundColor: "#0f0f0f",
+          }}
         />
 
         {/* Cards container — stacking absolutely for perfect overlay */}
@@ -471,6 +484,19 @@ const DotGrid = ({
           ))}
         </div>
       </div>
+
+      {/* 
+        Bottom edge cover - prevents white flash at section boundary
+        during fast scroll transitions
+      */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-4 pointer-events-none"
+        style={{
+          backgroundColor: "#0f0f0f",
+          // Gradient to blend smoothly
+          background: "linear-gradient(to bottom, #0f0f0f, #0f0f0f)",
+        }}
+      />
     </section>
   );
 };

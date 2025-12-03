@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
-@font-face {
+/* @font-face {
   font-family: "TWKLausanne";
   src: url("/fonts/TWKLausanne-200.otf") format("opentype");
   font-weight: 200;
   font-style: normal;
   font-display: swap;
-}
+} */
 
 /* h1 {
     -webkit-font-smoothing: antialiased;
@@ -25,14 +25,6 @@
     /* --background: #0a0a0a; */
     /* --foreground: #ededed; */
   }
-}
-
-html,
-body {
-  height: auto;
-  overflow-x: hidden;
-  overflow-y: auto;
-  font-family: "TWKLausanne", sans-serif;
 }
 
 @keyframes float {
