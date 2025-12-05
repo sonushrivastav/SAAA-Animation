@@ -34,6 +34,7 @@ export default function Navbar(props) {
                     { label: 'Home', href: '/animation' },
                     { label: 'Service', href: '/service' },
                     { label: 'Social Media', href: '/socialmedia' },
+                    { label: 'About', href: '/about' },
                 ],
             },
             {

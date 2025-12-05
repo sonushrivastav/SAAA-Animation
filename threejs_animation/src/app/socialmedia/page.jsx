@@ -299,9 +299,9 @@ const SocialMediaMarketing = () => {
     };
     return (
         <div>
-            <section className="relative w-full overflow-hidden bg-[#FAFAFA] min-h-screen flex items-center justify-center">
-                {/* Left Section */}
+            <section className="relative w-full overflow-hidden bg-[#fafafa] min-h-screen flex items-center justify-center">
                 <div className="flex flex-col md:flex-row w-full  self-stretch items-center ">
+                    {/* left section */}
                     <div className=" relative w-full md:w-[65%] self-stretch flex items-center    text-[#0f0f0f] ">
                         <div className="absolute inset-0 ">
                             <DotGrid
@@ -316,7 +316,7 @@ const SocialMediaMarketing = () => {
                                 returnDuration={1.5}
                             />
                         </div>
-                        <div className="px-12 md:px-32 z-10">
+                        <div className="px-10 py-12 md:px-32 md:py-24 z-10">
                             <h1 className="text-4xl md:text-7xl  text-[#0f0f0f] font-semibold md:leading-[75px] ">
                                 Social{' '}
                                 <div className="bg-[#844de9] inline text-[#fafafa] px-2 rounded-md">
@@ -326,7 +326,7 @@ const SocialMediaMarketing = () => {
                                 Marketing
                             </h1>
 
-                            <p className="text-[#555555] mt-6 max-w-lg mx-auto md:mx-0 text-base md:text-xl">
+                            <p className="text-[#555555] mt-6 max-w-lg mx-auto md:mx-0 md:text-xl">
                                 We turn your feed into a fan club. From hashtags that travel to
                                 posts that trend, we make your brand impossible to ignore. Every
                                 scroll becomes a moment worth remembering. Because online,
@@ -336,8 +336,8 @@ const SocialMediaMarketing = () => {
                     </div>
 
                     {/* Right Section */}
-                    <div className="flex items-center justify-center self-stretch  w-[35%] ">
-                        <div className="w-full flex items-center justify-center border">
+                    <div className="flex items-center justify-center self-stretch w-full md:w-[35%] ">
+                        <div className="w-full flex items-center justify-center ">
                             <Image
                                 src={'/images/socialMedia/image 3.png'}
                                 alt={'dummy image'}
@@ -368,12 +368,13 @@ const SocialMediaMarketing = () => {
                 </h2>
 
                 {/* Stats Grid Section */}
-                <div className=" relative mt-16  flex flex-col md:flex-row flex-wrap bg-[#1a1a1a] rounded-2xl overflow-hidden ">
+                <div className=" relative mt-16  flex flex-col md:flex-row flex-wrap bg-[#0f0f0f] rounded-2xl overflow-hidden">
                     <StatCard
                         stat="100+"
                         label="accounts managed"
                         hasContent={true}
-                        roundedClass="rounded-tl-2xl"
+                        roundedClass="rounded-t-2xl sm:rounded-tr-none sm:rounded-tl-2xl
+"
                     />
 
                     {/* Card 2 */}
@@ -385,10 +386,10 @@ const SocialMediaMarketing = () => {
                     />
 
                     {/* Card 3 */}
-                    <StatCard hasContent={false} roundedClass="rounded-tr-2xl" />
+                    <StatCard hasContent={false} roundedClass="sm:rounded-tr-2xl" />
 
                     {/* Card 4 */}
-                    <StatCard hasContent={false} roundedClass="rounded-bl-2xl" />
+                    <StatCard hasContent={false} roundedClass="sm:rounded-bl-2xl" />
 
                     {/* Card 5 */}
                     <StatCard
@@ -403,7 +404,7 @@ const SocialMediaMarketing = () => {
                         stat="4%"
                         label="average increase in engagement"
                         hasContent={true}
-                        roundedClass="rounded-br-2xl"
+                        roundedClass="rounded-b-2xl sm:rounded-br-2xl sm:rounded-bl-none"
                     />
                 </div>
 
@@ -502,7 +503,7 @@ const SocialMediaMarketing = () => {
 
                 {/* Ready to level */}
                 <div className="mt-16 flex flex-col md:flex-row items-center text-[#0f0f0f]  ">
-                    <div className="flex flex-col w-[40%]">
+                    <div className="flex flex-col w-full md:w-[40%]">
                         <h1 className="text-4xl md:text-5xl   font-semibold  md:leading-[65px]">
                             Ready to{' '}
                             <div className="bg-[#844de9] inline px-2  rounded-md text-[#fafafa]">
@@ -518,11 +519,11 @@ const SocialMediaMarketing = () => {
                             Schedule A Call
                         </button>
                     </div>
-                    <div className="w-[60%]  relative flex items-center justify-center  h-[400px] scroll-container ">
+                    <div className="w-full md:w-[60%]  relative flex items-center justify-center  h-[400px] scroll-container ">
                         <canvas
                             // ref={canvasRef}
                             id="spiralCanvas"
-                            className=" absolute inset-0 w-full h-full pointer-events-none "
+                            className=" w-full h-full pointer-events-none "
                         ></canvas>
                     </div>
                 </div>
