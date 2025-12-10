@@ -37,7 +37,7 @@ export default function Footer() {
                     <p>info@saaaconsultants.com</p>
 
                     <div className="flex gap-4 mt-3">
-                        <a className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center hover:bg-purple-600 transition">
+                        <a className="w-10 h-10  bg-[#55555599] border-t-1 border-b-1 border-white rounded-full flex items-center justify-center hover:bg-purple-600 transition">
                             <svg
                                 width="70"
                                 height="70"
@@ -57,7 +57,7 @@ export default function Footer() {
                                 />
                             </svg>
                         </a>
-                        <a className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center hover:bg-purple-600 transition">
+                        <a className="w-10 h-10  bg-[#55555599] border-t-1 border-b-1 border-white rounded-full flex items-center justify-center hover:bg-purple-600 transition">
                             <svg
                                 width="70"
                                 height="70"
@@ -77,7 +77,7 @@ export default function Footer() {
                                 <circle cx="25" cy="15" r="1.3" fill="white" />
                             </svg>
                         </a>
-                        <a className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center hover:bg-purple-600 transition">
+                        <a className="w-10 h-10  bg-[#55555599] border-t-1 border-b-1 border-white rounded-full flex items-center justify-center hover:bg-purple-600 transition">
                             <svg
                                 width="70"
                                 height="70"

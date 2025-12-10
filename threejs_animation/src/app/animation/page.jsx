@@ -16,6 +16,7 @@ import FlowingParticles from '../../components/ParticleBackground';
 import ParticlesMorphPerSlice from '../../components/ScrollServiceLogo';
 import StarfieldBackground from '../../components/StarfieldBackground';
 import StatsSection from '../../components/Stats';
+import useDeviceType from '../../components/hooks/useDeviceType';
 
 // ✅ It's good practice to register the plugin once
 gsap.registerPlugin(ScrollTrigger);
@@ -106,6 +107,8 @@ const Animation = () => {
         return tex;
     }
 
+    const { isMobile, isTablet, isDesktop } = useDeviceType();
+
     useEffect(() => {
         const lenis = new Lenis({
             duration: 1.1,
@@ -123,6 +126,8 @@ const Animation = () => {
             requestAnimationFrame(raf);
         }
         requestAnimationFrame(raf);
+
+        // responsive checks based on updated width
 
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(
@@ -159,22 +164,8 @@ const Animation = () => {
             scene.environment = hdrMap;
         });
 
-        const spiralConfigs = [
-            { s: 6, p: [-1.1, 1.1, 0], r: [Math.PI / 2.12, 0.0, 0.0] },
-            { s: 6, p: [-1.4, 0.7, 0], r: [Math.PI / 2.1, 0.4, 0.0] },
-            { s: 5.8, p: [-1.5, 0.25, 0], r: [Math.PI / 2.2, 0.8, 0.0] },
-            { s: 5.6, p: [-1.4, -0.2, 0], r: [Math.PI / 2.4, 1.2, 0.0] },
-            { s: 5.3, p: [-1.1, -0.54, 0], r: [Math.PI / 2.6, 1.65, 0.0] },
-            { s: 4.5, p: [-0.75, -0.7, 0], r: [Math.PI / 3, 2.1, 0.0] },
-            { s: 3.8, p: [-0.46, -0.8, -0.11], r: [Math.PI / 3, 2.5, 0.0] },
-        ];
-
-        const spiralInitialStates = [];
-
         const loader = new GLTFLoader();
         let particlesMaterial = null;
-        let logoGroup = null;
-        const individualSpirals = [];
         const logoMaterials = [];
         const initialSlicePositions = [];
         const initialSliceRotations = [];
@@ -187,9 +178,21 @@ const Animation = () => {
                 // const modelGroup = new THREE.Group();
                 scene.add(rawModel);
                 // modelGroup.add(rawModel);
-                rawModel.scale.set(17, 17, 4);
-                rawModel.position.set(-2.3, -2.4, 0);
-                rawModel.rotation.set(0, 0, 0);
+
+                if (isMobile) {
+                    rawModel.scale.set(13, 13, 6);
+                    rawModel.position.set(0.5, -2.8, 0);
+                    rawModel.rotation.set(0, 0, 0);
+                } else if (isTablet) {
+                    rawModel.scale.set(17, 17, 4);
+                    rawModel.position.set(-2.3, -2.4, 0);
+                    rawModel.rotation.set(0, 0, 0);
+                } else {
+                    // Desktop fallback
+                    rawModel.scale.set(17, 17, 4);
+                    rawModel.position.set(-2.3, -2.4, 0);
+                    rawModel.rotation.set(0, 0, 0);
+                }
 
                 rawModel.traverse(child => {
                     if (child.isMesh) {
@@ -231,15 +234,6 @@ const Animation = () => {
                 //     initialRotX: -0.1,
                 //     initialRotZ: -0.2,
                 // });
-
-                individualSpirals.push({
-                    finalPosition: { x: 0.4, y: 0.2, z: -0.18 },
-                    finalRotation: {
-                        x: 0,
-                        y: -1.53159265358979,
-                        z: 0.0484073464102068,
-                    },
-                });
 
                 createParticleSystem(
                     rawModel,
@@ -622,7 +616,6 @@ const Animation = () => {
 
             flyingTexts.forEach((el, i) => {
                 const startTime = i === 0 ? '>' : `>-=${textDuration * overlap + 0.5}`;
-                console.log(`for ${i} time is ${startTime}`);
 
                 const labelName = `flyingText-${i}`;
                 tl.addLabel(labelName, startTime);
@@ -835,7 +828,7 @@ const Animation = () => {
                         setActiveServiceIndex(serviceCount - 1);
                     },
                     onReverseComplete: () => {
-                        setActiveServiceIndex(0);
+                        // setActiveServiceIndex(0);
                     },
                 },
                 'serviceEnd'
@@ -995,7 +988,7 @@ const Animation = () => {
             window.removeEventListener('mousemove', handleMouseMove);
             // Dispose of Three.js resources if component unmounts
         };
-    }, []);
+    }, [isMobile, isTablet]);
 
     return (
         <main className="  bg-[#fafafa] font-sans text-black">
@@ -1012,14 +1005,14 @@ const Animation = () => {
                         ref={canvasRef}
                         className="absolute top-0 h-full w-full  pointer-events-none"
                     />
-                    <div className="absolute right-40 top-[38%]  initial-text ">
-                        <h1 className="text-5xl md:text-7xl font-bold leading-tight text-[#0f0f0f] hover:text-red-400 ">
+                    <div className="absolute right-0 top-[20%] md:right-3 md:top-[38%]   initial-text  pr-10 md:px-16 lg:px-32">
+                        <h1 className="text-4xl md:text-4xl lg:text-7xl  font-bold leading-tight text-[#0f0f0f] hover:text-red-400 ">
                             What you envision, <br />
                             We help you become.
                         </h1>
                     </div>
-                    <div className="absolute  top-[0%]  pointer-events-none opacity-0 second-text text-center">
-                        <h1 className="text-5xl md:text-7xl font-bold leading-tight text-[#0f0f0f]">
+                    <div className="absolute  top-[0%]  pointer-events-none opacity-0 second-text text-center px-10 md:px-16 lg:px-32">
+                        <h1 className="text-4xl md:text-4xl lg:text-7xl font-bold leading-tight text-[#0f0f0f]">
                             Every need of your brand, under one roof, powered by one partner.
                         </h1>
                     </div>
@@ -1034,9 +1027,9 @@ const Animation = () => {
                         {texts.map((t, i) => (
                             <div
                                 key={i}
-                                className="absolute top-[45%] sm:top-[47%] px-12   text-wrapper w-full text-center "
+                                className="absolute top-[45%] sm:top-[47%] px-10 md:px-16 lg:px-32  text-wrapper w-full text-center "
                             >
-                                <h1 className="text-3xl sm:text-5xl font-bold text-[#fafafa] ">
+                                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#fafafa] ">
                                     {t}
                                 </h1>
                             </div>
@@ -1063,6 +1056,8 @@ const Animation = () => {
                                 size={20}
                                 initialActiveIndex={3}
                                 activeIndex={activeServiceIndex}
+                                isMobile
+                                isTablet
                             />
                             <EffectComposer>
                                 <Bloom
@@ -1077,16 +1072,16 @@ const Animation = () => {
                     </div>
 
                     {/* Service Texts beside logo */}
-                    <div className="absolute right-[12%] w-[400px] h-[250px] flex items-center justify-center text-left   service-texts  ">
+                    <div className="absolute bottom-15 md:bottom-[29%] lg:bottom-[33%] right-[18%] lg:right-[12%] w-[250px] h-[200px] lg:w-[400px] lg:h-[250px] flex items-center justify-center text-left   service-texts  ">
                         {SERVICE_DATA.map((service, i) => (
                             <div
                                 key={i}
                                 className={`absolute top-0 h-full w-full transition-opacity duration-700 service-text service-${i} opacity-0  flex flex-col items-start justify-center `}
                             >
-                                <h2 className={`text-3xl sm:text-5xl font-bold `}>
+                                <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold `}>
                                     {service.title}
                                 </h2>
-                                <p className=" text-lg sm:text-xl mt-2">{service.subtext}</p>
+                                <p className=" text-base lg:text-xl mt-2">{service.subtext}</p>
                             </div>
                         ))}
                     </div>

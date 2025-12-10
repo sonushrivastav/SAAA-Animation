@@ -7,11 +7,11 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
-import CaseStudyCards from '../../components/allServicesComponents/CaseStudyCards';
-import ContactForm from '../../components/allServicesComponents/ContactForm';
-import FaqAccordion from '../../components/allServicesComponents/FaqAccordion';
-import OtherServices from '../../components/allServicesComponents/OtherServices';
-import DotGrid from '../../components/socialMedia/DotGrid';
+import CaseStudyCards from '../../../components/allServicesComponents/CaseStudyCards';
+import ContactForm from '../../../components/allServicesComponents/ContactForm';
+import FaqAccordion from '../../../components/allServicesComponents/FaqAccordion';
+import OtherServices from '../../../components/allServicesComponents/OtherServices';
+import DotGrid from '../../../components/socialMedia/DotGrid';
 gsap.registerPlugin(ScrollTrigger);
 
 const platformImages = [
@@ -345,19 +345,17 @@ const SocialMediaMarketing = () => {
                     <div className="z-10 relative w-full md:w-[65%] self-stretch flex items-center    text-[#0f0f0f] ">
                         <div className="px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20 ">
                             <h1 className="text-5xl lg:text-7xl  text-[#0f0f0f] font-semibold lg:leading-[75px] ">
-                                Social{' '}
                                 <span className="bg-[#844de9] inline text-[#fafafa] px-2 rounded-md">
-                                    Media
-                                </span>
-                                <br />
-                                Marketing
+                                    3D
+                                </span>{' '}
+                                Modeling
                             </h1>
 
                             <p className="text-[#555555] mt-6 max-w-lg mx-auto md:mx-0 md:text-xl">
-                                We turn your feed into a fan club. From hashtags that travel to
-                                posts that trend, we make your brand impossible to ignore. Every
-                                scroll becomes a moment worth remembering. Because online,
-                                consistency is the real celebrity
+                                A playground for ideas that refuse to stay flat. Sharp, detailed,
+                                and impossible to scroll past. We shape visuals that feel real
+                                enough to touch and bold enough to remember. From digital mockups to
+                                motion renders, every project feels alive in three dimensions.
                             </p>
                         </div>
                     </div>

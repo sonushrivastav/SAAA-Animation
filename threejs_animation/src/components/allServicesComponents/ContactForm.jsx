@@ -1,6 +1,73 @@
 'use client';
 import { useState } from 'react';
+function CustomSelect({ value, onChange, options, placeholder, error }) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef(null);
 
+    // close on outside click
+    useEffect(() => {
+        const handleClickOutside = e => {
+            if (ref.current && !ref.current.contains(e.target)) {
+                setOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    return (
+        <div ref={ref} className="relative w-full">
+            {/* Button */}
+            <button
+                type="button"
+                onClick={() => setOpen(o => !o)}
+                className={`
+                    w-full flex items-center justify-between rounded-md p-3
+                    bg-[#fafafa] text-left text-[#0f0f0f]
+                    transition-all duration-300
+                    ${error ? 'border border-red-500' : 'border border-[#9C9C9C]'}
+                    focus:outline-none focus:ring-1 focus:ring-[#844de9]
+                `}
+            >
+                <span className={value ? '' : 'text-[#9c9c9c]'}>{value || placeholder}</span>
+
+                <motion.span
+                    animate={{ rotate: open ? 180 : 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="ml-2"
+                >
+                    ▾
+                </motion.span>
+            </button>
+
+            {/* Dropdown */}
+            <AnimatePresence>
+                {open && (
+                    <motion.ul
+                        initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                        transition={{ duration: 0.2, ease: 'easeOut' }}
+                        className="absolute z-50 mt-2 w-full rounded-md bg-white shadow-lg border border-[#e5e5e5] overflow-hidden"
+                    >
+                        {options.map(opt => (
+                            <li
+                                key={opt}
+                                onClick={() => {
+                                    onChange(opt);
+                                    setOpen(false);
+                                }}
+                                className="cursor-pointer px-4 py-3 text-sm hover:bg-[#f3f3f3] transition-colors"
+                            >
+                                {opt}
+                            </li>
+                        ))}
+                    </motion.ul>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+}
 export default function ContactForm() {
     const [formData, setFormData] = useState({
         firstName: '',
@@ -51,7 +118,7 @@ export default function ContactForm() {
     return (
         <form
             onSubmit={handleSubmit}
-            className="bg-transparent border border-[#0f0f0f] rounded-xl shadow-sm w-full p-6 md:p-10 z-10"
+            className="bg-transparent rounded-t-2xl  lg:rounded-r-none lg:rounded-l-2xl shadow-sm w-full p-6 md:p-10 z-10"
         >
             {/* Name fields */}
             <div className="w-full flex flex-col md:flex-row gap-6 mb-2">
@@ -126,9 +193,13 @@ export default function ContactForm() {
                     } bg-[#fafafa] focus:ring-1 focus:ring-[#844de9] rounded-md p-3 outline-none text-[#0f0f0f] placeholder-[#9c9c9c]`}
                 >
                     <option value="">Interested in*</option>
-                    <option value="services">Option 1</option>
-                    <option value="partnership">Option 2</option>
-                    <option value="support">Option 3</option>
+                    <option value="Branding/ Designing">Branding/ Designing</option>
+                    <option value="UI/UX Design">UI/UX Design</option>
+                    <option value="Web Development">Web Development</option>
+                    <option value="Digital Marketing">Digital Marketing</option>
+                    <option value="Investor Relations">Investor Relations</option>
+                    <option value="Financial Advisory">Financial Advisory</option>
+                    <option value="Legal advice">Legal advice</option>
                 </select>
                 {errors.interest && <p className="text-red-500 text-sm">{errors.interest}</p>}
             </div>

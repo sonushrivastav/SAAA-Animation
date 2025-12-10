@@ -22,6 +22,39 @@ const ourVision = [
     },
 ];
 
+const teamMembers = [
+    {
+        image: '/images/about/saurav.webp',
+        name: 'Saurav Singh',
+        role: 'Co-Head, Digital Marketing',
+    },
+    {
+        image: '/images/about/rohan.webp',
+        name: 'Rohan Matle',
+        role: 'Co-Head, Website Development',
+    },
+    {
+        image: '/images/about/saurabh.webp',
+        name: 'Saurabh Rajguru',
+        role: 'Head, UI/UX Design',
+    },
+    {
+        image: '/images/about/harsh.webp',
+        name: 'Harsh Pathak',
+        role: 'Head, Design',
+    },
+    {
+        image: '/images/about/tejas.webp',
+        name: 'Tejas Naik Satham',
+        role: 'Co-Head, Digital Marketing',
+    },
+    {
+        image: '/images/about/puja.webp',
+        name: 'Puja Naik',
+        role: 'Co-Head, Website Development',
+    },
+];
+
 const TeamCard = ({
     name = 'Nati',
     role = 'Managing Director',
@@ -37,13 +70,14 @@ const TeamCard = ({
             style={{ transformStyle: 'preserve-3d' }}
         >
             {/* Base Image */}
-            <Image src={image} alt={name} fill className="object-cover" />
+            <Image src={image} alt={name} fill sizes="300px" className="front-image object-cover" />
 
             {/* Hover Reveal Image */}
             <Image
                 src={bgImage}
                 alt={name}
                 fill
+                sizes="300px"
                 className="hover-img object-cover absolute inset-0"
             />
             {/* Info */}
@@ -55,28 +89,23 @@ const TeamCard = ({
     );
 };
 
-const waitForImages = () =>
-    new Promise(resolve => {
-        const imgs = Array.from(document.images);
-        if (imgs.length === 0) return resolve();
-        let loaded = 0;
-        imgs.forEach(img => {
-            if (img.complete) {
-                if (++loaded === imgs.length) resolve();
-            } else {
-                img.onload = img.onerror = () => {
-                    if (++loaded === imgs.length) resolve();
-                };
-            }
-        });
-    });
+// const waitForTeamImages = async () => {
+//     const images = Array.from(document.querySelectorAll('.team-card img'));
+
+//     await Promise.all(
+//         images.map(img => {
+//             if (img.complete) return;
+//             return img.decode().catch(() => {});
+//         })
+//     );
+// };
 
 const StatCard = ({ stat, label, hasContent, roundedClass }) => {
     const [isHovered, setIsHovered] = useState(false);
 
     return (
         <div
-            className={`relative p-8 md:p-10 ${roundedClass} bg-transparent transition-colors duration-300 w-full md:w-[33.33%] h-[400px] ${
+            className={`relative p-4 md:p-6 lg:p-10 ${roundedClass} bg-transparent transition-colors duration-300 w-full   lg:h-[400px] ${
                 hasContent
                     ? `border ${isHovered ? 'border-[#fafafa]' : 'border-[#555555]'}`
                     : isHovered
@@ -105,16 +134,16 @@ const StatCard = ({ stat, label, hasContent, roundedClass }) => {
 
             {/* Content */}
             {hasContent && (
-                <div className="relative z-10 flex flex-col justify-between h-full">
+                <div className="relative z-10 flex flex-col justify-start lg:justify-between h-full">
                     <h2
-                        className={`text-2xl md:text-4xl font-bold transition-colors duration-300 ${
+                        className={`text-xl md:text-2xl lg:text-4xl font-bold transition-colors duration-300 ${
                             isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
                         }`}
                     >
                         {stat}
                     </h2>
                     <p
-                        className={`text-base md:text-lg mt-2 transition-colors duration-300 ${
+                        className={`text-sm md:text-base lg:text-lg mt-2 transition-colors  duration-300 ${
                             isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
                         }`}
                     >
@@ -127,12 +156,14 @@ const StatCard = ({ stat, label, hasContent, roundedClass }) => {
 };
 const About = () => {
     let start, end;
-    const isMobile = window.innerWidth < 768;
+
     useLayoutEffect(() => {
+        const isMobile = window.innerWidth < 768;
         let ctx;
         const setup = async () => {
-            await waitForImages();
-            ScrollTrigger.refresh();
+            requestAnimationFrame(() => {
+                ScrollTrigger.refresh(true);
+            });
 
             ctx = gsap.context(() => {
                 const parent = document.querySelector('.team-parent');
@@ -168,20 +199,20 @@ const About = () => {
                     gsap.from(cards, {
                         opacity: 0,
                         scale: 0.1,
-                        x: i => initialOffsets[i].x,
-                        y: i => initialOffsets[i].y,
+                        // x: 200,
+                        y: 250,
                         z: -4000,
                         rotateX: 160,
                         rotateY: 110,
-                        rotate: 110,
-                        duration: 5.64,
+                        rotate: 65,
+                        duration: 8.64,
                         ease: 'power3.out',
                         stagger: 1.15,
 
                         scrollTrigger: {
                             trigger: row,
-                            start,
-                            end,
+                            start: 'top 70%',
+                            end: 'top 20%',
                             scrub: 1,
                         },
                     });
@@ -211,12 +242,13 @@ const About = () => {
             </section>
 
             {/* bit about us */}
-            <section className="w-full  bg-[#0f0f0f] text-[#fafafa] px-10 py-12 md:px-32 md:py-24">
-                <h2 className="text-4xl md:text-5xl   font-semibold  md:leading-[65px]">
-                    A Bit <div className="bg-[#844de9] inline px-2  rounded-md">About Us</div> that
+            <section className="w-full  bg-[#0f0f0f] text-[#fafafa] px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
+                <h2 className="text-3xl md:text-4xl lg:text-5xl   font-semibold  lg:leading-[60px]">
+                    A Bit <span className="bg-[#844de9] inline px-2  rounded-md">About Us</span>{' '}
+                    that
                 </h2>
 
-                <div className="mt-16 bg-[#0f0f0f] text-[#9c9c9c] text-lg md:text-xl">
+                <div className="mt-12 md:mt-14 bg-[#0f0f0f] text-[#9c9c9c] text-lg md:text-xl lg:text-2xl">
                     <p className="pb-6 ">
                         SAAA Consultants is a multidisciplinary creative team built on one belief:
                         different perspectives create better outcomes. We approach every brief with
@@ -238,7 +270,7 @@ const About = () => {
                     </p>
 
                     <Image
-                        className="w-full h-full py-6"
+                        className="w-full h-[300px] md:h-[450px] py-6"
                         src={'/Image.png'}
                         width={200}
                         height={200}
@@ -254,15 +286,15 @@ const About = () => {
             </section>
 
             {/* our vision */}
-            <section className=" bg-[#fafafa] w-full  px-10 py-12 md:px-32 md:py-24">
-                <h2 className="text-4xl md:text-5xl   font-semibold  md:leading-[65px]">
+            <section className=" bg-[#fafafa] w-full  px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
+                <h2 className="text-3xl md:text-4xl lg:text-5xl   font-semibold  lg:leading-[60px]">
                     Quotes That Gave Us{' '}
-                    <div className="bg-[#844de9] text-[#fafafa] inline px-2  rounded-md">
+                    <span className="bg-[#844de9] text-[#fafafa] inline px-2  rounded-md">
                         Our Vision
-                    </div>
+                    </span>
                 </h2>
 
-                <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
+                <div className="mt-12 md:mt-14 grid gap-8 md:grid-cols-2 lg:grid-cols-3  items-stretch">
                     {ourVision.map((item, index) => (
                         <div key={index} className="relative ">
                             {/* Dotted border on right and bottom */}
@@ -288,7 +320,7 @@ const About = () => {
                                     </div>
                                     {/* text */}
                                     <div className="relative w-full px-6 flex justify-between items-center pb-4">
-                                        <h3 className="text-lg md:text-2xl uppercase font-semibold italic  text-[#0f0f0f] ">
+                                        <h3 className="text-lg md:text-xl lg:text-2xl uppercase font-semibold italic  text-[#0f0f0f] ">
                                             {item.title}
                                         </h3>
                                         <svg
@@ -314,24 +346,24 @@ const About = () => {
             </section>
 
             {/* collective */}
-            <section className="bg-[#0f0f0f]  text-[#fafafa] w-full min-h-screen  px-10 py-12 md:px-32 md:py-24">
-                <h2 className="text-4xl md:text-5xl   font-semibold  md:leading-[65px]">
-                    We are a <div className="bg-[#844de9] inline px-2  rounded-md">collective</div>{' '}
-                    of dedicated individuals committed to transforming ideas into captivating
-                    digital experiences.
+            <section className="bg-[#0f0f0f]  text-[#fafafa] w-full min-h-screen px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
+                <h2 className="text-3xl md:text-4xl lg:text-5xl   font-semibold  lg:leading-[60px]">
+                    We are a{' '}
+                    <span className="bg-[#844de9] inline px-2  rounded-md">collective</span> of
+                    dedicated individuals committed to transforming ideas into captivating digital
+                    experiences.
                 </h2>
 
-                <div className=" relative mt-16  flex flex-col md:flex-row flex-wrap bg-[#0f0f0f] rounded-2xl overflow-hidden">
+                <div className=" relative mt-12 md:mt-14  grid grid-cols-2 md:grid-cols-3 bg-[#0f0f0f] rounded-2xl overflow-hidden">
                     <StatCard
                         stat="Innovative Customization"
                         label="Our strategy centers on a research-focused approach, delving deep to gather insights. By understanding your business and market trends, we craft a customized strategy for relentless growth and long-term brand success."
                         hasContent={true}
-                        roundedClass="rounded-t-2xl sm:rounded-tr-none sm:rounded-tl-2xl
-"
+                        roundedClass="rounded-tl-2xl"
                     />
 
                     {/* Card 2 */}
-                    <StatCard hasContent={false} roundedClass="" />
+                    <StatCard hasContent={false} roundedClass="rounded-tr-2xl sm:rounded-tr-none" />
 
                     {/* Card 3 */}
                     <StatCard
@@ -349,67 +381,74 @@ const About = () => {
                         stat="Insightful Strategy"
                         label="Thriving on creativity, our innovative process sets us apart. We craft customized strategies for a personalized experience tailored to your unique requirements."
                         hasContent={true}
-                        roundedClass=""
+                        roundedClass="rounded-bl-2xl sm:rounded-bl-none"
                     />
 
                     {/* Card 6 */}
-                    <StatCard
-                        hasContent={false}
-                        roundedClass="rounded-b-2xl sm:rounded-br-2xl sm:rounded-bl-none"
-                    />
+                    <StatCard hasContent={false} roundedClass="rounded-br-2xl" />
                 </div>
             </section>
 
             {/* Team */}
-            <section className="bg-[#fafafa]  text-[#0f0f0f] w-full min-h-screen  px-10 py-12 md:px-32 md:py-24">
-                <h2 className="text-4xl md:text-5xl   font-semibold  md:leading-[65px]">
+            <section className="bg-[#fafafa]  text-[#0f0f0f] w-full min-h-screen  px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
+                <h2 className="text-3xl md:text-4xl lg:text-5xl   font-semibold  lg:leading-[60px]">
                     Meet The Team That Turns Work Into{' '}
-                    <div className="bg-[#844de9] text-[#fafafa] inline px-2  rounded-md">Wow</div>
+                    <span className="bg-[#844de9] text-[#fafafa] inline px-2  rounded-md">Wow</span>
                 </h2>
                 <div
-                    className="team-parent relative w-full mt-16"
+                    className="team-parent relative w-full mt-12 md:mt-14"
                     style={{ perspective: '1200px', perspectiveOrigin: 'center center' }}
                 >
                     {' '}
                     <div className="team-row flex items-center flex-col md:flex-row  justify-center gap-2 py-1 ">
-                        <TeamCard image="/images/about/saurav.webp" />
-                        <TeamCard image="/images/about/rohan.webp" />
-                        <TeamCard image="/images/about/saurabh.webp" />
-                        <TeamCard image="/images/about/harsh.webp" />
-                        <TeamCard image="/images/about/tejas.webp" />
-                        <TeamCard image="/images/about/puja.webp" />
+                        {teamMembers.map((member, index) => (
+                            <TeamCard
+                                key={index}
+                                image={member.image}
+                                name={member.name}
+                                role={member.role}
+                            />
+                        ))}
                     </div>
-                    <div className="team-row flex flex-col md:flex-row items-center justify-center gap-2 py-1">
-                        <TeamCard image="/images/about/saurav.webp" />
-                        <TeamCard image="/images/about/rohan.webp" />
-                        <TeamCard image="/images/about/saurabh.webp" />
-                        <TeamCard image="/images/about/harsh.webp" />
-                        <TeamCard image="/images/about/tejas.webp" />
-                        <TeamCard image="/images/about/puja.webp" />
+                    <div className="team-row flex items-center flex-col md:flex-row  justify-center gap-2 py-1 ">
+                        {teamMembers.map((member, index) => (
+                            <TeamCard
+                                key={index}
+                                image={member.image}
+                                name={member.name}
+                                role={member.role}
+                            />
+                        ))}
                     </div>
-                    <div className="team-row flex flex-col md:flex-row items-center justify-center gap-2 py-1">
-                        <TeamCard image="/images/about/saurav.webp" />
-                        <TeamCard image="/images/about/rohan.webp" />
-                        <TeamCard image="/images/about/saurabh.webp" />
-                        <TeamCard image="/images/about/harsh.webp" />
-                        <TeamCard image="/images/about/tejas.webp" />
-                        <TeamCard image="/images/about/puja.webp" />
+                    <div className="team-row flex items-center flex-col md:flex-row  justify-center gap-2 py-1 ">
+                        {teamMembers.map((member, index) => (
+                            <TeamCard
+                                key={index}
+                                image={member.image}
+                                name={member.name}
+                                role={member.role}
+                            />
+                        ))}
                     </div>
-                    <div className="team-row flex flex-col md:flex-row items-center justify-center gap-2 py-1">
-                        <TeamCard image="/images/about/saurav.webp" />
-                        <TeamCard image="/images/about/rohan.webp" />
-                        <TeamCard image="/images/about/saurabh.webp" />
-                        <TeamCard image="/images/about/harsh.webp" />
-                        <TeamCard image="/images/about/tejas.webp" />
-                        <TeamCard image="/images/about/puja.webp" />
+                    <div className="team-row flex items-center flex-col md:flex-row  justify-center gap-2 py-1 ">
+                        {teamMembers.map((member, index) => (
+                            <TeamCard
+                                key={index}
+                                image={member.image}
+                                name={member.name}
+                                role={member.role}
+                            />
+                        ))}
                     </div>
-                    <div className="team-row flex flex-col md:flex-row items-center justify-center gap-2 py-1">
-                        <TeamCard image="/images/about/saurav.webp" />
-                        <TeamCard image="/images/about/rohan.webp" />
-                        <TeamCard image="/images/about/saurabh.webp" />
-                        <TeamCard image="/images/about/harsh.webp" />
-                        <TeamCard image="/images/about/tejas.webp" />
-                        <TeamCard image="/images/about/puja.webp" />
+                    <div className="team-row flex items-center flex-col md:flex-row  justify-center gap-2 py-1 ">
+                        {teamMembers.map((member, index) => (
+                            <TeamCard
+                                key={index}
+                                image={member.image}
+                                name={member.name}
+                                role={member.role}
+                            />
+                        ))}
                     </div>
                 </div>
             </section>

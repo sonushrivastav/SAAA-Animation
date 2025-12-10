@@ -2,9 +2,10 @@
 import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { gsap } from 'gsap';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler.js';
+import useDeviceType from './hooks/useDeviceType';
 
 if (typeof window !== 'undefined') gsap.registerPlugin();
 
@@ -155,12 +156,18 @@ export default function ParticlesMorphPerSlice({
     size = 12,
     initialActiveIndex = 0,
     activeIndex = 0,
+    // isMobile = false,
+    // isTablet = false,
 }) {
     const { scene } = useGLTF(glbPath);
     const mouse = useRef(new THREE.Vector2(0, 0));
     const materialsRef = useRef([]);
     const pointsGroupRef = useRef();
     const slicesRef = useRef(null);
+    const { isMobile, isTablet } = useDeviceType();
+    const [groupPosition, setGroupPosition] = useState([-3, -3.3, 0]);
+    const [groupRotation, setGroupRotation] = useState([0, 0, -0.6]);
+    const [groupScale, setGroupScale] = useState([20, 20, 10]);
 
     slicesRef.current = [];
 
@@ -169,6 +176,23 @@ export default function ParticlesMorphPerSlice({
             slicesRef.current.push(child);
         }
     });
+
+    useEffect(() => {
+        if (isTablet) {
+            setGroupPosition([-2, -2.5, 0]);
+            setGroupRotation([0, 0, -0.25]);
+            setGroupScale([14, 14, 9]);
+        } else if (isMobile) {
+            setGroupPosition([-2, -0, 0]);
+            setGroupRotation([0, 0, -Math.PI / 2]);
+            setGroupScale([13, 13, 7]);
+        } else {
+            // Desktop fallback
+            setGroupPosition([-3, -3.3, 0]);
+            setGroupRotation([0, 0, -0.6]);
+            setGroupScale([20, 20, 10]);
+        }
+    }, [isMobile, isTablet]);
 
     const order = {
         Curve001: 2,
@@ -188,8 +212,6 @@ export default function ParticlesMorphPerSlice({
         slice.position.set(0, 0, 0);
         slice.rotation.set(0, 0, 0);
     });
-
-
 
     // mouse move
     useEffect(() => {
@@ -382,9 +404,9 @@ export default function ParticlesMorphPerSlice({
     return (
         <group
             ref={pointsGroupRef}
-            position={[-3, -3.3, 0]}
-            rotation={[0, 0, -0.6]}
-            scale={[20, 20, 10]}
+            position={groupPosition}
+            rotation={groupRotation}
+            scale={groupScale}
         >
             {meshesPerSlice.map((m, idx) => (
                 <primitive key={idx} object={m.points} />

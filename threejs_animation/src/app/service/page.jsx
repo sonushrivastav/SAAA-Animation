@@ -1,10 +1,10 @@
 'use client';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import DotGrid from '../../components/servicePage/DotGrid';
-import HeroSerivce from '../../components/servicePage/HeroSerivce';
 import OtherSolutions from '../../components/servicePage/OtherSolution';
+import HeroSerivce from '../../components/servicePage/HeroSerivce';
 
 if (typeof window !== 'undefined') {
     gsap.registerPlugin(ScrollTrigger);
@@ -32,7 +32,7 @@ const Service = () => {
                 '#060010 45%',
                 '#22579C 60%',
                 '#4A8AE6 70%',
-                'transparent 95%',
+                '#fafafa 95%',
             ];
 
             gsap.set(gradientRef1.current, {
@@ -61,14 +61,14 @@ const Service = () => {
         if (gradientRef2.current) {
             // Color pattern based on uploaded image (light top → blue mid → dark bottom)
             const colors2 = [
-                'transparent 0%',
-                'rgba(255,255,255,1) 20%', // starts pure white to match previous background
-                'rgba(255,255,255,0) 35%',
+                'rgba(250,250,250,1) 0%',
+                'rgba(250,250,250,1) 20%', // starts pure white to match previous background
+                'rgba(250,250,250,1) 35%',
                 '#DCEBFA  40%', // white top
                 '#7fb8f9 50%', // sky blue
                 '#0094ff 60%', // bright blue center
                 '#003a6e 75%', // deep navy
-                '#000000 100%',
+                '#0f0f0f 100%',
             ];
 
             gsap.set(gradientRef2.current, {
@@ -144,8 +144,16 @@ const Service = () => {
                 <div className="absolute inset-0" />
             </div>
 
-            <div className="w-full  h-[500px] self-center bg-black">
-                <h1 className="text-7xl text-center text-white">Video</h1>
+            <div className="w-full  h-screen self-center bg-[#0f0f0f]">
+                <Suspense fallback={<p>Loading video...</p>}>
+                    <video
+                        src="/videos/Big_Buck_Bunny_1080_10s_5MB.mp4"
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                    ></video>
+                </Suspense>
             </div>
         </>
     );

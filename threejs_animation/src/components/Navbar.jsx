@@ -27,25 +27,61 @@ export default function Navbar(props) {
         logoSrc2 = '/images/socialMedia/Main_Logo.svg',
         logoAlt = 'Logo',
         cta = { label: 'Let’s Connect', href: '/contact' },
-        menu = [
-            {
-                title: 'Products',
-                items: [
-                    { label: 'Home', href: '/animation' },
-                    { label: 'Service', href: '/service' },
-                    { label: 'Social Media', href: '/socialmedia' },
-                    { label: 'About', href: '/about' },
-                ],
-            },
-            {
-                title: 'Resources',
-                items: [
-                    { label: 'Docs', href: '/docs' },
-                    { label: 'Blog', href: '/blog' },
-                ],
-            },
-        ],
     } = props;
+
+    const megaSections = [
+        {
+            title: 'Design',
+            items: [
+                { label: 'UI / UX', href: '/design/ui-ux' },
+                { label: 'Branding', href: '/design/branding' },
+                { label: '3D Modeling', href: '/design/3d-modeling' },
+                { label: 'Motion Graphics / Editing', href: '/design/motion-graphics' },
+                { label: 'Print Media', href: '/design/print-media' },
+                {
+                    label: 'Creative / Marketing Collaterals',
+                    href: '/design/creative-collaterals',
+                },
+            ],
+        },
+        {
+            title: 'Build',
+            items: [
+                { label: 'Basic Website', href: '/build/basic-website' },
+                { label: 'E-Commerce Website', href: '/build/ecommerce' },
+                { label: 'Custom CMS', href: '/build/custom-cms' },
+                { label: 'Landing Pages', href: '/build/landing-pages' },
+                { label: 'Web / Mobile Applications', href: '/build/web-apps' },
+                {
+                    label: 'AMC',
+                    href: '/build/amc',
+                },
+            ],
+        },
+        {
+            title: 'Grow',
+            items: [
+                { label: 'Social Media Marketing', href: '/socialmedia' },
+                { label: 'Paid Ads / Performance Marketing', href: '/grow/paidAds' },
+                { label: 'SEO', href: '/grow/seo' },
+                { label: 'Email & WhatsApp Marketing', href: '/grow/emailMarketing' },
+            ],
+        },
+        {
+            title: 'More',
+            items: [
+                { label: 'Investor Relations', href: '/investor-relations' },
+                { label: 'Financial Advisory', href: '/financial-advisory' },
+                { label: 'Legal & Compliance', href: '/legal-compliance' },
+            ],
+        },
+    ];
+
+    const smallMenu = [
+        { label: 'About us', href: '/about' },
+        { label: 'Our Work', href: '/our-work' },
+        { label: 'Services', href: '/service' },
+    ];
 
     const [open, setOpen] = useState(false);
     const [showMega, setShowMega] = useState(false);
@@ -67,7 +103,7 @@ export default function Navbar(props) {
             ? '90%'
             : '70%'
         : open
-        ? '90%'
+        ? '96%'
         : '40%';
 
     // OPEN/CLOSE SEQUENCING
@@ -77,38 +113,40 @@ export default function Navbar(props) {
             setTimeout(() => setShowMega(true), 250);
         } else {
             setShowMega(false);
-            setTimeout(() => setOpen(false), 300);
+            setTimeout(() => setOpen(false), 350);
         }
     };
 
     // click-outside close
     useEffect(() => {
-        const handleClickOutside = e => {
+        if (!open) return;
+
+        const handler = e => {
             if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
                 setShowMega(false);
-                setTimeout(() => setOpen(false), 200);
+                setTimeout(() => setOpen(false), 250);
             }
         };
 
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [open]);
 
     return (
-        <div className="w-full fixed top-2 z-99 bg-transparent">
+        <div className="w-full fixed top-5 z-99 bg-transparent">
             <header className="z-50 flex justify-center bg-transparent">
                 <motion.div
                     ref={wrapperRef}
                     animate={{ width: computedWidth }}
                     transition={{ type: 'spring', stiffness: 260, damping: 26 }}
-                    className="overflow-hidden bg-black/80 rounded-lg w-full"
+                    className="overflow-hidden bg-black/80 backdrop-blur-2xl rounded-lg w-full"
                 >
                     <div className="flex h-16 items-center justify-between px-4">
                         {/* Hamburger */}
                         <button
                             onClick={handleToggle}
                             aria-label="Toggle menu"
-                            className="flex items-center justify-center p-2 text-white hover:bg-white/10 rounded-md"
+                            className="flex items-center justify-center p-2 text-[#fafafa] hover:bg-[#555555] rounded-md"
                         >
                             <svg
                                 className="h-6 w-6"
@@ -174,35 +212,56 @@ export default function Navbar(props) {
                                 animate={{ opacity: 1, height: 'auto' }}
                                 exit={{ opacity: 0, height: 0 }}
                                 transition={{ duration: 0.35 }}
-                                className="border-t border-white/10 bg-black/95 md:px-8 px-4"
+                                className="border-t lg:border-t-0 border-white/10  md:px-8 px-4"
                             >
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 py-6 text-[#fafafa]">
-                                    {menu.map(section => (
-                                        <div key={section.title}>
-                                            <h4 className="text-lg font-semibold mb-3">
-                                                {section.title}
-                                            </h4>
-                                            <ul className="space-y-2">
-                                                {section.items.map(item => (
-                                                    <li key={item.href}>
-                                                        <Link
-                                                            href={item.href}
-                                                            onClick={() => {
-                                                                setShowMega(false);
-                                                                setTimeout(
-                                                                    () => setOpen(false),
-                                                                    200
-                                                                );
-                                                            }}
-                                                            className="text-white/80 hover:text-white text-sm"
+                                <div className="flex flex-col md:flex-row md:justify-between py-6 gap-8 ">
+                                    <div className="w-full md:w-[20%] flex flex-col rounded-xl border border-[#555555] px-10 py-2   ">
+                                        {smallMenu.map(item => (
+                                            <Link
+                                                key={item.href}
+                                                onClick={handleToggle}
+                                                href={item.href}
+                                                className="border-b-2 border-dashed border-[#555555] py-4 "
+                                            >
+                                                <h3 className="text-3xl font-semibold text-[#fafafa] hover-underline-animation">
+                                                    {item.label}
+                                                </h3>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                    <div className="w-full md:w-[80%] flex flex-col rounded-xl border border-[#555555]   px-10 py-2   ">
+                                        {megaSections.map((section, index) => (
+                                            <div
+                                                key={section.title}
+                                                className={` ${
+                                                    index === megaSections.length - 1
+                                                        ? 'border-b-0'
+                                                        : 'border-b-2'
+                                                }  border-dashed border-[#555555] py-4`}
+                                            >
+                                                <h3 className="text-3xl font-semibold text-[#555555] ">
+                                                    {section.title}
+                                                </h3>
+
+                                                <ul className="flex flex-wrap items-center gap-6 pt-1">
+                                                    {section.items.map(item => (
+                                                        <li
+                                                            key={item.href}
+                                                            className="hover-underline-animation"
                                                         >
-                                                            {item.label}
-                                                        </Link>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    ))}
+                                                            <Link
+                                                                href={item.href}
+                                                                onClick={handleToggle}
+                                                                className="text-base text-[#fafafa] uppercase "
+                                                            >
+                                                                {item.label}
+                                                            </Link>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             </motion.div>
                         )}
