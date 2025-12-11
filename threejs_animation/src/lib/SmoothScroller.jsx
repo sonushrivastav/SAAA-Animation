@@ -8,10 +8,12 @@ export default function SmoothScroller() {
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
+    console.log(pathname, searchParams);
+
     // Scroll to top on route change
     useEffect(() => {
         if (lenis.current) {
-            lenis.current.scrollTo(0, { immediate: true });
+            lenis.current.scrollTo(20, { immediate: false });
         }
     }, [pathname, searchParams]);
 
@@ -19,7 +21,7 @@ export default function SmoothScroller() {
         // Create Lenis instance
         lenis.current = new Lenis({
             duration: 1.1,
-            easing: t => 1 - Math.pow(1 - t, 3),
+            easing: t => 1 - Math.pow(1 - t, 5),
             smoothWheel: true,
             smoothTouch: true,
             touchMultiplier: 0.9,

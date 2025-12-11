@@ -68,7 +68,7 @@ function CustomSelect({ value, onChange, options, placeholder, error }) {
         </div>
     );
 }
-export default function ContactForm() {
+export default function ContactForm({ btnPosition = 'right' }) {
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -116,34 +116,39 @@ export default function ContactForm() {
     };
 
     return (
-        <form
-            onSubmit={handleSubmit}
-            className="bg-transparent rounded-t-2xl  lg:rounded-r-none lg:rounded-l-2xl shadow-sm w-full p-6 md:p-10 z-10"
-        >
+        <form onSubmit={handleSubmit} className="bg-transparent  text-[#0f0f0f]  w-full  z-10">
             {/* Name fields */}
-            <div className="w-full flex flex-col md:flex-row gap-6 mb-2">
+            <div className="w-full flex flex-col md:flex-row gap-6 mb-6">
                 <div className="w-full">
+                    <label className="" htmlFor="firstName">
+                        Full Name *
+                    </label>
                     <input
+                        id="firstName"
                         name="firstName"
                         type="text"
                         placeholder="First Name *"
                         value={formData.firstName}
                         onChange={handleChange}
-                        className={`w-full border ${
+                        className={`w-full mt-2 italic border ${
                             errors.firstName ? 'border-red-500' : 'border-[#9C9C9C]'
-                        } bg-[#fafafa] focus:ring-1 focus:ring-[#844de9] rounded-md p-3 outline-none text-[#0f0f0f] placeholder-[#9c9c9c]`}
+                        } bg-[#fafafa]  focus:ring-1 focus:ring-[#844de9] rounded-md p-3 outline-none text-[#0f0f0f] placeholder-[#9c9c9c]`}
                     />
                     {errors.firstName && <p className="text-red-500 text-sm">{errors.firstName}</p>}
                 </div>
 
                 <div className="w-full">
+                    <label className="" htmlFor="lastName">
+                        Last Name *
+                    </label>
                     <input
+                        id="lastName"
                         name="lastName"
                         type="text"
                         placeholder="Last Name *"
                         value={formData.lastName}
                         onChange={handleChange}
-                        className={`w-full  border ${
+                        className={`w-full mt-2 border ${
                             errors.lastName ? 'border-red-500' : 'border-[#9C9C9C]'
                         } bg-[#fafafa] focus:ring-1 focus:ring-[#844de9] rounded-md p-3 outline-none text-[#0f0f0f] placeholder-[#9c9c9c]`}
                     />
@@ -152,15 +157,19 @@ export default function ContactForm() {
             </div>
 
             {/* Email + Phone */}
-            <div className="flex flex-col md:flex-row gap-6 mb-2">
+            <div className="flex flex-col md:flex-row gap-6 mb-6">
                 <div className="w-full">
+                    <label className="" htmlFor="email">
+                        Email Id *
+                    </label>
                     <input
+                        id="email"
                         name="email"
                         type="email"
-                        placeholder="Email Id *"
+                        placeholder="john.doe@company.com"
                         value={formData.email}
                         onChange={handleChange}
-                        className={`w-full  border ${
+                        className={`w-full mt-2 italic border ${
                             errors.email ? 'border-red-500' : 'border-[#9C9C9C]'
                         } bg-[#fafafa] focus:ring-1 focus:ring-[#844de9] rounded-md p-3 outline-none text-[#0f0f0f] placeholder-[#9c9c9c]`}
                     />
@@ -168,13 +177,17 @@ export default function ContactForm() {
                 </div>
 
                 <div className="w-full">
+                    <label className="" htmlFor="number">
+                        Number *
+                    </label>
                     <input
+                        id="number"
                         name="number"
                         type="tel"
-                        placeholder="Number *"
+                        placeholder="+91"
                         value={formData.number}
                         onChange={handleChange}
-                        className={`w-full border ${
+                        className={`w-full mt-2 italic border ${
                             errors.number ? 'border-red-500' : 'border-[#9C9C9C]'
                         } bg-[#fafafa] focus:ring-1 focus:ring-[#844de9] rounded-md p-3 outline-none text-[#0f0f0f] placeholder-[#9c9c9c]`}
                     />
@@ -183,16 +196,20 @@ export default function ContactForm() {
             </div>
 
             {/* Dropdown */}
-            <div className="mt-3 w-full">
+            <div className="mb-6 w-full">
+                <label className="" htmlFor="interest">
+                    Interested in *
+                </label>
                 <select
+                    id="interest"
                     name="interest"
                     value={formData.interest}
                     onChange={handleChange}
-                    className={`w-full border ${
+                    className={`w-full mt-2 italic border ${
                         errors.interest ? 'border-red-500' : 'border-[#9C9C9C]'
                     } bg-[#fafafa] focus:ring-1 focus:ring-[#844de9] rounded-md p-3 outline-none text-[#0f0f0f] placeholder-[#9c9c9c]`}
                 >
-                    <option value="">Interested in*</option>
+                    <option value="">Select an option</option>
                     <option value="Branding/ Designing">Branding/ Designing</option>
                     <option value="UI/UX Design">UI/UX Design</option>
                     <option value="Web Development">Web Development</option>
@@ -204,14 +221,18 @@ export default function ContactForm() {
                 {errors.interest && <p className="text-red-500 text-sm">{errors.interest}</p>}
             </div>
 
-            <div className="mt-3 w-full">
+            <div className="mb-6 w-full">
+                <label className="" htmlFor="message">
+                    Message
+                </label>
                 <textarea
+                    id="message"
                     name="message"
                     placeholder="Type your message here..."
                     rows="5"
                     value={formData.message}
                     onChange={handleChange}
-                    className={`w-full border ${
+                    className={`w-full mt-2 italic border ${
                         errors.message ? 'border-red-500' : 'border-[#9C9C9C]'
                     } bg-[#fafafa] focus:ring-1 focus:ring-[#844de9] rounded-md p-3 outline-none text-[#0f0f0f] placeholder-[#9c9c9c]`}
                 ></textarea>
@@ -219,9 +240,13 @@ export default function ContactForm() {
             </div>
 
             {/* Submit */}
-            <div className="w-full flex items-center justify-end mt-3">
+            <div
+                className={`w-full flex items-center  mt-3 ${
+                    btnPosition === 'left' ? 'justify-start' : 'justify-end'
+                }`}
+            >
                 <button
-                    className="bg-[#844de9] px-4 py-2 rounded-lg text-[#fafafa] text-xl font-semibold"
+                    className="bg-[#0f0f0f] px-4 py-2 rounded-full text-[#fafafa] text-xl font-semibold"
                     type="submit"
                 >
                     Submit

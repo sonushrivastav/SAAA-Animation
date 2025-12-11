@@ -255,7 +255,7 @@ function initSpiralAnimation(slicesRef) {
     animate();
 }
 
-const SocialMediaMarketing = () => {
+const SocialMediaMarketing = ({ data }) => {
     const [activeIndex, setActiveIndex] = useState(0);
     const slicesRef = useRef([]);
 
@@ -285,7 +285,9 @@ const SocialMediaMarketing = () => {
                             dotSize={2}
                             gap={8}
                             baseColor={!hasContent ? '#271e37' : '#271e37'}
-                            activeColor={!hasContent && isHovered ? '#fafafa' : '#844de9'}
+                            activeColor={
+                                !hasContent ? '#fafafa' : isHovered ? '#844de9' : '#271e37'
+                            }
                             proximity={120}
                             shockRadius={250}
                             shockStrength={5}
@@ -299,7 +301,7 @@ const SocialMediaMarketing = () => {
                 {hasContent && (
                     <div className="relative z-10 flex flex-col justify-end h-full">
                         <h2
-                            className={`text-3xl md:text-4xl lg:text-5xl font-bold transition-colors duration-300 ${
+                            className={`text-3xl md:text-4xl lg:text-4xl font-bold transition-colors duration-300 ${
                                 isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
                             }`}
                         >
@@ -395,7 +397,7 @@ const SocialMediaMarketing = () => {
                 </h2>
 
                 {/* Stats Grid Section */}
-                <div className=" relative mt-12 md:mt-14  grid grid-cols-2 md:grid-cols-3 bg-[#0f0f0f] rounded-2xl overflow-hidden">
+                <div className=" relative mt-12 md:mt-14  grid grid-cols-2 md:grid-cols-3 bg-[#0f0f0f] rounded-2xl ">
                     <StatCard
                         stat="100+"
                         label="accounts managed"
@@ -561,22 +563,21 @@ const SocialMediaMarketing = () => {
                         out to us
                     </h2>
                     <div className="mt-12 md:mt-14 w-full flex flex-col lg:flex-row items-stretch justify-center border border-[#0F0F0F] rounded-2xl ">
-                        <div className="relative flex w-full lg:w-[50%] rounded-t-2xl    lg:rounded-r-none lg:rounded-l-2xl">
+                        <div className="relative flex w-full lg:w-[50%] rounded-t-2xl p-6 md:p-10   lg:rounded-r-none lg:rounded-l-2xl">
                             <div className="absolute inset-0 z-1 pointer-events-none">
                                 <DotGrid
-                                    dotSize={3}
-                                    gap={15}
-                                    baseColor="#55555533"
-                                    activeColor="#844de911"
+                                    dotSize={2}
+                                    gap={8}
+                                    baseColor="#271e3722"
+                                    activeColor="#844de9"
                                     proximity={120}
                                     shockRadius={250}
                                     shockStrength={5}
                                     resistance={750}
                                     returnDuration={1.5}
-                                    className="px-1 py-1"
                                 />
                             </div>
-                            <ContactForm />
+                            <ContactForm btnPosition="left" />
                         </div>
 
                         <div className="relative w-full lg:w-[50%] h-[350px] lg:h-auto  rounded-b-2xl    lg:rounded-l-none lg:rounded-r-2xl overflow-hidden">

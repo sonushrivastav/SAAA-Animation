@@ -7,11 +7,11 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
-import CaseStudyCards from '../../../components/allServicesComponents/CaseStudyCards';
-import ContactForm from '../../../components/allServicesComponents/ContactForm';
-import FaqAccordion from '../../../components/allServicesComponents/FaqAccordion';
-import OtherServices from '../../../components/allServicesComponents/OtherServices';
-import DotGrid from '../../../components/socialMedia/DotGrid';
+import CaseStudyCards from '../../components/allServicesComponents/CaseStudyCards';
+import ContactForm from '../../components/allServicesComponents/ContactForm';
+import FaqAccordion from '../../components/allServicesComponents/FaqAccordion';
+import OtherServices from '../../components/allServicesComponents/OtherServices';
+import DotGrid from '../../components/socialMedia/DotGrid';
 gsap.registerPlugin(ScrollTrigger);
 
 const platformImages = [
@@ -255,9 +255,10 @@ function initSpiralAnimation(slicesRef) {
     animate();
 }
 
-const SocialMediaMarketing = () => {
+const ServiceLayout = ({ data }) => {
     const [activeIndex, setActiveIndex] = useState(0);
     const slicesRef = useRef([]);
+    console.log('data is', data);
 
     useEffect(() => {
         initSpiralAnimation(slicesRef);
@@ -285,7 +286,9 @@ const SocialMediaMarketing = () => {
                             dotSize={2}
                             gap={8}
                             baseColor={!hasContent ? '#271e37' : '#271e37'}
-                            activeColor={!hasContent && isHovered ? '#fafafa' : '#844de9'}
+                            activeColor={
+                                !hasContent ? '#fafafa' : isHovered ? '#844de9' : '#271e37'
+                            }
                             proximity={120}
                             shockRadius={250}
                             shockStrength={5}
@@ -299,7 +302,7 @@ const SocialMediaMarketing = () => {
                 {hasContent && (
                     <div className="relative z-10 flex flex-col justify-end h-full">
                         <h2
-                            className={`text-3xl md:text-4xl lg:text-5xl font-bold transition-colors duration-300 ${
+                            className={`text-3xl md:text-4xl lg:text-4xl font-bold transition-colors duration-300 ${
                                 isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
                             }`}
                         >
@@ -344,21 +347,18 @@ const SocialMediaMarketing = () => {
                     {/* left section */}
                     <div className="z-10 relative w-full md:w-[65%] self-stretch flex items-center    text-[#0f0f0f] ">
                         <div className="px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20 ">
-                            <h1 className="text-5xl lg:text-7xl  text-[#0f0f0f] font-semibold lg:leading-[75px]  ">
-                                SEO
-                                {/* <br />
+                            <h1 className="text-5xl lg:text-7xl  text-[#0f0f0f] font-semibold lg:leading-[75px] ">
+                                {data.title}
+                                {/* Social{' '}
                                 <span className="bg-[#844de9] inline text-[#fafafa] px-2 rounded-md">
-                                    Ads / Performance
+                                    Media
                                 </span>
                                 <br />
                                 Marketing */}
                             </h1>
 
                             <p className="text-[#555555] mt-6 max-w-lg mx-auto md:mx-0 md:text-xl">
-                                We help you climb search results without breaking stride. Smart
-                                keywords, clean strategy, and content that pulls you to the top.
-                                Visibility that grows naturally and lasts longer than trends.
-                                Because staying relevant is a long game, and we know how to play it.
+                                {data.heroDescription}
                             </p>
                         </div>
                     </div>
@@ -396,10 +396,10 @@ const SocialMediaMarketing = () => {
                 </h2>
 
                 {/* Stats Grid Section */}
-                <div className=" relative mt-12 md:mt-14  grid grid-cols-2 md:grid-cols-3 bg-[#0f0f0f] rounded-2xl overflow-hidden">
+                <div className=" relative mt-12 md:mt-14  grid grid-cols-2 md:grid-cols-3 bg-[#0f0f0f] rounded-2xl ">
                     <StatCard
-                        stat="100+"
-                        label="accounts managed"
+                        stat={data.stats[0].stat}
+                        label={data.stats[0].label}
                         hasContent={true}
                         roundedClass="rounded-tl-2xl
 "
@@ -407,8 +407,8 @@ const SocialMediaMarketing = () => {
 
                     {/* Card 2 */}
                     <StatCard
-                        stat="1 Cr+"
-                        label="total reach generated"
+                        stat={data.stats[1].stat}
+                        label={data.stats[2].label}
                         hasContent={true}
                         roundedClass="rounded-tr-2xl sm:rounded-tr-none"
                     />
@@ -421,16 +421,16 @@ const SocialMediaMarketing = () => {
 
                     {/* Card 5 */}
                     <StatCard
-                        stat="150%"
-                        label="follower growth achieved"
+                        stat={data.stats[2].stat}
+                        label={data.stats[2].label}
                         hasContent={true}
                         roundedClass="rounded-bl-2xl sm:rounded-bl-none"
                     />
 
                     {/* Card 6 */}
                     <StatCard
-                        stat="4%"
-                        label="average increase in engagement"
+                        stat={data.stats[3].stat}
+                        label={data.stats[3].label}
                         hasContent={true}
                         roundedClass="rounded-br-2xl"
                     />
@@ -443,7 +443,7 @@ const SocialMediaMarketing = () => {
                         Platforms we manage
                     </h1>
                     <div className="grid grid-cols-3  md:grid-cols-6 justify-center gap-6">
-                        {platformImages.map((src, index) => (
+                        {data.platformImages.map((src, index) => (
                             // <div
                             //     key={index}
                             //     className="w-12 h-12 md:w-20 md:h-20 flex items-center justify-center "
@@ -474,7 +474,7 @@ const SocialMediaMarketing = () => {
 
                 <div className="mt-12 md:mt-14 grid gap-12 md:gap-6 lg:gap-10 md:grid-cols-3 items-stretch">
                     {' '}
-                    <CaseStudyCards caseStudies={caseStudies} />
+                    <CaseStudyCards caseStudies={data.caseStudies} />
                 </div>
 
                 <div className="w-full flex items-center justify-center mt-12 ">
@@ -536,7 +536,7 @@ const SocialMediaMarketing = () => {
                         We're Here To Help
                     </h2>
                     <div className="mt-12 md:mt-14 flex flex-col gap-6">
-                        <FaqAccordion faqData={faqData} defaultActiveIndex={0} />
+                        <FaqAccordion faqData={data.faqData} defaultActiveIndex={0} />
                     </div>
                 </div>
                 {/* Accordion */}
@@ -552,7 +552,7 @@ const SocialMediaMarketing = () => {
                     </span>
                 </h2>
                 <div className="mt-10 md:mt-14">
-                    <OtherServices services={servicesArray} />
+                    <OtherServices services={data.servicesArray} />
                 </div>
                 <div className="mt-12 md:mt-14 flex flex-col items-center justify-center">
                     <h2 className="text-3xl  md:text-4xl lg:text-5xl text-[#0f0f0f]   font-semibold  lg:leading-[60px] ">
@@ -562,22 +562,21 @@ const SocialMediaMarketing = () => {
                         out to us
                     </h2>
                     <div className="mt-12 md:mt-14 w-full flex flex-col lg:flex-row items-stretch justify-center border border-[#0F0F0F] rounded-2xl ">
-                        <div className="relative flex w-full lg:w-[50%] rounded-t-2xl    lg:rounded-r-none lg:rounded-l-2xl">
+                        <div className="relative flex w-full lg:w-[50%] rounded-t-2xl p-6 md:p-10   lg:rounded-r-none lg:rounded-l-2xl">
                             <div className="absolute inset-0 z-1 pointer-events-none">
                                 <DotGrid
-                                    dotSize={3}
-                                    gap={15}
-                                    baseColor="#55555533"
-                                    activeColor="#844de911"
+                                    dotSize={2}
+                                    gap={8}
+                                    baseColor="#271e3722"
+                                    activeColor="#844de9"
                                     proximity={120}
                                     shockRadius={250}
                                     shockStrength={5}
                                     resistance={750}
                                     returnDuration={1.5}
-                                    className="px-1 py-1"
                                 />
                             </div>
-                            <ContactForm />
+                            <ContactForm btnPosition="left" />
                         </div>
 
                         <div className="relative w-full lg:w-[50%] h-[350px] lg:h-auto  rounded-b-2xl    lg:rounded-l-none lg:rounded-r-2xl overflow-hidden">
@@ -596,4 +595,4 @@ const SocialMediaMarketing = () => {
     );
 };
 
-export default SocialMediaMarketing;
+export default ServiceLayout;

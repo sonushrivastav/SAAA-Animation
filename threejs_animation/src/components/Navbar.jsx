@@ -33,28 +33,28 @@ export default function Navbar(props) {
         {
             title: 'Design',
             items: [
-                { label: 'UI / UX', href: '/design/ui-ux' },
-                { label: 'Branding', href: '/design/branding' },
-                { label: '3D Modeling', href: '/design/3d-modeling' },
-                { label: 'Motion Graphics / Editing', href: '/design/motion-graphics' },
-                { label: 'Print Media', href: '/design/print-media' },
+                { label: 'UI / UX', href: '/dynamic/ui-ux' },
+                { label: 'Branding', href: '/dynamic/branding' },
+                { label: '3D Modeling', href: '/dynamic/3d-modeling' },
+                { label: 'Motion Graphics / Editing', href: '/dynamic/motion-graphics-editing' },
+                { label: 'Print Media', href: '/dynamic/print-media' },
                 {
-                    label: 'Creative / Marketing Collaterals',
-                    href: '/design/creative-collaterals',
+                    label: 'dynamic / Marketing Collaterals',
+                    href: '/dynamic/creative-marketing-collaterals',
                 },
             ],
         },
         {
             title: 'Build',
             items: [
-                { label: 'Basic Website', href: '/build/basic-website' },
-                { label: 'E-Commerce Website', href: '/build/ecommerce' },
-                { label: 'Custom CMS', href: '/build/custom-cms' },
-                { label: 'Landing Pages', href: '/build/landing-pages' },
-                { label: 'Web / Mobile Applications', href: '/build/web-apps' },
+                { label: 'Basic Website', href: '/dynamic/basic-website' },
+                { label: 'E-Commerce Website', href: '/dynamic/ecommerce-website' },
+                { label: 'Custom CMS', href: '/dynamic/custom-cms' },
+                { label: 'Landing Pages', href: '/dynamic/landing-pages' },
+                { label: 'Web / Mobile Applications', href: '/dynamic/web-mobile-applications' },
                 {
                     label: 'AMC',
-                    href: '/build/amc',
+                    href: '/dynamic/amc',
                 },
             ],
         },
@@ -62,17 +62,20 @@ export default function Navbar(props) {
             title: 'Grow',
             items: [
                 { label: 'Social Media Marketing', href: '/socialmedia' },
-                { label: 'Paid Ads / Performance Marketing', href: '/grow/paidAds' },
-                { label: 'SEO', href: '/grow/seo' },
-                { label: 'Email & WhatsApp Marketing', href: '/grow/emailMarketing' },
+                {
+                    label: 'Paid Ads / Performance Marketing',
+                    href: '/dynamic/paid-ads-performance-marketing',
+                },
+                { label: 'SEO', href: '/dynamic/seo' },
+                { label: 'Email & WhatsApp Marketing', href: '/dynamic/email-whatsapp-marketing' },
             ],
         },
         {
             title: 'More',
             items: [
-                { label: 'Investor Relations', href: '/investor-relations' },
-                { label: 'Financial Advisory', href: '/financial-advisory' },
-                { label: 'Legal & Compliance', href: '/legal-compliance' },
+                { label: 'Investor Relations', href: '/dynamic/investor-relations' },
+                { label: 'Financial Advisory', href: '/dynamic/financial-advisory' },
+                { label: 'Legal & Compliance', href: '/dynamic/legal-compliance' },
             ],
         },
     ];
@@ -133,13 +136,17 @@ export default function Navbar(props) {
     }, [open]);
 
     return (
-        <div className="w-full fixed top-5 z-99 bg-transparent">
+        <div
+            className={`w-full fixed left-0 z-99 bg-transparent transition-all duration-300
+        ${isMobile && open ? 'top-0' : 'top-5'}`}
+        >
             <header className="z-50 flex justify-center bg-transparent">
                 <motion.div
                     ref={wrapperRef}
                     animate={{ width: computedWidth }}
                     transition={{ type: 'spring', stiffness: 260, damping: 26 }}
-                    className="overflow-hidden bg-black/80 backdrop-blur-2xl rounded-lg w-full"
+                    className={` bg-black/80 backdrop-blur-2xl  w-full
+                         ${isMobile && open ? 'rounded-none' : 'rounded-lg '}`}
                 >
                     <div className="flex h-16 items-center justify-between px-4">
                         {/* Hamburger */}
@@ -212,7 +219,7 @@ export default function Navbar(props) {
                                 animate={{ opacity: 1, height: 'auto' }}
                                 exit={{ opacity: 0, height: 0 }}
                                 transition={{ duration: 0.35 }}
-                                className="border-t lg:border-t-0 border-white/10  md:px-8 px-4"
+                                className="border-t lg:border-t-0 border-white/10  md:px-8 px-4 overflow-y-auto max-h-[90vh]"
                             >
                                 <div className="flex flex-col md:flex-row md:justify-between py-6 gap-8 ">
                                     <div className="w-full md:w-[20%] flex flex-col rounded-xl border border-[#555555] px-10 py-2   ">
@@ -229,7 +236,7 @@ export default function Navbar(props) {
                                             </Link>
                                         ))}
                                     </div>
-                                    <div className="w-full md:w-[80%] flex flex-col rounded-xl border border-[#555555]   px-10 py-2   ">
+                                    <div className="w-full md:w-[80%] grid grid-cols-2 lg:grid-cols-1 rounded-xl border border-[#555555]  px-3 lg:px-10 py-2   ">
                                         {megaSections.map((section, index) => (
                                             <div
                                                 key={section.title}
@@ -237,13 +244,13 @@ export default function Navbar(props) {
                                                     index === megaSections.length - 1
                                                         ? 'border-b-0'
                                                         : 'border-b-2'
-                                                }  border-dashed border-[#555555] py-4`}
+                                                }  border-dashed border-[#555555] py-4  pr-2`}
                                             >
                                                 <h3 className="text-3xl font-semibold text-[#555555] ">
                                                     {section.title}
                                                 </h3>
 
-                                                <ul className="flex flex-wrap items-center gap-6 pt-1">
+                                                <ul className="flex flex-col lg:flex-row flex-wrap items-start gap-3 lg:gap-6 pt-1">
                                                     {section.items.map(item => (
                                                         <li
                                                             key={item.href}
