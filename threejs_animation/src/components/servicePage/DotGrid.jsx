@@ -11,7 +11,7 @@ const Card = React.forwardRef(({ title, items, description }, ref) => {
     return (
         <div
             ref={ref}
-            className="absolute left-1/2 top-1/2 w-full max-w-7xl h-[500px] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-[#555555]/30 backdrop-blur-[10px] border border-[#9C9C9C]   p-8 flex justify-between gap-8"
+            className="absolute left-1/2 top-1/2 w-full max-w-7xl h-[500px] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-[#555555]/10 backdrop-blur-xl border border-[#9C9C9C]   p-8 flex justify-between gap-8"
             style={{ willChange: 'transform' }}
         >
             {/* Left content */}

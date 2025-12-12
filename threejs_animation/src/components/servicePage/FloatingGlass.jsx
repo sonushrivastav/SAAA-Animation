@@ -229,21 +229,21 @@ function GlassModel({
             const originalColor = child.material.color;
             const originalMap = child.material.map || null;
 
-            child.material = new THREE.MeshPhysicalMaterial({
-                color: originalColor,
-                map: originalMap,
-                metalness: 0,
-                roughness: 0.1,
-                transmission: 0.3,
-                opacity: 0.6,
-                transparent: true,
-                thickness: 0.5,
-                envMapIntensity: 1,
-                clearcoat: 1,
-                clearcoatRoughness: 0.1,
-                ior: 1.5,
-                side: THREE.DoubleSide,
-            });
+            // child.material = new THREE.MeshPhysicalMaterial({
+            //     // color: originalColor,
+            //     // map: originalMap,
+            //     // metalness: 0,
+            //     // roughness: 0.1,
+            //     // transmission: 0.3,
+            //     // opacity: 0.6,
+            //     // transparent: true,
+            //     // thickness: 0.5,
+            //     // envMapIntensity: 1,
+            //     // clearcoat: 1,
+            //     // clearcoatRoughness: 0.1,
+            //     // ior: 1.5,
+            //     // side: THREE.DoubleSide,
+            // });
         }
     });
 
@@ -324,7 +324,7 @@ export default function ThreeGlass({
     motionVariant = 0,
     mouseInfluence = false,
 }) {
-    const modelUrl = '/models/new4.glb';
+    const modelUrl = '/models/new5.glb';
     // bg-gradient-to-r from-[#010a20] via-[#15a9b0] to-[#0f4d63]
     return (
         <div className="w-full h-full ">

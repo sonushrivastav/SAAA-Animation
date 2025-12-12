@@ -84,6 +84,8 @@ export default function Navbar(props) {
         { label: 'About us', href: '/about' },
         { label: 'Our Work', href: '/our-work' },
         { label: 'Services', href: '/service' },
+        { label: 'Contact', href: '/contact' },
+        { label: 'Case Studies', href: '/case-studies' },
     ];
 
     const [open, setOpen] = useState(false);

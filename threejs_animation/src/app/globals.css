@@ -78,4 +78,49 @@ body {
     transform: scaleX(1);
     transform-origin: bottom left;
 }
+.alpha {
+    position: -webkit-sticky !important;
+    position: sticky;
+}
+#sidebarWrap {
+  height: auto;
+  width: 210px;
+  float: right;
+  position: relative;
+  box-shadow: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+#content {
+  width: 568px;
+  height: 800px;
+}
+
+#footer {
+  clear: both;
+  margin: 10px 0;
+}
+
+#sidebar {
+  width: 200px;
+  height: 300px;
+  position: absolute;
+}
+
+#header {
+  height: 80px;
+  margin-bottom: 10px;
+}
+
+#sidebar.fixed {
+  position: fixed;
+  top: 0;
+}
+
+#footer {
+  height: 800px;
+}
+
 /* Navbar Hover Effect End */
