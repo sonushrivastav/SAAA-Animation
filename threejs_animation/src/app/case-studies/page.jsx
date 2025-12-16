@@ -157,12 +157,12 @@ const CaseStudies = () => {
                 </h2>
 
                 {/* Tabs */}
-                <div className="flex gap-4 mt-8 flex-wrap">
+                <div className="flex flex-row overflow-x-auto overflow-y-auto no-scrollbar gap-4 mt-8 lg:flex-wrap">
                     {tabs.map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`px-5 py-2 rounded-full border transition ${
+                            className={`px-5 py-2 rounded-full border transition whitespace-nowrap ${
                                 activeTab === tab
                                     ? 'bg-[#0f0f0f] text-[#fafafa] border-[#EDEDED]'
                                     : 'border-[#555555] text-[#555555] '

@@ -174,7 +174,6 @@
 import { Environment, OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import { Suspense, useEffect, useRef } from 'react';
-import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 function GlassModel({
@@ -301,7 +300,7 @@ function GlassModel({
     });
 
     return (
-        <group ref={ref} position={[0, 0, 0]} scale={[6.5,6.5,6.5]}>
+        <group ref={ref} position={[0, 0, 0]} scale={[6.5, 6.5, 6.5]}>
             <primitive position={[0, -0.4, 0]} object={scene} />
         </group>
     );

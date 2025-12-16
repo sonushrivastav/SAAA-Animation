@@ -170,6 +170,38 @@ const Animation = () => {
         const initialSlicePositions = [];
         const initialSliceRotations = [];
 
+        const spiralTarget = isMobile
+            ? {
+                  //  x for left right , z for up down
+                  position: { x: 0.015, y: 0.05, z: -0.29 },
+                  rotation: {
+                      x: -0.2,
+                      y: -1.5,
+                      z: 0,
+                  },
+                  duration: 4,
+              }
+            : isTablet
+            ? {
+                  position: { x: 0.18, y: 0.08, z: -0.2 },
+                  rotation: {
+                      x: -0.16,
+                      y: -1.4,
+                      z: 0,
+                  },
+                  duration: 4.5,
+              }
+            : {
+                  // Desktop / large screens
+                  position: { x: 0.21, y: 0.1, z: -0.22 },
+                  rotation: {
+                      x: -0.181592653589793,
+                      y: -1.53159265358979,
+                      z: 0,
+                  },
+                  duration: 5,
+              };
+
         loader.load(
             '/models/model.glb',
             gltf => {
@@ -180,8 +212,8 @@ const Animation = () => {
                 // modelGroup.add(rawModel);
 
                 if (isMobile) {
-                    rawModel.scale.set(13, 13, 6);
-                    rawModel.position.set(0.5, -2.8, 0);
+                    rawModel.scale.set(14, 14, 6);
+                    rawModel.position.set(0.8, -3.3, 0);
                     rawModel.rotation.set(0, 0, 0);
                 } else if (isTablet) {
                     rawModel.scale.set(17, 17, 4);
@@ -249,17 +281,25 @@ const Animation = () => {
             }
         );
 
-        // createParticleSystem function remains largely unchanged
         function createParticleSystem(rawModel, materials, scene, camera) {
-            // Create a temporary sampling group that matches the FINAL assembled state
             const samplingGroup = new THREE.Group();
 
             samplingGroup.add(rawModel.clone());
 
             samplingGroup.traverse(child => {
                 if (child.isMesh) {
-                    child.position.set(0.21, 0.1, -0.22);
-                    child.rotation.set(-0.181592653589793, -1.53159265358979, 0);
+                    // child.position.set(0.21, 0.1, -0.22);
+                    // child.rotation.set(-0.181592653589793, -1.53159265358979, 0);
+                    child.position.set(
+                        spiralTarget.position.x,
+                        spiralTarget.position.y,
+                        spiralTarget.position.z
+                    );
+                    child.rotation.set(
+                        spiralTarget.rotation.x,
+                        spiralTarget.rotation.y,
+                        spiralTarget.rotation.z
+                    );
                 }
             });
 
@@ -491,23 +531,18 @@ const Animation = () => {
                 tl.to(
                     slice.position,
                     {
-                        x: 0.21,
-                        y: 0.1,
-                        z: -0.22,
-                        duration: 5,
+                        ...spiralTarget.position,
+                        duration: spiralTarget.duration,
                         ease: 'power1.inOut',
                     },
                     delay
                 );
 
-                // Rotate each spiral into place
                 tl.to(
                     slice.rotation,
                     {
-                        x: -0.181592653589793,
-                        y: -1.53159265358979,
-                        z: 0,
-                        duration: 5,
+                        ...spiralTarget.rotation,
+                        duration: spiralTarget.duration,
                         ease: 'power1.inOut',
                     },
                     delay
@@ -517,7 +552,7 @@ const Animation = () => {
             tl.to(
                 '.initial-text',
                 {
-                    y: '-20vh',
+                    y: '-10vh',
                     opacity: 0,
                     duration: 3.5,
                     ease: 'power1.inOut',
@@ -527,7 +562,7 @@ const Animation = () => {
             tl.to(
                 '.second-text',
                 {
-                    y: '15vh',
+                    y: '2vh',
                     opacity: 1,
                     duration: 3.5,
                     ease: 'power1.inOut',
@@ -761,7 +796,7 @@ const Animation = () => {
                 `.service-0`,
                 {
                     opacity: 0,
-                    y: 100,
+                    y: -100,
                     filter: 'blur(12px)',
                 },
                 {
@@ -786,7 +821,7 @@ const Animation = () => {
                     `.service-${i - 1}`,
                     {
                         opacity: 0,
-                        y: 100,
+                        y: -100,
                         filter: 'blur(10px)',
                         duration: 1.2,
                         ease: 'power2.inOut',
@@ -799,7 +834,7 @@ const Animation = () => {
                     `.service-${i}`,
                     {
                         opacity: 0,
-                        y: 100,
+                        y: -100,
                         filter: 'blur(12px)',
                     },
                     {
@@ -1005,13 +1040,13 @@ const Animation = () => {
                         ref={canvasRef}
                         className="absolute top-0 h-full w-full  pointer-events-none"
                     />
-                    <div className="absolute right-0 top-[20%] md:right-3 md:top-[38%]   initial-text  pr-10 md:px-16 lg:px-32">
-                        <h1 className="text-4xl md:text-4xl lg:text-7xl  font-bold leading-tight text-[#0f0f0f] hover:text-red-400 ">
+                    <div className="absolute right-0 top-[20%] md:right-3 md:top-[38%]   initial-text items-center justify-center w-full md:w-fit pr-0 md:pr-10 md:px-16 lg:px-32">
+                        <h1 className="text-center md:text-left text-4xl md:text-4xl lg:text-7xl  font-bold leading-tight text-[#0f0f0f] ">
                             What you envision, <br />
                             We help you become.
                         </h1>
                     </div>
-                    <div className="absolute  top-[0%]  pointer-events-none opacity-0 second-text text-center px-10 md:px-16 lg:px-32">
+                    <div className="absolute  top-[11%]  pointer-events-none opacity-0 second-text text-center px-10 md:px-16 lg:px-32">
                         <h1 className="text-4xl md:text-4xl lg:text-7xl font-bold leading-tight text-[#0f0f0f]">
                             Every need of your brand, under one roof, powered by one partner.
                         </h1>
@@ -1052,12 +1087,10 @@ const Animation = () => {
                             <pointLight position={[-5, -5, 5]} intensity={1.5} color={'#2f00ff'} />
                             <ParticlesMorphPerSlice
                                 glbPath={'/models/model.glb'}
-                                particleCount={12500}
+                                particleCount={10000}
                                 size={20}
-                                initialActiveIndex={3}
+                                initialActiveIndex={0}
                                 activeIndex={activeServiceIndex}
-                                isMobile
-                                isTablet
                             />
                             <EffectComposer>
                                 <Bloom

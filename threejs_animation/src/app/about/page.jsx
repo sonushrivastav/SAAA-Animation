@@ -248,7 +248,7 @@ const About = () => {
                     that
                 </h2>
 
-                <div className="mt-12 md:mt-14 bg-[#0f0f0f] text-[#9c9c9c] text-lg md:text-xl lg:text-2xl">
+                <div className="mt-12 md:mt-14 bg-[#0f0f0f] text-[#9c9c9c] text-lg md:text-xl lg:text-xl font-semibold">
                     <p className="pb-6 ">
                         SAAA Consultants is a multidisciplinary creative team built on one belief:
                         different perspectives create better outcomes. We approach every brief with
