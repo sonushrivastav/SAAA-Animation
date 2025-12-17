@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 const OtherServices = ({ services = [], buttonText = 'Know More', onButtonClick }) => {
     return (
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
+        <div className=" grid gap-8 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
             {services.map((item, index) => (
                 <div key={index} className="relative h-full">
                     <div

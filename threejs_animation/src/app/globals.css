@@ -37,9 +37,9 @@ body {
 
 /* To hide scroll bar */
 @utility no-scrollbar {
-  &::-webkit-scrollbar {
-    display: none;
-  }
+    &::-webkit-scrollbar {
+        display: none;
+    }
 }
 /* -----END------- */
 

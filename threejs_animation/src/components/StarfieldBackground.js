@@ -22,10 +22,10 @@ export default function StarfieldBackground({}) {
             step: 0.01,
             label: 'Base Speed',
         },
-        // spacing: { value: 87, min: 10, max: 200, step: 1, label: 'Grid Spacing' }, // New control
-        // count: { value: 15, min: 1, max: 50, step: 1, label: 'Grid Count' }, // New control
-        spacing: { value: 50, min: 10, max: 200, step: 1, label: 'Grid Spacing' }, // New control
-        count: { value: 18, min: 1, max: 50, step: 1, label: 'Grid Count' }, // New control
+        spacing: { value: 87, min: 10, max: 200, step: 1, label: 'Grid Spacing' }, // New control
+        count: { value: 15, min: 1, max: 50, step: 1, label: 'Grid Count' }, // New control
+        // spacing: { value: 50, min: 10, max: 200, step: 1, label: 'Grid Spacing' }, // New control
+        // count: { value: 18, min: 1, max: 50, step: 1, label: 'Grid Count' }, // New control
         sizeScale: {
             value: 200.0, // Used in uSizeScale uniform
             min: 100,

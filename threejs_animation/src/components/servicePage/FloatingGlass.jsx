@@ -193,32 +193,7 @@ function GlassModel({
     const canvas = document.createElement('canvas');
     canvas.width = 256;
     canvas.height = 256;
-    // const ctx = canvas.getContext('2d');
-    // const gradient = ctx.createLinearGradient(0, 0, 0, 256);
-    // gradient.addColorStop(0, color);
-    // gradient.addColorStop(1, gradientColor);
-    // ctx.fillStyle = gradient;
-    // ctx.fillRect(0, 0, 256, 256);
-    // const gradientTexture = new THREE.CanvasTexture(canvas);
 
-    // scene.traverse((child) => {
-    //   if (child.isMesh) {
-    //     child.material = new THREE.MeshPhysicalMaterial({
-    //       // map: gradientTexture,
-    //       metalness: 0,
-    //       roughness: 0.1,
-    //       transmission: 1,
-    //       opacity: 0.3,
-    //       transparent: true,
-    //       thickness: 0.5,
-    //       envMapIntensity: 1,
-    //       clearcoat: 1,
-    //       clearcoatRoughness: 0.1,
-    //       ior: 1.5,
-    //       side: THREE.DoubleSide,
-    //     });
-    //   }
-    // });
 
     scene.traverse(child => {
         console.log('child', child);
@@ -228,21 +203,7 @@ function GlassModel({
             const originalColor = child.material.color;
             const originalMap = child.material.map || null;
 
-            // child.material = new THREE.MeshPhysicalMaterial({
-            //     // color: originalColor,
-            //     // map: originalMap,
-            //     // metalness: 0,
-            //     // roughness: 0.1,
-            //     // transmission: 0.3,
-            //     // opacity: 0.6,
-            //     // transparent: true,
-            //     // thickness: 0.5,
-            //     // envMapIntensity: 1,
-            //     // clearcoat: 1,
-            //     // clearcoatRoughness: 0.1,
-            //     // ior: 1.5,
-            //     // side: THREE.DoubleSide,
-            // });
+
         }
     });
 
@@ -267,26 +228,21 @@ function GlassModel({
 
         switch (motionVariant) {
             case 0:
-                mesh.rotation.y += rotationSpeed;
                 mesh.position.x = Math.sin(t) * amplitude;
                 mesh.position.y = Math.cos(t * 0.8) * amplitude * 0.8;
                 break;
 
             case 1:
-                mesh.rotation.y -= rotationSpeed * 0.7;
                 mesh.position.x = Math.cos(t * 1.2) * amplitude * 1.2;
                 mesh.position.y = Math.sin(t * 0.7) * amplitude * 0.9;
                 break;
 
             case 2:
-                mesh.rotation.x += rotationSpeed * 1.5;
                 mesh.position.x = Math.sin(t * 0.6) * amplitude;
                 mesh.position.y = Math.cos(t * 1.4) * amplitude;
                 break;
 
             case 3:
-                mesh.rotation.y += rotationSpeed * 0.5;
-                mesh.rotation.x -= rotationSpeed * 0.2;
                 mesh.position.x = Math.cos(t * 0.9) * amplitude * 0.7;
                 mesh.position.y = Math.sin(t * 1.1) * amplitude;
                 break;
@@ -300,7 +256,7 @@ function GlassModel({
     });
 
     return (
-        <group ref={ref} position={[0, 0, 0]} scale={[6.5, 6.5, 6.5]}>
+        <group ref={ref} position={[0, 0, 0]} scale={[5, 5,5]}>
             <primitive position={[0, -0.4, 0]} object={scene} />
         </group>
     );
@@ -317,19 +273,19 @@ function Loader() {
 
 export default function ThreeGlass({
     color = '#844DE9',
+    modelUrl = '/models/grow.glb',
     speed = 1,
     amplitude = 0.05,
     rotationSpeed = 0.002,
     motionVariant = 0,
     mouseInfluence = false,
 }) {
-    const modelUrl = '/models/new5.glb';
     // bg-gradient-to-r from-[#010a20] via-[#15a9b0] to-[#0f4d63]
     return (
         <div className="w-full h-full ">
             <Canvas gl={{ alpha: true }}>
                 <PerspectiveCamera makeDefault position={[0, 0, 5]} />
-                <OrbitControls enableZoom={false} enablePan={false} />
+                {/* <OrbitControls enableZoom={false} enablePan={false} /> */}
 
                 <ambientLight intensity={0.5} />
                 <directionalLight position={[10, 10, 5]} intensity={1} />

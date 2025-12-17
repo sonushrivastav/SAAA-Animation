@@ -1,6 +1,7 @@
 'use client';
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import ThreeGlass from './FloatingGlass';
+
 import GradientBackground from './GradientBackground';
 
 const GlassInstance = memo(function GlassInstance({
@@ -10,6 +11,7 @@ const GlassInstance = memo(function GlassInstance({
     amplitude,
     mouseInfluence,
     delay = 0,
+    modelUrl,
 }) {
     const [isLoaded, setIsLoaded] = useState(false);
 
@@ -23,6 +25,7 @@ const GlassInstance = memo(function GlassInstance({
     return (
         <div className={`absolute ${position} w-48 h-48`}>
             <ThreeGlass
+                modelUrl={modelUrl}
                 motionVariant={motionVariant}
                 speed={speed}
                 amplitude={amplitude}
@@ -38,14 +41,9 @@ const HeroSerivce = memo(function HeroService() {
     // Glass configurations - memoized
     const glassConfigs = useMemo(
         () => [
+
             {
-                position: 'top-[10%] left-[29%]',
-                motionVariant: 0,
-                speed: 1.2,
-                amplitude: 0.06,
-                delay: 100,
-            },
-            {
+                modelUrl: '/models/design.glb',
                 position: 'top-[50%] left-60',
                 motionVariant: 1,
                 speed: 0.9,
@@ -53,6 +51,7 @@ const HeroSerivce = memo(function HeroService() {
                 delay: 300,
             },
             {
+                modelUrl: '/models/build.glb',
                 position: 'top-[65%] right-[25%]',
                 motionVariant: 2,
                 speed: 1.4,
@@ -60,6 +59,7 @@ const HeroSerivce = memo(function HeroService() {
                 delay: 500,
             },
             {
+                modelUrl: '/models/grow.glb',
                 position: 'top-[25%] right-[20%]',
                 motionVariant: 3,
                 speed: 0.8,
@@ -105,6 +105,7 @@ const HeroSerivce = memo(function HeroService() {
                     glassConfigs.map((config, index) => (
                         <GlassInstance
                             key={index}
+                            modelUrl={config.modelUrl}
                             position={config.position}
                             motionVariant={config.motionVariant}
                             speed={config.speed}
@@ -117,7 +118,7 @@ const HeroSerivce = memo(function HeroService() {
 
             {/* Text Content */}
             <div className="absolute  text-center text-white px-8 max-w-3xl">
-                <h2 className="text-2xl md:text-3xl font-semibold leading-relaxed mb-8">
+                <h2 className="text-xl md:text-3xl font-semibold leading-relaxed mb-8">
                     Every brand deserves more than service providers. You get thinkers, creators,
                     and partners who are dedicated to your growth. Each solution is shaped around
                     your vision, built for today, and ready for what’s next.

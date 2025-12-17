@@ -2,14 +2,31 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Suspense, useEffect, useRef } from 'react';
+import OtherServices from '../../components/allServicesComponents/OtherServices';
 import DotGrid from '../../components/servicePage/DotGrid';
-import OtherSolutions from '../../components/servicePage/OtherSolution';
 import HeroSerivce from '../../components/servicePage/HeroSerivce';
 
 if (typeof window !== 'undefined') {
     gsap.registerPlugin(ScrollTrigger);
 }
 
+const servicesArray = [
+    {
+        title: 'INVESTOR RELATIONS',
+        description:
+            'We turn reports into relationships. By shaping data into clear, confident narratives, we help investors see your brand’s true potential. Numbers tell stories too, we just make them easier to believe in.',
+    },
+    {
+        title: 'FINANCIAL ADVISORY',
+        description:
+            'We read between the spreadsheets. Our experts turn complex numbers into actionable insights for your brand. Balancing vision with viability, we make sure your next move is a smart one. Every decision is backed by clarity, not guesswork.',
+    },
+    {
+        title: 'LEGAL & COMPLIANCE',
+        description:
+            'We take care of the fine print while you focus on the big picture. Reliable, simple, and structured. Protection that moves with your business, not against it. So you can grow freely knowing every box is ticked and every detail secured.',
+    },
+];
 const Service = () => {
     const gradientRef1 = useRef(null);
     const gradientRef2 = useRef(null);
@@ -137,7 +154,17 @@ const Service = () => {
                 <div className="absolute inset-0" />
             </div>
 
-            <OtherSolutions />
+            <section className="flex flex-col  bg-[#fafafa]  px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
+                <h2 className="text-3xl  md:text-4xl lg:text-5xl text-[#0f0f0f]   font-semibold  lg:leading-[60px] ">
+                    Other Related{' '}
+                    <span className="bg-[#844de9] inline px-2  rounded-md text-[#fafafa]">
+                        Services
+                    </span>
+                </h2>
+                <div className="mt-10 md:mt-14">
+                    <OtherServices services={servicesArray} />
+                </div>
+            </section>
 
             {/* Second Gradient Section (based on uploaded image colors) */}
             <div ref={gradientRef2} className="relative w-full h-[80vh] overflow-hidden">

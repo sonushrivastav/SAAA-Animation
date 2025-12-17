@@ -24,7 +24,7 @@ export default function RootLayout({ children }) {
         <html lang="en">
             <body className="">
                 <Navbar />
-                {/* <SmoothScroller /> */}
+                <SmoothScroller />
                 {children}
                 <Footer />
             </body>

@@ -7,7 +7,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ThreeGlass from './FloatingGlass';
 gsap.registerPlugin(ScrollTrigger, InertiaPlugin);
 
-const Card = React.forwardRef(({ title, items, description }, ref) => {
+const Card = React.forwardRef(({ title, items, description, modelUrl }, ref) => {
     return (
         <div
             ref={ref}
@@ -15,18 +15,18 @@ const Card = React.forwardRef(({ title, items, description }, ref) => {
             style={{ willChange: 'transform' }}
         >
             {/* Left content */}
-            <div className="w-3/5 flex flex-col">
+            <div className="w-full md:w-3/5 flex flex-col">
                 <span className="inline-block w-fit text-xl font-semibold  text-[#FAFAFA] uppercase  bg-[#844DE9] p-3.5 rounded-md mb-4">
                     {title}
                 </span>
                 <p className="text-sm text-[#9C9C9C] font-normal  ">{description}</p>
                 <ul className="flex flex-col  pt-5 text-sm flex-1">
-                    {items.map((it, i) => (
+                    {items.map((item, i) => (
                         <li
                             key={i}
-                            className="text-[#FBFBFB] border-t border-dashed border-[#555555] py-3.5 font-semibold uppercase underline tracking-normal text-md"
+                            className="text-[#fafafa] border-t border-dashed  border-[#555555] py-1 md:py-3.5 md:font-semibold uppercase  tracking-normal text-lg md:text-xl lg:text-xl"
                         >
-                            {it}
+                            <h3 className="   hover-underline-animation">{item}</h3>
                         </li>
                     ))}
                 </ul>
@@ -34,10 +34,16 @@ const Card = React.forwardRef(({ title, items, description }, ref) => {
 
             {/* Right placeholder (3D model area) */}
             <div
-                className="w-2/5 flex items-center justify-center p-6 text-center"
+                className="hidden md:flex md:w-2/5  items-center justify-center p-6 text-center"
                 style={{ pointerEvents: 'auto' }}
             >
-                <ThreeGlass motionVariant={0} speed={1.2} amplitude={0.06} mouseInfluence={true} />
+                <ThreeGlass
+                    motionVariant={0}
+                    speed={1.2}
+                    amplitude={0.06}
+                    mouseInfluence={true}
+                    modelUrl={modelUrl}
+                />
             </div>
         </div>
     );
@@ -308,6 +314,7 @@ const DotGrid = ({
                 'PRINT MEDIA',
                 'CREATIVE / MARKETING COLLATERALS',
             ],
+            modelUrl: '/models/design.glb',
         },
         {
             title: 'BUILD',
@@ -321,6 +328,7 @@ const DotGrid = ({
                 'WEB / MOBILE APPLICATIONS',
                 'AMC',
             ],
+            modelUrl: '/models/build.glb',
         },
         {
             title: 'GROW',
@@ -332,6 +340,7 @@ const DotGrid = ({
                 'SEO',
                 'EMAIL & WHATSAPP MARKETING',
             ],
+            modelUrl: '/models/grow.glb',
         },
     ];
     useEffect(() => {
@@ -439,7 +448,7 @@ const DotGrid = ({
         >
             <div
                 ref={wrapperRef}
-                className="sticky top-0  h-[105vh] w-full flex flex-col gap-12 py-24 px-48"
+                className="sticky top-0  h-[105vh] w-full flex flex-col gap-12   px-8 py-24 md:px-14 lg:px-28 md:py-16 lg:py-20"
             >
                 {/* Header */}
                 <div ref={titleRef} className="relative z-10 ">
@@ -466,6 +475,7 @@ const DotGrid = ({
                             title={c.title}
                             description={c.description}
                             items={c.items}
+                            modelUrl={c.modelUrl}
                         />
                     ))}
                 </div>
