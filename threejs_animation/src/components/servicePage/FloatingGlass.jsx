@@ -195,8 +195,6 @@ function GlassModel({
     canvas.height = 256;
 
     scene.traverse(child => {
-        console.log('child', child);
-
         if (child.isMesh) {
             // Get the original material's color
             const originalColor = child.material.color;

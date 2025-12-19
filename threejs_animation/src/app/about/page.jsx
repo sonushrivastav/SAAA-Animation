@@ -66,7 +66,7 @@ const TeamCard = ({
     return (
         <div
             ref={cardRef}
-            className="team-card relative md:w-[300px] w-[120px] md:h-[300px] h-[200px] mt-4 lg:mt-0 mx-auto will-change-transform overflow-hidden"
+            className="team-card relative lg:w-[300px] md:w-[250px]  w-[120px] md:h-[300px] h-[200px] mt-4 lg:mt-0 mx-auto will-change-transform overflow-hidden"
             style={{ transformStyle: 'preserve-3d' }}
         >
             {/* Base Image */}
@@ -105,7 +105,7 @@ const StatCard = ({ stat, label, hasContent, roundedClass }) => {
 
     return (
         <div
-            className={`relative p-4 md:p-6 lg:p-10 ${roundedClass} bg-transparent transition-colors duration-300 w-full   lg:h-[400px] ${
+            className={`relative p-4 md:p-6 lg:p-10 ${roundedClass} bg-transparent transition-colors duration-300 w-full  h-[250px] md:h-[400px] ${
                 hasContent
                     ? `border ${isHovered ? 'border-[#fafafa]' : 'border-[#555555]'}`
                     : isHovered
@@ -134,9 +134,9 @@ const StatCard = ({ stat, label, hasContent, roundedClass }) => {
 
             {/* Content */}
             {hasContent && (
-                <div className="relative z-10 flex flex-col justify-start lg:justify-between h-full">
+                <div className="relative z-10 flex flex-col justify-between h-full">
                     <h2
-                        className={`text-xl md:text-2xl lg:text-4xl font-bold transition-colors duration-300 ${
+                        className={`text-3xl md:text-2xl lg:text-4xl font-bold transition-colors duration-300 ${
                             isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
                         }`}
                     >
@@ -346,7 +346,7 @@ const About = () => {
             </section>
 
             {/* collective */}
-            <section className="bg-[#0f0f0f]  text-[#fafafa] w-full min-h-screen px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
+            <section className="bg-[#0f0f0f]  text-[#fafafa] w-full  px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
                 <h2 className="text-3xl md:text-4xl lg:text-5xl   font-semibold  lg:leading-[60px]">
                     We are a{' '}
                     <span className="bg-[#844de9] inline px-2  rounded-md">collective</span> of
@@ -354,16 +354,19 @@ const About = () => {
                     experiences.
                 </h2>
 
-                <div className=" relative mt-12 md:mt-14  grid grid-cols-2 md:grid-cols-3 bg-[#0f0f0f] rounded-2xl overflow-hidden">
+                <div className=" relative mt-12 md:mt-14  grid grid-cols-1 md:grid-cols-3 bg-[#0f0f0f] rounded-2xl overflow-hidden">
                     <StatCard
                         stat="Innovative Customization"
                         label="Our strategy centers on a research-focused approach, delving deep to gather insights. By understanding your business and market trends, we craft a customized strategy for relentless growth and long-term brand success."
                         hasContent={true}
-                        roundedClass="rounded-tl-2xl"
+                        roundedClass="rounded-t-2xl sm:rounded-r-none"
                     />
 
                     {/* Card 2 */}
-                    <StatCard hasContent={false} roundedClass="rounded-tr-2xl sm:rounded-tr-none" />
+                    <StatCard
+                        hasContent={false}
+                        roundedClass="rounded-tr-2xl sm:rounded-tr-none hidden sm:flex"
+                    />
 
                     {/* Card 3 */}
                     <StatCard
@@ -374,33 +377,33 @@ const About = () => {
                     />
 
                     {/* Card 4 */}
-                    <StatCard hasContent={false} roundedClass="sm:rounded-bl-2xl" />
+                    <StatCard hasContent={false} roundedClass="sm:rounded-bl-2xl hidden sm:flex" />
 
                     {/* Card 5 */}
                     <StatCard
                         stat="Insightful Strategy"
                         label="Thriving on creativity, our innovative process sets us apart. We craft customized strategies for a personalized experience tailored to your unique requirements."
                         hasContent={true}
-                        roundedClass="rounded-bl-2xl sm:rounded-bl-none"
+                        roundedClass="rounded-b-2xl sm:rounded-b-none"
                     />
 
                     {/* Card 6 */}
-                    <StatCard hasContent={false} roundedClass="rounded-br-2xl" />
+                    <StatCard hasContent={false} roundedClass="rounded-br-2xl hidden sm:flex" />
                 </div>
             </section>
 
             {/* Team */}
-            <section className="bg-[#fafafa]  text-[#0f0f0f] w-full min-h-screen  px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
-                <h2 className="text-3xl md:text-4xl lg:text-5xl   font-semibold  lg:leading-[60px]">
+            <section className="bg-[#fafafa]  text-[#0f0f0f] w-full min-h-screen   py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
+                <h2 className="text-3xl md:text-4xl lg:text-5xl   font-semibold  lg:leading-[60px] px-8">
                     Meet The Team That Turns Work Into{' '}
                     <span className="bg-[#844de9] text-[#fafafa] inline px-2  rounded-md">Wow</span>
                 </h2>
                 <div
-                    className="team-parent relative w-full mt-12 md:mt-14"
+                    className="team-parent px-4 relative w-full mt-12 md:mt-14"
                     style={{ perspective: '1200px', perspectiveOrigin: 'center center' }}
                 >
                     {' '}
-                    <div className="team-row flex items-center flex-row flex-wrap md:flex-row  justify-center  md:gap-2 gap-0 lg:py-1 py-0 ">
+                    <div className="team-row flex items-center flex-row flex-wrap  justify-center  md:gap-2 gap-0 lg:py-1 py-0 ">
                         {teamMembers.map((member, index) => (
                             <TeamCard
                                 key={index}

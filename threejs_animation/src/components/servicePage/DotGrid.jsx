@@ -4,6 +4,7 @@ import { InertiaPlugin } from 'gsap/InertiaPlugin';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import useDeviceType from '../hooks/useDeviceType';
 import ThreeGlass from './FloatingGlass';
 gsap.registerPlugin(ScrollTrigger, InertiaPlugin);
 
@@ -33,6 +34,7 @@ const Card = React.forwardRef(({ title, items, description, modelUrl }, ref) => 
             </div>
 
             {/* Right placeholder (3D model area) */}
+
             <div
                 className=" flex md:w-2/5  items-center justify-center p-6 text-center"
                 style={{ pointerEvents: 'auto' }}
@@ -104,6 +106,8 @@ const DotGrid = ({
 
     const baseRgb = useMemo(() => hexToRgb(baseColor), [baseColor]);
     const activeRgb = useMemo(() => hexToRgb(activeColor), [activeColor]);
+
+    const { isMobile, isTablet } = useDeviceType();
 
     const circlePath = useMemo(() => {
         if (typeof window === 'undefined' || !window.Path2D) return null;
@@ -351,11 +355,11 @@ const DotGrid = ({
             const stackOffset = 25;
             const totalStackHeight = stackOffset * (cards.length - 1);
 
-            const getInner = cardEl => cardEl?.querySelector?.('.cardInner') ?? cardEl;
+            // const getInner = cardEl => cardEl?.querySelector?.('.cardInner') ?? cardEl;
 
             // Basic starting state: every card centered, slightly down, invisible, low scale
-            gsap.set(getInner(cardRefs.current[0]), {
-                y: 25 + totalStackHeight,
+            gsap.set(cardRefs.current[0], {
+                y: window.innerHeight,
                 scale: 1,
                 transformOrigin: 'center center',
                 zIndex: 1, // top card highest z
@@ -366,8 +370,8 @@ const DotGrid = ({
                 gsap.set(card, {
                     y: window.innerHeight,
                     scale: 1,
-                    transformOrigin: 'center center',
-                    zIndex: idx + 2,
+                    // transformOrigin: 'center center',
+                    zIndex: cards.length + (idx + 1),
                 });
             });
 
@@ -379,62 +383,61 @@ const DotGrid = ({
                     // Pin for enough distance: one viewport per card + a little extra
                     end: () => `+=${window.innerHeight * (cards.length + 0.5)}`,
                     pin: true,
-                    scrub: 0.5,
+                    scrub: true,
                     pinSpacing: true,
                     anticipatePin: 1,
                     fastScrollEnd: true, // Better handling of fast scrolls
                     preventOverlaps: true, // Prevent animation conflicts
-                    onLeave: () => {
-                        // Ensure clean state when leaving
-                        ScrollTrigger.refresh();
-                    },
-                    onLeaveBack: () => {
-                        // Ensure clean state when scrolling back
-                        ScrollTrigger.refresh();
-                    },
+                    // onLeave: () => {
+                    //     // Ensure clean state when leaving
+                    //     ScrollTrigger.refresh();
+                    // },
+                    // onLeaveBack: () => {
+                    //     // Ensure clean state when scrolling back
+                    //     ScrollTrigger.refresh();
+                    // },
                 },
             });
 
             // move title upward and stick before first card appears
             tl.to(titleRef.current, {
-                y: -80, // adjust upward distance (you can tweak)
+                y: `${isMobile ? 0 : -20}`, // adjust upward distance (you can tweak)
                 opacity: 1,
                 ease: 'power2.out',
                 duration: 0.8,
             });
 
             // Animate first card to center position
+            const topDistance = isMobile ? 30 : -40;
             tl.to(
-                getInner(cardRefs.current[0]),
+                cardRefs.current[0],
                 {
-                    y: 0 - stackOffset * (cards.length - 1),
-                    scale: 0.85,
+                    y: topDistance,
+                    scale: 1,
                     ease: 'power2.out',
                     duration: cards.length - 1,
                 },
                 0
             );
 
-            cards.forEach((_, i) => {
+            cards.slice(1).forEach((_, i) => {
                 const cardIndex = i + 1;
-                const cardEl = cardRefs.current[cardIndex];
-                const inner = getInner(cardEl);
-                console.log(inner);
-
-                const startTime = cardIndex * 1;
+                const inner = cardRefs.current[cardIndex];
                 const cardsAbove = cards.length - 1 - cardIndex;
+                const topDistance = isMobile ? 0 : -40;
 
                 tl.to(
                     inner,
                     {
-                        y: -(stackOffset * cardsAbove),
-                        scale: 0.85,
+                        y: topDistance + stackOffset * cardIndex,
+                        scale: 1,
                         ease: 'power2.out',
-                        duration: cards.length - cardIndex,
+                        duration: 1,
                     },
-                    startTime
+                    '>'
                 );
             });
+
             // Add extra scroll space at the end before unpinning
             tl.to({}, { duration: 0.5 });
         }, rootRef);

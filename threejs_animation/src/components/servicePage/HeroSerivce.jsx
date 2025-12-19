@@ -137,7 +137,7 @@ const HeroSerivce = memo(function HeroService() {
 
             {/* Text Content */}
             <div className="absolute  text-center text-[#fafafa] px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20 w-[full] lg:w-[75%]">
-                <h2 className="text-2xl md:text-4xl lg:text-4xl font-semibold leading-normal md:leading-[50px] lg:leading-[63px] ">
+                <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold leading-normal md:leading-[50px] lg:leading-[63px] ">
                     Every brand deserves more than service providers. You get thinkers, creators,
                     and partners who are dedicated to your growth. Each solution is shaped around
                     your vision, built for today, and ready for what’s next.

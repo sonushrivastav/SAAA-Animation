@@ -389,7 +389,7 @@ const SocialMediaMarketing = ({ data }) => {
 
             {/* Key Figures Section */}
 
-            <section className="w-full min-h-screen bg-[#0f0f0f] text-[#fafafa] px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
+            <section className="w-full  bg-[#0f0f0f] text-[#fafafa] px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
                 <h2 className="text-3xl md:text-4xl lg:text-5xl   font-semibold  lg:leading-[60px]">
                     Here are some{' '}
                     <span className="bg-[#844de9]  px-2  rounded-md">key figures</span> that
@@ -397,13 +397,12 @@ const SocialMediaMarketing = ({ data }) => {
                 </h2>
 
                 {/* Stats Grid Section */}
-                <div className=" relative mt-12 md:mt-14  grid grid-cols-2 md:grid-cols-3 bg-[#0f0f0f] rounded-2xl ">
+                <div className=" relative mt-12 md:mt-14  grid grid-cols-1 md:grid-cols-3 bg-[#0f0f0f] rounded-2xl ">
                     <StatCard
                         stat="100+"
                         label="accounts managed"
                         hasContent={true}
-                        roundedClass="rounded-tl-2xl
-"
+                        roundedClass="rounded-t-2xl sm:rounded-tr-none"
                     />
 
                     {/* Card 2 */}
@@ -411,21 +410,21 @@ const SocialMediaMarketing = ({ data }) => {
                         stat="1 Cr+"
                         label="total reach generated"
                         hasContent={true}
-                        roundedClass="rounded-tr-2xl sm:rounded-tr-none"
+                        roundedClass=""
                     />
 
                     {/* Card 3 */}
-                    <StatCard hasContent={false} roundedClass="sm:rounded-tr-2xl" />
+                    <StatCard hasContent={false} roundedClass="sm:rounded-tr-2xl hidden sm:flex" />
 
                     {/* Card 4 */}
-                    <StatCard hasContent={false} roundedClass="sm:rounded-bl-2xl" />
+                    <StatCard hasContent={false} roundedClass="sm:rounded-bl-2xl hidden sm:flex" />
 
                     {/* Card 5 */}
                     <StatCard
                         stat="150%"
                         label="follower growth achieved"
                         hasContent={true}
-                        roundedClass="rounded-bl-2xl sm:rounded-bl-none"
+                        roundedClass=""
                     />
 
                     {/* Card 6 */}
@@ -433,7 +432,7 @@ const SocialMediaMarketing = ({ data }) => {
                         stat="4%"
                         label="average increase in engagement"
                         hasContent={true}
-                        roundedClass="rounded-br-2xl"
+                        roundedClass="rounded-b-2xl sm:rounded-bl-none"
                     />
                 </div>
 
@@ -465,7 +464,7 @@ const SocialMediaMarketing = ({ data }) => {
 
             {/* case stuides */}
 
-            <section className="w-full min-h-screen bg-[#fafafa] px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20 ">
+            <section className="w-full  bg-[#fafafa] px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20 ">
                 <h2 className="text-3xl md:text-4xl  lg:text-5xl font-semibold  lg:leading-[60px]">
                     Case{' '}
                     <span className="bg-[#844de9] inline px-2  rounded-md text-[#fafafa]">
@@ -514,7 +513,7 @@ const SocialMediaMarketing = ({ data }) => {
 
             {/* Accordian section */}
 
-            <section className="relative bg-[#0f0f0f] flex min-h-screen px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
+            <section className="relative bg-[#0f0f0f] flex  px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
                 <div className="absolute inset-0 z-1">
                     <DotGrid
                         dotSize={2}

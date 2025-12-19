@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import ContactForm from '../../components/allServicesComponents/ContactForm';
+import useDeviceType from '../../components/hooks/useDeviceType';
 import DotGrid from '../../components/socialMedia/DotGrid';
 
 const Contact = () => {
@@ -16,12 +17,12 @@ const Contact = () => {
         variant = 'location',
         roundedClass = '',
     }) => {
+        const { isMobile, isTablet } = useDeviceType();
         const [isHovered, setIsHovered] = useState(false);
 
         const [copied, setCopied] = useState(false);
 
         const isContact = variant === 'contact';
-        console.log(contactPerson);
 
         const handleCopy = () => {
             navigator.clipboard.writeText(email);
@@ -93,7 +94,7 @@ const Contact = () => {
                         </div>
                         <div className="flex flex-col  gap-2 ">
                             <p className=" text-xs md:text-sm lg:text-base text-[#9c9c9c]">Email</p>
-                            <div className="flex flex-col md:flex-row gap-2">
+                            <div className="flex  md:flex-row items-center  gap-2">
                                 <p
                                     className={`text-sm md:text-base lg:text-xl  transition-colors duration-300 truncate ${
                                         isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
@@ -103,7 +104,7 @@ const Contact = () => {
                                 </p>
 
                                 {/* Copy button visible only on hover */}
-                                {isHovered && (
+                                {(isHovered || isMobile || isTablet) && (
                                     <button
                                         onClick={handleCopy}
                                         className="text-xs px-2 py-1 rounded-md bg-transparent text-[#fafafa] border border-[#666]"
@@ -140,7 +141,7 @@ const Contact = () => {
                         </div>
                         <div className="flex flex-col  gap-2 ">
                             <div className="flex flex-row gap-6 items-center  ">
-                                <div className=" lg:w-25 lg:h-25 rounded-[100%] border-t-2 border-[#fafafa] border-b-2">
+                                <div className="w-20 h-20 lg:w-25 lg:h-25 rounded-[100%] border-t-2 border-[#fafafa] border-b-2">
                                     <Image
                                         src={'/images/about/saurav.webp'}
                                         width={200}
@@ -166,14 +167,14 @@ const Contact = () => {
                                         </p>
                                     </div>
 
-                                    {isHovered && (
+                                    {(isHovered || isMobile || isTablet) && (
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
                                             width="56"
                                             height="56"
                                             viewBox="0 0 56 56"
                                             fill="none"
-                                            className=" rounded-[100%] border-t-2 border-[#fafafa] border-b-2"
+                                            className="w-20 sm:w-auto rounded-[100%] border-t-2 border-[#fafafa] border-b-2"
                                         >
                                             <rect
                                                 width="56"
@@ -219,14 +220,14 @@ const Contact = () => {
                     and create side by side. We're excited to chat with you.
                 </h2>
 
-                <div className=" relative mt-12 md:mt-14  grid grid-cols-2 md:grid-cols-2 bg-[#0f0f0f] rounded-2xl ">
+                <div className=" relative mt-12 md:mt-14  grid grid-cols-1 md:grid-cols-2 bg-[#0f0f0f] rounded-2xl ">
                     <StatCard
                         hasContent={true}
                         title="Mumbai"
                         address="Kanakia Wall Street, Mumbai, India"
                         email="info@saaaconsultants.com"
                         variant="location"
-                        roundedClass="rounded-tl-2xl"
+                        roundedClass="rounded-t-2xl sm:rounded-tr-none"
                         headQurter={true}
                     />
 
@@ -236,7 +237,7 @@ const Contact = () => {
                         address="Sambhajinagar"
                         email="info@saaaconsultants.com"
                         variant="location"
-                        roundedClass="rounded-tr-2xl sm:rounded-tr-none"
+                        roundedClass="rounded-tr-none sm:rounded-tr-2xl"
                     />
 
                     {/* Card 3 */}
@@ -249,10 +250,10 @@ const Contact = () => {
                             role: 'Co-Head, Digital Marketing / Business',
                             image: '/images/about/saurav.webp',
                         }}
-                        roundedClass="rounded-bl-2xl sm:rounded-bl-none"
+                        roundedClass="rounded-b-2xl sm:rounded-br-none"
                     />
 
-                    <StatCard hasContent={false} roundedClass="rounded-br-2xl" />
+                    <StatCard hasContent={false} roundedClass="rounded-br-2xl hidden sm:flex" />
                 </div>
             </section>
 
