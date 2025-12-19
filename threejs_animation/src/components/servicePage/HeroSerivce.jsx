@@ -2,6 +2,7 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import ThreeGlass from './FloatingGlass';
 
+import useDeviceType from '../hooks/useDeviceType';
 import GradientBackground from './GradientBackground';
 
 const GlassInstance = memo(function GlassInstance({
@@ -23,7 +24,7 @@ const GlassInstance = memo(function GlassInstance({
     if (!isLoaded) return null;
 
     return (
-        <div className={`absolute ${position} w-48 h-48`}>
+        <div className={`absolute ${position} w-52 h-52  flex  items-center justify-center`}>
             <ThreeGlass
                 modelUrl={modelUrl}
                 motionVariant={motionVariant}
@@ -37,14 +38,19 @@ const GlassInstance = memo(function GlassInstance({
 const HeroSerivce = memo(function HeroService() {
     const containerRef = useRef(null);
     const [isVisible, setIsVisible] = useState(false);
-
+    const { isMobile, isTablet } = useDeviceType();
     // Glass configurations - memoized
     const glassConfigs = useMemo(
         () => [
-
             {
                 modelUrl: '/models/design.glb',
-                position: 'top-[50%] left-60',
+                position: `${
+                    isMobile
+                        ? 'top-[65%] left-[0%]'
+                        : isTablet
+                        ? 'top-[62%] left-[1%]'
+                        : 'top-[45%] left-[7%]'
+                }`,
                 motionVariant: 1,
                 speed: 0.9,
                 amplitude: 0.08,
@@ -52,7 +58,13 @@ const HeroSerivce = memo(function HeroService() {
             },
             {
                 modelUrl: '/models/build.glb',
-                position: 'top-[65%] right-[25%]',
+                position: `${
+                    isMobile
+                        ? 'top-[60%] right-[0%]'
+                        : isTablet
+                        ? 'top-[55%] right-[5%]'
+                        : 'top-[65%] right-[15%]'
+                }`,
                 motionVariant: 2,
                 speed: 1.4,
                 amplitude: 0.07,
@@ -60,7 +72,14 @@ const HeroSerivce = memo(function HeroService() {
             },
             {
                 modelUrl: '/models/grow.glb',
-                position: 'top-[25%] right-[20%]',
+                position: `${
+                    isMobile
+                        ? 'top-[4%] right-[25%]'
+                        : isTablet
+                        ? 'top-[0%] right-[5%]'
+                        : 'top-[21%] right-[11%]'
+                }`,
+
                 motionVariant: 3,
                 speed: 0.8,
                 amplitude: 0.05,
@@ -117,8 +136,8 @@ const HeroSerivce = memo(function HeroService() {
             </div>
 
             {/* Text Content */}
-            <div className="absolute  text-center text-white px-8 max-w-3xl">
-                <h2 className="text-xl md:text-3xl font-semibold leading-relaxed mb-8">
+            <div className="absolute  text-center text-[#fafafa] px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20 w-[full] lg:w-[75%]">
+                <h2 className="text-2xl md:text-4xl lg:text-4xl font-semibold leading-normal md:leading-[50px] lg:leading-[63px] ">
                     Every brand deserves more than service providers. You get thinkers, creators,
                     and partners who are dedicated to your growth. Each solution is shaped around
                     your vision, built for today, and ready for what’s next.

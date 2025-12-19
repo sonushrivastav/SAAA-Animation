@@ -171,7 +171,7 @@
 
 // Code Seperator new implementation for 3Dglass GLB
 
-import { Environment, OrbitControls, PerspectiveCamera } from '@react-three/drei';
+import { Environment, PerspectiveCamera } from '@react-three/drei';
 import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import { Suspense, useEffect, useRef } from 'react';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
@@ -194,7 +194,6 @@ function GlassModel({
     canvas.width = 256;
     canvas.height = 256;
 
-
     scene.traverse(child => {
         console.log('child', child);
 
@@ -202,8 +201,6 @@ function GlassModel({
             // Get the original material's color
             const originalColor = child.material.color;
             const originalMap = child.material.map || null;
-
-
         }
     });
 
@@ -256,8 +253,8 @@ function GlassModel({
     });
 
     return (
-        <group ref={ref} position={[0, 0, 0]} scale={[5, 5,5]}>
-            <primitive position={[0, -0.4, 0]} object={scene} />
+        <group ref={ref} position={[0, 0, 0]} scale={[5.5, 5.5, 5.5]}>
+            <primitive position={[0.08, -0.4, 0]} object={scene} />
         </group>
     );
 }
@@ -272,7 +269,6 @@ function Loader() {
 }
 
 export default function ThreeGlass({
-    color = '#844DE9',
     modelUrl = '/models/grow.glb',
     speed = 1,
     amplitude = 0.05,

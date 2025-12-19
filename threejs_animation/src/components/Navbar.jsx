@@ -33,28 +33,28 @@ export default function Navbar(props) {
         {
             title: 'Design',
             items: [
-                { label: 'UI / UX', href: '/dynamic/ui-ux' },
-                { label: 'Branding', href: '/dynamic/branding' },
-                { label: '3D Modeling', href: '/dynamic/3d-modeling' },
-                { label: 'Motion Graphics / Editing', href: '/dynamic/motion-graphics-editing' },
-                { label: 'Print Media', href: '/dynamic/print-media' },
+                { label: 'UI / UX', href: '/ui-ux' },
+                { label: 'Branding', href: '/branding' },
+                { label: '3D Modeling', href: '/3d-modeling' },
+                { label: 'Motion Graphics / Editing', href: '/motion-graphics-editing' },
+                { label: 'Print Media', href: '/print-media' },
                 {
-                    label: 'dynamic / Marketing Collaterals',
-                    href: '/dynamic/creative-marketing-collaterals',
+                    label: 'Creative Marketing Collaterals',
+                    href: '/creative-marketing-collaterals',
                 },
             ],
         },
         {
             title: 'Build',
             items: [
-                { label: 'Basic Website', href: '/dynamic/basic-website' },
-                { label: 'E-Commerce Website', href: '/dynamic/ecommerce-website' },
-                { label: 'Custom CMS', href: '/dynamic/custom-cms' },
-                { label: 'Landing Pages', href: '/dynamic/landing-pages' },
-                { label: 'Web / Mobile Applications', href: '/dynamic/web-mobile-applications' },
+                { label: 'Basic Website', href: '/basic-website' },
+                { label: 'E-Commerce Website', href: '/ecommerce-website' },
+                { label: 'Custom CMS', href: '/custom-cms' },
+                { label: 'Landing Pages', href: '/landing-pages' },
+                { label: 'Web / Mobile Applications', href: '/web-mobile-applications' },
                 {
                     label: 'AMC',
-                    href: '/dynamic/amc',
+                    href: '/amc',
                 },
             ],
         },
@@ -64,10 +64,10 @@ export default function Navbar(props) {
                 { label: 'Social Media Marketing', href: '/socialmedia' },
                 {
                     label: 'Paid Ads / Performance Marketing',
-                    href: '/dynamic/paid-ads-performance-marketing',
+                    href: '/paid-ads-performance-marketing',
                 },
-                { label: 'SEO', href: '/dynamic/seo' },
-                { label: 'Email & WhatsApp Marketing', href: '/dynamic/email-whatsapp-marketing' },
+                { label: 'SEO', href: '/seo' },
+                { label: 'Email & WhatsApp Marketing', href: '/email-whatsapp-marketing' },
             ],
         },
         {
@@ -232,7 +232,7 @@ export default function Navbar(props) {
                                                 href={item.href}
                                                 className="border-b-2 border-dashed border-[#555555] py-4 "
                                             >
-                                                <h3 className="text-3xl font-semibold text-[#fafafa] hover-underline-animation">
+                                                <h3 className="text-3xl font-semibold text-[#fafafa] hover-underline-animation ">
                                                     {item.label}
                                                 </h3>
                                             </Link>
@@ -261,7 +261,7 @@ export default function Navbar(props) {
                                                             <Link
                                                                 href={item.href}
                                                                 onClick={handleToggle}
-                                                                className="text-base text-[#fafafa] uppercase "
+                                                                className="text-base  text-[#fafafa] uppercase "
                                                             >
                                                                 {item.label}
                                                             </Link>

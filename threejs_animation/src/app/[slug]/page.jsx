@@ -1,5 +1,5 @@
-import ServiceLayout from '../../../components/allServicesComponents/ServiceLayout';
-import { servicesData } from '../../../lib/serviceData';
+import ServiceLayout from '../../components/allServicesComponents/ServiceLayout';
+import { servicesData } from '../../lib/serviceData';
 
 export default function ServicePage({ params }) {
     const { slug } = params;

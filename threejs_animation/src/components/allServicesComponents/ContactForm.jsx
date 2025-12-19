@@ -148,7 +148,7 @@ export default function ContactForm({ btnPosition = 'right' }) {
                         placeholder="Last Name *"
                         value={formData.lastName}
                         onChange={handleChange}
-                        className={`w-full mt-2 border ${
+                        className={`w-full mt-2 italic border ${
                             errors.lastName ? 'border-red-500' : 'border-[#9C9C9C]'
                         } bg-[#fafafa] focus:ring-1 focus:ring-[#844de9] rounded-md p-3 outline-none text-[#0f0f0f] placeholder-[#9c9c9c]`}
                     />

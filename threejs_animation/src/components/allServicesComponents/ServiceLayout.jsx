@@ -12,6 +12,7 @@ import ContactForm from '../../components/allServicesComponents/ContactForm';
 import FaqAccordion from '../../components/allServicesComponents/FaqAccordion';
 import OtherServices from '../../components/allServicesComponents/OtherServices';
 import DotGrid from '../../components/socialMedia/DotGrid';
+import useDeviceType from '../hooks/useDeviceType';
 gsap.registerPlugin(ScrollTrigger);
 
 const platformImages = [
@@ -87,7 +88,7 @@ const servicesArray = [
     },
 ];
 
-function initSpiralAnimation(slicesRef) {
+function initSpiralAnimation(slicesRef, isMobile, isTablet) {
     const canvas = document.getElementById('spiralCanvas');
     if (!canvas) return;
 
@@ -112,7 +113,7 @@ function initSpiralAnimation(slicesRef) {
     window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
-        renderer.setSize(container.innerWidth, container.innerHeight);
+        renderer.setSize(container.clientWidth, container.clientHeight);
     });
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
@@ -127,24 +128,49 @@ function initSpiralAnimation(slicesRef) {
         scene.environment = hdrMap;
     });
 
+    const getModelTransform = () => {
+        if (isMobile) {
+            return {
+                scale: [8, 8, 4.2],
+                position: [-1.2, -0.6, 0],
+                rotation: [0, 0.1, -Math.PI / 2],
+            };
+        }
+
+        if (isTablet) {
+            return {
+                scale: [10, 10, 4.6],
+                position: [-1.35, -0.8, 0],
+                rotation: [0, 0.12, -Math.PI / 2],
+            };
+        }
+
+        // Desktop
+        return {
+            scale: [16, 16, 5],
+            position: [-2.6, -1.25, 0],
+            rotation: [0, 0.15, -Math.PI / 2],
+        };
+    };
+
     const loader = new GLTFLoader();
 
     loader.load('/models/model.glb', gltf => {
         const rawModel = gltf.scene;
+        const { scale, position, rotation } = getModelTransform();
 
         // const modelGroup = new THREE.Group();
         scene.add(rawModel);
         // modelGroup.add(rawModel);
-        rawModel.scale.set(16, 18, 5);
-        rawModel.position.set(-2.6, -1.25, 0);
-        rawModel.rotation.set(0, 0.15, -Math.PI / 2);
+        rawModel.scale.set(...scale);
+        rawModel.position.set(...position);
+        rawModel.rotation.set(...rotation);
 
         slicesRef.current = [];
 
         rawModel.traverse(child => {
             if (child.isMesh) {
                 slicesRef.current.push(child);
-                console.log(child.name);
             }
         });
 
@@ -231,11 +257,12 @@ function initSpiralAnimation(slicesRef) {
                 delay
             );
         });
+
         ScrollTrigger.create({
             trigger: '.scroll-container',
             start: 'top 80%',
             once: false, // only trigger once
-            onEnter: () => tl.play(), // plays when top hits center
+            onEnter: () => tl.play(),
         });
     });
 
@@ -258,11 +285,11 @@ function initSpiralAnimation(slicesRef) {
 const ServiceLayout = ({ data }) => {
     const [activeIndex, setActiveIndex] = useState(0);
     const slicesRef = useRef([]);
-    console.log('data is', data);
+    const { isMobile, isTablet } = useDeviceType();
 
     useEffect(() => {
-        initSpiralAnimation(slicesRef);
-    }, []);
+        initSpiralAnimation(slicesRef, isMobile, isTablet);
+    }, [isMobile, isTablet]);
 
     const StatCard = ({ stat, label, hasContent, roundedClass }) => {
         const [isHovered, setIsHovered] = useState(false);
@@ -485,7 +512,7 @@ const ServiceLayout = ({ data }) => {
 
                 {/* Ready to level */}
                 <div className="mt-12 md:mt-14 flex flex-col md:flex-row items-center text-[#0f0f0f]  ">
-                    <div className="flex flex-col w-full md:w-[40%]">
+                    <div className="flex flex-col w-full md:w-[50%] lg:w-[40%]">
                         <h1 className="text-3xl  md:text-4xl lg:text-5xl   font-semibold  lg:leading-[60px]">
                             Ready to{' '}
                             <div className="bg-[#844de9] inline px-2  rounded-md text-[#fafafa]">
@@ -501,7 +528,7 @@ const ServiceLayout = ({ data }) => {
                             Schedule A Call
                         </button>
                     </div>
-                    <div className="w-full md:w-[60%]  relative flex items-center justify-center  h-[400px] scroll-container ">
+                    <div className="w-full md:w-[50%]  lg:w-[60%]  relative flex items-center justify-center  h-[400px] scroll-container ">
                         <canvas
                             // ref={canvasRef}
                             id="spiralCanvas"

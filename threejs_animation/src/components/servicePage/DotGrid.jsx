@@ -11,7 +11,7 @@ const Card = React.forwardRef(({ title, items, description, modelUrl }, ref) => 
     return (
         <div
             ref={ref}
-            className="absolute left-1/2 top-1/2 w-full max-w-7xl h-[500px] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-[#555555]/10 backdrop-blur-xl border border-[#9C9C9C]   p-8 flex justify-between gap-8"
+            className="absolute left-1/2 top-1/2 w-full  lg:h-[490px] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-[#555555]/10 backdrop-blur-xl border border-[#9C9C9C]   p-8 flex lg:flex-row flex-col justify-between gap-8"
             style={{ willChange: 'transform' }}
         >
             {/* Left content */}
@@ -34,7 +34,7 @@ const Card = React.forwardRef(({ title, items, description, modelUrl }, ref) => 
 
             {/* Right placeholder (3D model area) */}
             <div
-                className="hidden md:flex md:w-2/5  items-center justify-center p-6 text-center"
+                className=" flex md:w-2/5  items-center justify-center p-6 text-center"
                 style={{ pointerEvents: 'auto' }}
             >
                 <ThreeGlass
@@ -408,17 +408,19 @@ const DotGrid = ({
                 getInner(cardRefs.current[0]),
                 {
                     y: 0 - stackOffset * (cards.length - 1),
-                    scale: 1 - (cards.length - 1) * 0.02,
+                    scale: 0.85,
                     ease: 'power2.out',
                     duration: cards.length - 1,
                 },
                 0
             );
 
-            cards.slice(1).forEach((_, i) => {
+            cards.forEach((_, i) => {
                 const cardIndex = i + 1;
                 const cardEl = cardRefs.current[cardIndex];
                 const inner = getInner(cardEl);
+                console.log(inner);
+
                 const startTime = cardIndex * 1;
                 const cardsAbove = cards.length - 1 - cardIndex;
 
@@ -426,7 +428,7 @@ const DotGrid = ({
                     inner,
                     {
                         y: -(stackOffset * cardsAbove),
-                        scale: 1 - cardsAbove * 0.02,
+                        scale: 0.85,
                         ease: 'power2.out',
                         duration: cards.length - cardIndex,
                     },
@@ -444,11 +446,11 @@ const DotGrid = ({
         <section
             ref={rootRef}
             className={` relative   bg-[#0f0f0f] overflow-hidden ${className}`}
-            style={{ height: `${100}vh`, backgroundColor: '#0f0f0f', ...style }}
+            style={{ height: `${110}vh`, backgroundColor: '#0f0f0f', ...style }}
         >
             <div
                 ref={wrapperRef}
-                className="sticky top-0  h-[105vh] w-full flex flex-col gap-12   px-8 py-24 md:px-14 lg:px-28 md:py-16 lg:py-20"
+                className="sticky top-0   h-[105vh]  w-full flex flex-col gap-12   px-8 py-24 md:px-14 lg:px-28 md:py-16 lg:py-20"
             >
                 {/* Header */}
                 <div ref={titleRef} className="relative z-10 ">

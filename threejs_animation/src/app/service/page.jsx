@@ -44,9 +44,9 @@ const Service = () => {
         // ===== First Gradient Animation (existing one) =====
         if (gradientRef1.current) {
             const colors1 = [
-                '#060010 0%',
-                '#060010 30%',
-                '#060010 45%',
+                '#0f0f0f 0%',
+                '#0f0f0f 30%',
+                '#0f0f0f 45%',
                 '#22579C 60%',
                 '#4A8AE6 70%',
                 '#fafafa 95%',
@@ -128,11 +128,11 @@ const Service = () => {
                 style={{ backgroundColor: '#0f0f0f' }}
             >
                 <DotGrid
-                    dotSize={5}
-                    gap={10}
+                    dotSize={2}
+                    gap={8}
                     baseColor="#323234"
                     activeColor="#5227FF"
-                    proximity={100}
+                    proximity={120}
                     shockRadius={250}
                     shockStrength={5}
                     resistance={750}
@@ -171,7 +171,7 @@ const Service = () => {
                 <div className="absolute inset-0" />
             </div>
 
-            <div className="w-full  h-screen self-center bg-[#0f0f0f]">
+            <div className="w-full   self-center bg-[#0f0f0f]">
                 <Suspense fallback={<p>Loading video...</p>}>
                     <video
                         src="/videos/Big_Buck_Bunny_1080_10s_5MB.mp4"

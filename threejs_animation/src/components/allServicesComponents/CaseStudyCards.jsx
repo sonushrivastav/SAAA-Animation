@@ -3,6 +3,13 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
+const slugify = slug =>
+    slug
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, '') // remove special chars
+        .replace(/\s+/g, '-') // replace spaces with -
+        .replace(/-+/g, '-'); // remove duplicate hyphens
 const CaseStudyCards = ({ caseStudies = [], className = '' }) => {
     return (
         <>
@@ -17,14 +24,17 @@ const CaseStudyCards = ({ caseStudies = [], className = '' }) => {
                     ></div>
 
                     {/* Main card */}
-                    <div className="relative bg-white pt-6 rounded-xl border border-[#0f0f0f] flex flex-col items-start justify-between h-full">
+                    <Link
+                        href={`/case-studies/${slugify(item.title)}`}
+                        className="relative bg-white pt-6 rounded-xl border border-[#0f0f0f] flex flex-col items-start justify-between h-full"
+                    >
                         <div className="flex flex-col w-full">
                             <div className="w-full px-6 flex justify-between items-center">
                                 <h3 className="text-lg md:text-2xl uppercase font-semibold text-[#0f0f0f]">
                                     {item.title}
                                 </h3>
 
-                                <Link href={item.href} className="cursor-pointer">
+                                <div className="cursor-pointer">
                                     <svg
                                         width="12"
                                         height="12"
@@ -38,7 +48,7 @@ const CaseStudyCards = ({ caseStudies = [], className = '' }) => {
                                             strokeWidth="2"
                                         />
                                     </svg>
-                                </Link>
+                                </div>
                             </div>
 
                             <div className="px-6 py-2">
@@ -57,7 +67,7 @@ const CaseStudyCards = ({ caseStudies = [], className = '' }) => {
                                 className="h-full w-full object-cover rounded-b-2xl"
                             />
                         </div>
-                    </div>
+                    </Link>
                 </div>
             ))}
         </>

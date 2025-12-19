@@ -2,7 +2,6 @@
 import { Environment } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import { Bloom, EffectComposer } from '@react-three/postprocessing';
-import Lenis from '@studio-freight/lenis';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { BlendFunction } from 'postprocessing';
@@ -12,12 +11,11 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
+import useDeviceType from '../../components/hooks/useDeviceType';
 import FlowingParticles from '../../components/ParticleBackground';
 import ParticlesMorphPerSlice from '../../components/ScrollServiceLogo';
 import StarfieldBackground from '../../components/StarfieldBackground';
 import StatsSection from '../../components/Stats';
-import useDeviceType from '../../components/hooks/useDeviceType';
-
 // ✅ It's good practice to register the plugin once
 gsap.registerPlugin(ScrollTrigger);
 
@@ -39,7 +37,7 @@ const Animation = () => {
     const texts = [
         'You’re visible everywhere, but remembered nowhere?',
         'Your website and UI/UX look great in reviews, not in results.',
-        'Investors are interested, but not invested',
+        'Investors are interested, but not invested?',
     ];
     const SERVICE_DATA = [
         {
@@ -110,22 +108,22 @@ const Animation = () => {
     const { isMobile, isTablet, isDesktop } = useDeviceType();
 
     useEffect(() => {
-        const lenis = new Lenis({
-            duration: 1.1,
-            easing: t => 1 - Math.pow(1 - t, 3),
-            smoothWheel: true,
-            smoothTouch: true,
-            touchMultiplier: 0.9,
-            wheelMultiplier: 0.4,
-        });
+        // const lenis = new Lenis({
+        //     duration: 1.1,
+        //     easing: t => 1 - Math.pow(1 - t, 3),
+        //     smoothWheel: true,
+        //     smoothTouch: true,
+        //     touchMultiplier: 0.9,
+        //     wheelMultiplier: 0.4,
+        // });
 
-        lenis.on('scroll', ScrollTrigger.update);
+        // lenis.on('scroll', ScrollTrigger.update);
 
-        function raf(time) {
-            lenis.raf(time);
-            requestAnimationFrame(raf);
-        }
-        requestAnimationFrame(raf);
+        // function raf(time) {
+        //     lenis.raf(time);
+        //     requestAnimationFrame(raf);
+        // }
+        // requestAnimationFrame(raf);
 
         // responsive checks based on updated width
 
@@ -222,7 +220,7 @@ const Animation = () => {
                 } else {
                     // Desktop fallback
                     rawModel.scale.set(17, 17, 4);
-                    rawModel.position.set(-2.3, -2.4, 0);
+                    rawModel.position.set(-2.3, -2.8, 0);
                     rawModel.rotation.set(0, 0, 0);
                 }
 
@@ -267,13 +265,7 @@ const Animation = () => {
                 //     initialRotZ: -0.2,
                 // });
 
-                createParticleSystem(
-                    rawModel,
-
-                    logoMaterials,
-                    scene,
-                    camera
-                );
+                createParticleSystem(rawModel, logoMaterials, scene, camera);
             },
             undefined,
             error => {
@@ -488,6 +480,7 @@ const Animation = () => {
                 depthWrite: false,
             });
         }
+        const modelScale = { value: 1 };
 
         function setupScrollAnimation(materials, particlesMaterial, camera) {
             // Make sure starfield starts hidden
@@ -500,13 +493,13 @@ const Animation = () => {
                     start: 'top top',
                     end: '100% bottom',
                     scrub: 0.82, // smooth scroll-scrub
-                    // snap: {
-                    //   snapTo: "labelsDirectional",
-                    //   duration: 0.9, // instant transition to snap point
-                    //   delay: 0, // start snapping immediately when scroll stops
-                    //   ease: "none",
-                    //   inertia: false,
-                    // },
+                    snap: {
+                        snapTo: 'labelsDirectional',
+                        duration: 2.9, // instant transition to snap point
+                        delay: 0, // start snapping immediately when scroll stops
+                        ease: 'none',
+                        inertia: false,
+                    },
 
                     onUpdate: self => {
                         gsap.to(flowAnimation.current, {
@@ -519,13 +512,13 @@ const Animation = () => {
             });
 
             // --- STEP 1: Move logo to center ---
-            // tl.addLabel("initial");
+            tl.addLabel('initial');
             // Animate each spiral individually to center with rotation
             slicesRef.current.forEach((slice, index) => {
-                let delay = index * 0.3;
-                if (index === slicesRef.length - 1) {
-                    delay = index * 0.02;
-                }
+                let delay = index * 0.6;
+                // if (index === slicesRef.length - 1) {
+                //     delay = index * 0.02;
+                // }
 
                 // Move each spiral to center
                 tl.to(
@@ -547,6 +540,17 @@ const Animation = () => {
                     },
                     delay
                 );
+                if (isMobile) {
+                    tl.to(
+                        modelScale,
+                        {
+                            value: 0.58, // 🔽 slight scale down (tweak: 0.85–0.9)
+                            duration: 2,
+                            ease: 'power1.inOut',
+                        },
+                        0 // sync with rotation start
+                    );
+                }
             });
 
             tl.to(
@@ -569,7 +573,7 @@ const Animation = () => {
                 },
                 '>+1'
             );
-            // tl.addLabel('rotation');
+            tl.addLabel('rotation');
             tl.to('.second-text', { opacity: 0, duration: 3.5, ease: 'power1.inOut' }, '>');
 
             // --- STEP 4: Particle explosion ---
@@ -658,12 +662,12 @@ const Animation = () => {
                 if (i === flyingTexts.length - 1) {
                     tl.fromTo(
                         el,
-                        { opacity: 0, scale: 0.1, filter: 'blur(6px)' },
+                        { opacity: 0, scale: 0.1 },
                         {
                             opacity: 1,
                             scale: 1.1,
                             y: 0,
-                            filter: 'blur(0px)',
+
                             ease: 'power2.out',
                             duration: textDuration,
                         },
@@ -683,13 +687,14 @@ const Animation = () => {
                     );
                 } else {
                     // 🔸 Normal animation for first 2 flying texts
+                    tl.addLabel(labelName, startTime);
                     tl.fromTo(
                         el,
-                        { opacity: 0, scale: 0.1, filter: 'blur(6px)' },
+                        { opacity: 0, scale: 0.1 },
                         {
                             opacity: 0,
                             scale: 1.1,
-                            filter: 'blur(0px)',
+
                             ease: 'power2.inOut',
                             duration: textDuration,
                             onUpdate: function () {
@@ -701,6 +706,7 @@ const Animation = () => {
                         labelName
                     );
                 }
+
                 // 🌌 Change Starfield direction after 2nd flying text
                 if (i === 1) {
                     // index 1 = 2nd text
@@ -869,7 +875,7 @@ const Animation = () => {
                 'serviceEnd'
             );
             // 5️⃣ Transition after last (7th) service text
-            tl.addLabel('afterLastService', '>+1'); // small scroll gap after 7th text
+            // tl.addLabel('afterLastService', '>+1'); // small scroll gap after 7th text
 
             // Fade out flowing particles, service texts, and logo model
             tl.to(
@@ -1030,6 +1036,7 @@ const Animation = () => {
             <div id="scroll-spacer" className="w-full scroll-spacer h-[1050vh] bg-[#0f0f0f]" />
             <div className="w-full h-full relative">
                 <div className="initial-animation fixed inset-0 z-[10] pointer-events-none bg-[#fafafa]">
+                    {/* <ParticlesBg /> */}
                     <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
                         <FlowingParticles
                             flowAnimation={flowAnimation}
@@ -1040,14 +1047,14 @@ const Animation = () => {
                         ref={canvasRef}
                         className="absolute top-0 h-full w-full  pointer-events-none"
                     />
-                    <div className="absolute right-0 top-[20%] md:right-3 md:top-[38%]   initial-text items-center justify-center w-full md:w-fit pr-0 md:pr-10 md:px-16 lg:px-32">
-                        <h1 className="text-center md:text-left text-4xl md:text-4xl lg:text-7xl  font-bold leading-tight text-[#0f0f0f] ">
+                    <div className="absolute right-0 top-[20%] md:right-3 md:top-[38%]   initial-text items-center justify-center w-full md:w-fit pr-0 md:pr-10 md:px-16 lg:px-20   xl:px-32">
+                        <h1 className="text-center    lg:text-6xl md:text-5xl text-5xl font-semibold leading-tight text-[#0f0f0f] ">
                             What you envision, <br />
                             We help you become.
                         </h1>
                     </div>
                     <div className="absolute  top-[11%]  pointer-events-none opacity-0 second-text text-center px-10 md:px-16 lg:px-32">
-                        <h1 className="text-4xl md:text-4xl lg:text-7xl font-bold leading-tight text-[#0f0f0f]">
+                        <h1 className="text-4xl md:text-4xl lg:text-6xl font-semibold leading-tight text-[#0f0f0f]">
                             Every need of your brand, under one roof, powered by one partner.
                         </h1>
                     </div>
@@ -1064,7 +1071,7 @@ const Animation = () => {
                                 key={i}
                                 className="absolute top-[45%] sm:top-[47%] px-10 md:px-16 lg:px-32  text-wrapper w-full text-center "
                             >
-                                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#fafafa] ">
+                                <h1 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-[#fafafa] ">
                                     {t}
                                 </h1>
                             </div>
@@ -1111,7 +1118,7 @@ const Animation = () => {
                                 key={i}
                                 className={`absolute top-0 h-full w-full transition-opacity duration-700 service-text service-${i} opacity-0  flex flex-col items-start justify-center `}
                             >
-                                <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold `}>
+                                <h2 className={`text-3xl md:text-4xl lg:text-5xl font-semibold `}>
                                     {service.title}
                                 </h2>
                                 <p className=" text-base lg:text-xl mt-2">{service.subtext}</p>

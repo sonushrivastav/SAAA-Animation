@@ -1,46 +1,28 @@
 @import 'tailwindcss';
 
-/* Register the custom font */
-@font-face {
-    font-family: 'GriftBlack';
-    src: url('/fonts/grift-regular.otf') format('opentype');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
-
-/* Root + theme variables */
+/* Theme tokens */
 @theme inline {
     --color-background: var(--background);
     --color-foreground: var(--foreground);
-    --font-sans: var(--font-geist-sans);
-    --font-mono: var(--font-geist-mono);
 }
 
-/* Optional dark mode variables */
-@media (prefers-color-scheme: dark) {
-    :root {
-        /* --background: #0a0a0a; */
-        /* --foreground: #ededed; */
+/* Base styles */
+@layer base {
+    html,
+    body {
+        font-family: var(--font-grift);
+        font-weight: 400;
+        overflow-x: hidden;
     }
 }
 
-/* Global styles */
-html,
-body {
-    height: auto;
-    overflow-x: hidden;
-    overflow-y: auto;
-    font-family: 'GriftBlack';
-    font-weight: 400;
-}
-
-/* To hide scroll bar */
+/* Hide scrollbar utility */
 @utility no-scrollbar {
     &::-webkit-scrollbar {
         display: none;
     }
 }
+
 /* -----END------- */
 
 /* Our Team Members Starts */

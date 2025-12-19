@@ -1,9 +1,7 @@
+import ParticlesData from '../assets/particles/particles.json';
 import Particles, { initParticlesEngine } from '@tsparticles/react';
-import { useEffect, useMemo, useState } from 'react';
-// import { loadAll } from "@tsparticles/all"; // if you are going to use `loadAll`, install the "@tsparticles/all" package too.
-// import { loadFull } from "tsparticles"; // if you are going to use `loadFull`, install the "tsparticles" package too.
 import { loadSlim } from '@tsparticles/slim'; // if you are going to use `loadSlim`, install the "@tsparticles/slim" package too.
-// import { loadBasic } from "@tsparticles/basic"; // if you are going to use `loadBasic`, install the "@tsparticles/basic" package too.
+import { useEffect, useMemo, useState } from 'react';
 
 const ParticlesBG = () => {
     const [init, setInit] = useState(false);
@@ -99,7 +97,9 @@ const ParticlesBG = () => {
     );
 
     if (init) {
-        return <Particles id="tsparticles" particlesLoaded={particlesLoaded} options={options} />;
+        return (
+            <Particles id="tsparticles" particlesLoaded={particlesLoaded} options={ParticlesData} />
+        );
     }
 
     return <></>;

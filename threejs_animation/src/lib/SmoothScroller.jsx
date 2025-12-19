@@ -13,7 +13,7 @@ export default function SmoothScroller() {
     // Scroll to top on route change
     useEffect(() => {
         if (lenis.current) {
-            lenis.current.scrollTo(20, { immediate: false });
+            lenis.current.scrollTo(0, { immediate: false });
         }
     }, [pathname, searchParams]);
 
@@ -38,15 +38,11 @@ export default function SmoothScroller() {
 
         frameId = requestAnimationFrame(raf);
 
-        // Resize watcher
-        const resize = setInterval(() => {
-            lenis.current?.resize();
-        }, 150);
+
 
         // Cleanup
         return () => {
             cancelAnimationFrame(frameId);
-            clearInterval(resize);
             lenis.current?.destroy();
             lenis.current = null;
         };

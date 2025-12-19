@@ -66,7 +66,7 @@ const TeamCard = ({
     return (
         <div
             ref={cardRef}
-            className="team-card relative w-[300px] h-[300px] mx-auto will-change-transform overflow-hidden"
+            className="team-card relative md:w-[300px] w-[120px] md:h-[300px] h-[200px] mt-4 lg:mt-0 mx-auto will-change-transform overflow-hidden"
             style={{ transformStyle: 'preserve-3d' }}
         >
             {/* Base Image */}
@@ -190,7 +190,7 @@ const About = () => {
                         });
                     });
                     if (isMobile) {
-                        start = 'top bottom';
+                        start = 'top 80%';
                         end = 'top top';
                     } else {
                         start = 'top 70%';
@@ -211,8 +211,8 @@ const About = () => {
 
                         scrollTrigger: {
                             trigger: row,
-                            start: 'top 70%',
-                            end: 'top 20%',
+                            start,
+                            end,
                             scrub: 1,
                         },
                     });
@@ -229,7 +229,7 @@ const About = () => {
 
     return (
         <div>
-            <section className=" w-full min-h-screen">
+            <section className=" w-full ">
                 <Suspense fallback={<p>Loading video...</p>}>
                     <video
                         src="/videos/Big_Buck_Bunny_1080_10s_5MB.mp4"
@@ -400,7 +400,7 @@ const About = () => {
                     style={{ perspective: '1200px', perspectiveOrigin: 'center center' }}
                 >
                     {' '}
-                    <div className="team-row flex items-center flex-col md:flex-row  justify-center gap-2 py-1 ">
+                    <div className="team-row flex items-center flex-row flex-wrap md:flex-row  justify-center  md:gap-2 gap-0 lg:py-1 py-0 ">
                         {teamMembers.map((member, index) => (
                             <TeamCard
                                 key={index}
@@ -410,7 +410,7 @@ const About = () => {
                             />
                         ))}
                     </div>
-                    <div className="team-row flex items-center flex-col md:flex-row  justify-center gap-2 py-1 ">
+                    <div className="team-row flex items-center flex-row flex-wrap md:flex-row  justify-center  md:gap-2 gap-0 lg:py-1 py-0  ">
                         {teamMembers.map((member, index) => (
                             <TeamCard
                                 key={index}
@@ -420,7 +420,7 @@ const About = () => {
                             />
                         ))}
                     </div>
-                    <div className="team-row flex items-center flex-col md:flex-row  justify-center gap-2 py-1 ">
+                    <div className="team-row flex items-center flex-row flex-wrap md:flex-row  justify-center  md:gap-2 gap-0 lg:py-1 py-0 ">
                         {teamMembers.map((member, index) => (
                             <TeamCard
                                 key={index}
@@ -430,7 +430,7 @@ const About = () => {
                             />
                         ))}
                     </div>
-                    <div className="team-row flex items-center flex-col md:flex-row  justify-center gap-2 py-1 ">
+                    <div className="team-row flex items-center flex-row flex-wrap md:flex-row  justify-center  md:gap-2 gap-0 lg:py-1 py-0 ">
                         {teamMembers.map((member, index) => (
                             <TeamCard
                                 key={index}
@@ -440,7 +440,7 @@ const About = () => {
                             />
                         ))}
                     </div>
-                    <div className="team-row flex items-center flex-col md:flex-row  justify-center gap-2 py-1 ">
+                    <div className="team-row flex items-center flex-row flex-wrap md:flex-row  justify-center  md:gap-2 lg:py-1 py-0 ">
                         {teamMembers.map((member, index) => (
                             <TeamCard
                                 key={index}
