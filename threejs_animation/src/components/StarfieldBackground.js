@@ -374,35 +374,7 @@ export default function StarfieldBackground({}) {
             lastScroll = newScroll;
             scrollSpeed += velocity * 0.05;
 
-            // 💡 Use maxStretch and maxShrink from controls
-            // const stretchX = 1.0 + Math.min(Math.abs(velocity) * 0.08, maxStretch);
-            // const shrinkY = 1.0 + Math.min(Math.abs(velocity) * 0.05, maxShrink);
 
-            // gsap.to(material.uniforms.uStretchX, {
-            //   value: stretchX,
-            //   duration: 0.5,
-            //   ease: "power2.out",
-            //   onComplete: () => {
-            //     gsap.to(material.uniforms.uStretchX, {
-            //       value: 1.0,
-            //       duration: 0.5,
-            //       ease: "power2.out",
-            //     });
-            //   },
-            // });
-
-            // gsap.to(material.uniforms.uShrinkY, {
-            //   value: shrinkY,
-            //   duration: 0.5,
-            //   ease: "power2.out",
-            //   onComplete: () => {
-            //     gsap.to(material.uniforms.uShrinkY, {
-            //       value: 1.0,
-            //       duration: 0.5,
-            //       ease: "power2.out",
-            //     });
-            //   },
-            // });
         });
 
         // 🖱 Mouse parallax

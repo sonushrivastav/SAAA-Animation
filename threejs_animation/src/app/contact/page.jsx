@@ -67,7 +67,7 @@ const Contact = () => {
                         <div className="flex flex-col">
                             <div className="flex flex-row justify-between items-center">
                                 <h2
-                                    className={`text-2xl md:text-4xl lg:text-4xl font-bold transition-colors duration-300 truncate ${
+                                    className={`text-2xl md:text-4xl lg:text-4xl font-semibold transition-colors duration-300  ${
                                         isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
                                     }`}
                                 >
@@ -85,7 +85,7 @@ const Contact = () => {
                             </div>
 
                             <p
-                                className={`text-sm md:text-base lg:text-xl mt-4 transition-colors duration-300  ${
+                                className={`text-base md:text-lg lg:text-xl mt-4 transition-colors duration-300  ${
                                     isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
                                 }`}
                             >
@@ -93,10 +93,10 @@ const Contact = () => {
                             </p>
                         </div>
                         <div className="flex flex-col  gap-2 ">
-                            <p className=" text-xs md:text-sm lg:text-base text-[#9c9c9c]">Email</p>
+                            <p className="  text-sm md:text-base   text-[#9c9c9c]">Email</p>
                             <div className="flex  md:flex-row items-center  gap-2">
                                 <p
-                                    className={`text-sm md:text-base lg:text-xl  transition-colors duration-300 truncate ${
+                                    className={`text-base md:text-lg lg:text-xl font-[500]  transition-colors duration-300  ${
                                         isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
                                     }`}
                                 >

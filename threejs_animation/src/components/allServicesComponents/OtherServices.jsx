@@ -17,23 +17,16 @@ const OtherServices = ({ services = [], buttonText = 'Know More', onButtonClick 
                             {item.title}
                         </h3>
 
-                        <p className="text-lg text-[#555555] flex-grow">{item.description}</p>
+                        <p className="text-base md:text-lg lg:text-xl text-[#555555] flex-grow">
+                            {item.description}
+                        </p>
 
-                        {item.href ? (
-                            <Link
-                                href={item.href}
-                                className=" w-fit mt-12 px-4 py-2 rounded-full bg-[#0f0f0f] text-[#fafafa] cursor "
-                            >
-                                {buttonText}
-                            </Link>
-                        ) : (
-                            <button
-                                onClick={() => onButtonClick?.(item)}
-                                className="w-fit mt-12 px-4 py-2 rounded-full bg-[#0f0f0f] text-[#fafafa]"
-                            >
-                                {buttonText}
-                            </button>
-                        )}
+                        <Link
+                            href={item.href}
+                            className=" w-fit mt-12 px-4 py-2 rounded-full bg-[#0f0f0f] text-[#fafafa] text-base md:text-lg lg:text-xl  "
+                        >
+                            {buttonText}
+                        </Link>
                     </div>
                 </div>
             ))}

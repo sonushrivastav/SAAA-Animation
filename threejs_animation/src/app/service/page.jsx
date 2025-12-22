@@ -15,16 +15,19 @@ const servicesArray = [
         title: 'INVESTOR RELATIONS',
         description:
             'We turn reports into relationships. By shaping data into clear, confident narratives, we help investors see your brand’s true potential. Numbers tell stories too, we just make them easier to believe in.',
+        href: '/services/seo',
     },
     {
         title: 'FINANCIAL ADVISORY',
         description:
             'We read between the spreadsheets. Our experts turn complex numbers into actionable insights for your brand. Balancing vision with viability, we make sure your next move is a smart one. Every decision is backed by clarity, not guesswork.',
+        href: '/services/seo',
     },
     {
         title: 'LEGAL & COMPLIANCE',
         description:
             'We take care of the fine print while you focus on the big picture. Reliable, simple, and structured. Protection that moves with your business, not against it. So you can grow freely knowing every box is ticked and every detail secured.',
+        href: '/services/seo',
     },
 ];
 const Service = () => {

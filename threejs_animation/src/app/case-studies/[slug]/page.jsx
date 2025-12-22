@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import CaseStudyCards from '../../../components/allServicesComponents/CaseStudyCards';
+import useDeviceType from '../../../components/hooks/useDeviceType';
 import DotGrid from '../../../components/socialMedia/DotGrid';
 
 const caseStudies = [
@@ -45,6 +46,7 @@ export default function CaseStudyDetails() {
     ];
 
     const [active, setActive] = useState(sections[0].id);
+    const { isMobile, isTablet } = useDeviceType();
     const headingsRef = useRef({});
 
     const sidebarRef = useRef(null);
@@ -122,15 +124,20 @@ export default function CaseStudyDetails() {
     function handleClick(id) {
         const el = headingsRef.current[id];
         if (!el) return;
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        const offset = isMobile ? 140 : 80; // space from the top in pixels
+        const top = el.getBoundingClientRect().top + window.scrollY - offset;
+
+        window.scrollTo({ top, behavior: 'smooth' });
+
         setActive(id);
     }
 
     return (
         <main className="">
             {/* Hero Video Section */}
-            <section className="relative w-full overflow-hidden bg-[#fafafa] min-h-screen flex items-center justify-center">
-                <div className="flex flex-col md:flex-row w-full  self-stretch items-center md:justify-between py-30 ">
+            <section className="relative w-full overflow-hidden bg-[#fafafa]  flex items-center justify-center">
+                <div className="flex flex-col md:flex-row w-full lg:h-screen  self-stretch items-center md:justify-between ">
                     <div className="absolute inset-0 ">
                         <DotGrid
                             dotSize={2}
@@ -145,8 +152,8 @@ export default function CaseStudyDetails() {
                         />
                     </div>
                     {/* left section */}
-                    <div className="z-10 relative w-full md:w-[65%] self-stretch flex items-center    text-[#0f0f0f] ">
-                        <div className="px-8 py-35 md:px-14 lg:px-28 md:py-16 lg:py-20 ">
+                    <div className="z-10 relative w-full md:w-[60%] self-stretch flex items-center    text-[#0f0f0f] ">
+                        <div className="px-8 pt-35 md:px-14 lg:px-28 md:py-0 lg:py-0 ">
                             <h1 className="text-4xl lg:text-7xl  text-[#0f0f0f] font-semibold lg:leading-[85px] ">
                                 Meta Campaign <br /> for{' '}
                                 <span className="bg-[#844de9] inline text-[#fafafa] px-2  rounded-md">
@@ -154,7 +161,7 @@ export default function CaseStudyDetails() {
                                 </span>
                             </h1>
 
-                            <p className="text-[#555555] mt-6 max-w-lg mx-auto md:mx-0 md:text-xl">
+                            <p className="text-[#555555] mt-6 max-w-lg mx-auto md:mx-0 text-lg md:text-xl lg:text-2xl">
                                 Lugda By DiHi, a sustainable ethnic wear brand, wanted to drive
                                 high-quality sales and revenue growth from their Meta Ads campaigns
                                 by targeting fashion-forward women across India.
@@ -163,7 +170,7 @@ export default function CaseStudyDetails() {
                     </div>
 
                     {/* Right Section */}
-                    <div className="z-10 flex  items-center justify-center self-stretch w-full  md:w-[35%] px-8   ">
+                    <div className="z-10 flex  py-25 md:py-0 items-center justify-center self-stretch w-full  md:w-[40%] px-8   ">
                         <div className="w-full  flex items-center justify-center   ">
                             <Image
                                 src={'/images/casestudy/lugda.png'}
@@ -172,14 +179,6 @@ export default function CaseStudyDetails() {
                                 height={600}
                                 className="object-contain w-full"
                             ></Image>
-                            {/* <video
-                                src="/videos/social-media.mp4"
-                                autoPlay
-                                loop
-                                muted
-                                playsInline
-                                className="w-full h-auto rounded-2xl "
-                            /> */}
                         </div>
                     </div>
                 </div>
@@ -190,7 +189,7 @@ export default function CaseStudyDetails() {
                     {/* LEFT SIDEBAR COLUMN */}
                     <aside className=" relative w-full lg:w-[30%]    pt-2">
                         <nav ref={sidebarRef} className="relative  w-full lg:w-auto z-30  ">
-                            <div className="pt-25 lg:py-10  ">
+                            <div className="pt-20 lg:py-20  ">
                                 <ul className=" lg:space-y-6 overflow-x-auto overflow-y-auto items-stretch  border-b lg:border-t-0 lg:border-b-0  lg:border-l-2 lg:border-dashed border-[#9c9c9c] flex flex-row lg:flex-col no-scrollbar   ">
                                     {sections.map(s => (
                                         <li

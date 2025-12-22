@@ -13,6 +13,7 @@
         font-family: var(--font-grift);
         font-weight: 400;
         overflow-x: hidden;
+        scroll-behavior: smooth;
     }
 }
 
@@ -74,7 +75,7 @@
 .sidebar-fixed {
     position: fixed;
     top: 0;
-    padding-right: 2.5rem;
+    padding-right: 0;
     background-color: #0f0f0f;
 }
 /* -----END------- */

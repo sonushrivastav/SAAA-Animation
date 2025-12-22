@@ -21,27 +21,27 @@ export const servicesData = {
         caseStudies: [
             {
                 title: 'Creative Newtech',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/CNL.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Ruark Audio',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/iPhone 15 Mockup Poster 1.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Share India',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/Device 14PM.webp',
                 href: '/services/seo',
             },
-            
+
         ],
         faqData: [
             {
-                question: 'What does your SMM service include?',
+                question: 'What does your Social Media Marketing service include?',
                 answer: 'We build brands that speak before they’re introduced. From identity to visuals, we craft every detail to make your presence unforgettable. Because every great impression starts with a design that feels alive.',
             },
             {
@@ -105,26 +105,26 @@ export const servicesData = {
         caseStudies: [
             {
                 title: 'Creative Newtech',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/CNL.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Ruark Audio',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/iPhone 15 Mockup Poster 1.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Share India',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/Device 14PM.webp',
                 href: '/services/seo',
             },
         ],
         faqData: [
             {
-                question: 'What does your SMM service include?',
+                question: 'What does your Social Media Marketing service include?',
                 answer: 'We build brands that speak before they’re introduced. From identity to visuals, we craft every detail to make your presence unforgettable. Because every great impression starts with a design that feels alive.',
             },
             {
@@ -188,26 +188,26 @@ export const servicesData = {
         caseStudies: [
             {
                 title: 'Creative Newtech',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/CNL.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Ruark Audio',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/iPhone 15 Mockup Poster 1.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Share India',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/Device 14PM.webp',
                 href: '/services/seo',
             },
         ],
         faqData: [
             {
-                question: 'What does your SMM service include?',
+                question: 'What does your Social Media Marketing service include?',
                 answer: 'We build brands that speak before they’re introduced. From identity to visuals, we craft every detail to make your presence unforgettable. Because every great impression starts with a design that feels alive.',
             },
             {
@@ -271,26 +271,26 @@ export const servicesData = {
         caseStudies: [
             {
                 title: 'Creative Newtech',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/CNL.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Ruark Audio',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/iPhone 15 Mockup Poster 1.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Share India',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/Device 14PM.webp',
                 href: '/services/seo',
             },
         ],
         faqData: [
             {
-                question: 'What does your SMM service include?',
+                question: 'What does your Social Media Marketing service include?',
                 answer: 'We build brands that speak before they’re introduced. From identity to visuals, we craft every detail to make your presence unforgettable. Because every great impression starts with a design that feels alive.',
             },
             {
@@ -353,26 +353,26 @@ export const servicesData = {
         caseStudies: [
             {
                 title: 'Creative Newtech',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/CNL.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Ruark Audio',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/iPhone 15 Mockup Poster 1.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Share India',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/Device 14PM.webp',
                 href: '/services/seo',
             },
         ],
         faqData: [
             {
-                question: 'What does your SMM service include?',
+                question: 'What does your Social Media Marketing service include?',
                 answer: 'We build brands that speak before they’re introduced. From identity to visuals, we craft every detail to make your presence unforgettable. Because every great impression starts with a design that feels alive.',
             },
             {
@@ -436,26 +436,26 @@ export const servicesData = {
         caseStudies: [
             {
                 title: 'Creative Newtech',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/CNL.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Ruark Audio',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/iPhone 15 Mockup Poster 1.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Share India',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/Device 14PM.webp',
                 href: '/services/seo',
             },
         ],
         faqData: [
             {
-                question: 'What does your SMM service include?',
+                question: 'What does your Social Media Marketing service include?',
                 answer: 'We build brands that speak before they’re introduced. From identity to visuals, we craft every detail to make your presence unforgettable. Because every great impression starts with a design that feels alive.',
             },
             {
@@ -520,26 +520,26 @@ export const servicesData = {
         caseStudies: [
             {
                 title: 'Creative Newtech',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/CNL.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Ruark Audio',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/iPhone 15 Mockup Poster 1.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Share India',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/Device 14PM.webp',
                 href: '/services/seo',
             },
         ],
         faqData: [
             {
-                question: 'What does your SMM service include?',
+                question: 'What does your Social Media Marketing service include?',
                 answer: 'We build brands that speak before they’re introduced. From identity to visuals, we craft every detail to make your presence unforgettable. Because every great impression starts with a design that feels alive.',
             },
             {
@@ -603,26 +603,26 @@ export const servicesData = {
         caseStudies: [
             {
                 title: 'Creative Newtech',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/CNL.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Ruark Audio',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/iPhone 15 Mockup Poster 1.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Share India',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/Device 14PM.webp',
                 href: '/services/seo',
             },
         ],
         faqData: [
             {
-                question: 'What does your SMM service include?',
+                question: 'What does your Social Media Marketing service include?',
                 answer: 'We build brands that speak before they’re introduced. From identity to visuals, we craft every detail to make your presence unforgettable. Because every great impression starts with a design that feels alive.',
             },
             {
@@ -686,26 +686,26 @@ export const servicesData = {
         caseStudies: [
             {
                 title: 'Creative Newtech',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/CNL.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Ruark Audio',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/iPhone 15 Mockup Poster 1.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Share India',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/Device 14PM.webp',
                 href: '/services/seo',
             },
         ],
         faqData: [
             {
-                question: 'What does your SMM service include?',
+                question: 'What does your Social Media Marketing service include?',
                 answer: 'We build brands that speak before they’re introduced. From identity to visuals, we craft every detail to make your presence unforgettable. Because every great impression starts with a design that feels alive.',
             },
             {
@@ -769,26 +769,26 @@ export const servicesData = {
         caseStudies: [
             {
                 title: 'Creative Newtech',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/CNL.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Ruark Audio',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/iPhone 15 Mockup Poster 1.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Share India',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/Device 14PM.webp',
                 href: '/services/seo',
             },
         ],
         faqData: [
             {
-                question: 'What does your SMM service include?',
+                question: 'What does your Social Media Marketing service include?',
                 answer: 'We build brands that speak before they’re introduced. From identity to visuals, we craft every detail to make your presence unforgettable. Because every great impression starts with a design that feels alive.',
             },
             {
@@ -852,26 +852,26 @@ export const servicesData = {
         caseStudies: [
             {
                 title: 'Creative Newtech',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/CNL.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Ruark Audio',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/iPhone 15 Mockup Poster 1.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Share India',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/Device 14PM.webp',
                 href: '/services/seo',
             },
         ],
         faqData: [
             {
-                question: 'What does your SMM service include?',
+                question: 'What does your Social Media Marketing service include?',
                 answer: 'We build brands that speak before they’re introduced. From identity to visuals, we craft every detail to make your presence unforgettable. Because every great impression starts with a design that feels alive.',
             },
             {
@@ -935,26 +935,26 @@ export const servicesData = {
         caseStudies: [
             {
                 title: 'Creative Newtech',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/CNL.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Ruark Audio',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/iPhone 15 Mockup Poster 1.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Share India',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/Device 14PM.webp',
                 href: '/services/seo',
             },
         ],
         faqData: [
             {
-                question: 'What does your SMM service include?',
+                question: 'What does your Social Media Marketing service include?',
                 answer: 'We build brands that speak before they’re introduced. From identity to visuals, we craft every detail to make your presence unforgettable. Because every great impression starts with a design that feels alive.',
             },
             {
@@ -1018,26 +1018,26 @@ export const servicesData = {
         caseStudies: [
             {
                 title: 'Creative Newtech',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/CNL.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Ruark Audio',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/iPhone 15 Mockup Poster 1.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Share India',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/Device 14PM.webp',
                 href: '/services/seo',
             },
         ],
         faqData: [
             {
-                question: 'What does your SMM service include?',
+                question: 'What does your Social Media Marketing service include?',
                 answer: 'We build brands that speak before they’re introduced. From identity to visuals, we craft every detail to make your presence unforgettable. Because every great impression starts with a design that feels alive.',
             },
             {
@@ -1101,26 +1101,26 @@ export const servicesData = {
         caseStudies: [
             {
                 title: 'Creative Newtech',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/CNL.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Ruark Audio',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/iPhone 15 Mockup Poster 1.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Share India',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/Device 14PM.webp',
                 href: '/services/seo',
             },
         ],
         faqData: [
             {
-                question: 'What does your SMM service include?',
+                question: 'What does your Social Media Marketing service include?',
                 answer: 'We build brands that speak before they’re introduced. From identity to visuals, we craft every detail to make your presence unforgettable. Because every great impression starts with a design that feels alive.',
             },
             {
@@ -1184,26 +1184,26 @@ export const servicesData = {
         caseStudies: [
             {
                 title: 'Creative Newtech',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/CNL.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Ruark Audio',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/iPhone 15 Mockup Poster 1.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Share India',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/Device 14PM.webp',
                 href: '/services/seo',
             },
         ],
         faqData: [
             {
-                question: 'What does your SMM service include?',
+                question: 'What does your Social Media Marketing service include?',
                 answer: 'We build brands that speak before they’re introduced. From identity to visuals, we craft every detail to make your presence unforgettable. Because every great impression starts with a design that feels alive.',
             },
             {
@@ -1267,26 +1267,26 @@ export const servicesData = {
         caseStudies: [
             {
                 title: 'Creative Newtech',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/CNL.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Ruark Audio',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/iPhone 15 Mockup Poster 1.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Share India',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/Device 14PM.webp',
                 href: '/services/seo',
             },
         ],
         faqData: [
             {
-                question: 'What does your SMM service include?',
+                question: 'What does your Social Media Marketing service include?',
                 answer: 'We build brands that speak before they’re introduced. From identity to visuals, we craft every detail to make your presence unforgettable. Because every great impression starts with a design that feels alive.',
             },
             {
@@ -1350,26 +1350,26 @@ export const servicesData = {
         caseStudies: [
             {
                 title: 'Creative Newtech',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/CNL.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Ruark Audio',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/iPhone 15 Mockup Poster 1.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Share India',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/Device 14PM.webp',
                 href: '/services/seo',
             },
         ],
         faqData: [
             {
-                question: 'What does your SMM service include?',
+                question: 'What does your Social Media Marketing service include?',
                 answer: 'We build brands that speak before they’re introduced. From identity to visuals, we craft every detail to make your presence unforgettable. Because every great impression starts with a design that feels alive.',
             },
             {
@@ -1432,26 +1432,26 @@ export const servicesData = {
         caseStudies: [
             {
                 title: 'Creative Newtech',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/CNL.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Ruark Audio',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/iPhone 15 Mockup Poster 1.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Share India',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/Device 14PM.webp',
                 href: '/services/seo',
             },
         ],
         faqData: [
             {
-                question: 'What does your SMM service include?',
+                question: 'What does your Social Media Marketing service include?',
                 answer: 'We build brands that speak before they’re introduced. From identity to visuals, we craft every detail to make your presence unforgettable. Because every great impression starts with a design that feels alive.',
             },
             {
@@ -1514,26 +1514,26 @@ export const servicesData = {
         caseStudies: [
             {
                 title: 'Creative Newtech',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/CNL.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Ruark Audio',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/iPhone 15 Mockup Poster 1.webp',
                 href: '/services/seo',
             },
             {
                 title: 'Share India',
-                tag: 'SMM',
+                tag: 'Social Media Marketing',
                 img: '/images/socialMedia/Device 14PM.webp',
                 href: '/services/seo',
             },
         ],
         faqData: [
             {
-                question: 'What does your SMM service include?',
+                question: 'What does your Social Media Marketing service include?',
                 answer: 'We build brands that speak before they’re introduced. From identity to visuals, we craft every detail to make your presence unforgettable. Because every great impression starts with a design that feels alive.',
             },
             {

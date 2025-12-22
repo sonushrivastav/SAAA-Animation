@@ -10,19 +10,19 @@ const staticData = {
     'Digital Marketing': [
         {
             title: 'Creative Newtech',
-            tag: 'SMM',
+            tag: 'Social Media Marketing',
             img: '/images/socialMedia/CNL.webp',
             slug: 'Creative Newtech',
         },
         {
             title: 'Ruark Audio',
-            tag: 'SMM',
+            tag: 'Social Media Marketing',
             img: '/images/socialMedia/iPhone 15 Mockup Poster 1.webp',
             slug: 'Creative Newtech',
         },
         {
             title: 'Share India',
-            tag: 'SMM',
+            tag: 'Social Media Marketing',
             img: '/images/socialMedia/Device 14PM.webp',
             slug: 'Creative Newtech',
         },
@@ -30,19 +30,19 @@ const staticData = {
     'Website Development': [
         {
             title: 'Creative Newtech',
-            tag: 'SMM',
+            tag: 'Web Development',
             img: '/images/socialMedia/CNL.webp',
             slug: 'Creative Newtech',
         },
         {
             title: 'Ruark Audio',
-            tag: 'SMM',
+            tag: 'Web Development',
             img: '/images/socialMedia/iPhone 15 Mockup Poster 1.webp',
             slug: 'Creative Newtech',
         },
         {
             title: 'Share India',
-            tag: 'SMM',
+            tag: 'Web Development',
             img: '/images/socialMedia/Device 14PM.webp',
             slug: 'Creative Newtech',
         },
@@ -50,19 +50,19 @@ const staticData = {
     'UI / UX': [
         {
             title: 'Creative Newtech',
-            tag: 'SMM',
+            tag: 'UI-UX',
             img: '/images/socialMedia/CNL.webp',
             slug: 'Creative Newtech',
         },
         {
             title: 'Ruark Audio',
-            tag: 'SMM',
+            tag: 'UI-UX',
             img: '/images/socialMedia/iPhone 15 Mockup Poster 1.webp',
             slug: 'Creative Newtech',
         },
         {
             title: 'Share India',
-            tag: 'SMM',
+            tag: 'UI-UX',
             img: '/images/socialMedia/Device 14PM.webp',
             slug: 'Creative Newtech',
         },
@@ -70,19 +70,19 @@ const staticData = {
     'Graphic Design': [
         {
             title: 'Creative Newtech',
-            tag: 'SMM',
+            tag: 'Graphic Design',
             img: '/images/socialMedia/CNL.webp',
             slug: 'Creative Newtech',
         },
         {
             title: 'Ruark Audio',
-            tag: 'SMM',
+            tag: 'Graphic Design',
             img: '/images/socialMedia/iPhone 15 Mockup Poster 1.webp',
             slug: 'Creative Newtech',
         },
         {
             title: 'Share India',
-            tag: 'SMM',
+            tag: 'Graphic Design',
             img: '/images/socialMedia/Device 14PM.webp',
             slug: 'Creative Newtech',
         },
@@ -134,7 +134,7 @@ const CaseStudies = () => {
     return (
         <div>
             {/* video */}
-            <section className="w-full min-h-screen">
+            <section className="w-full ">
                 <Suspense fallback={<p>Loading video...</p>}>
                     <video
                         src="/videos/Big_Buck_Bunny_1080_10s_5MB.mp4"
@@ -162,7 +162,7 @@ const CaseStudies = () => {
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`px-5 py-2 rounded-full border transition whitespace-nowrap ${
+                            className={`px-5 py-2 rounded-full border transition whitespace-nowrap text-base md:text-lg lg:text-xl ${
                                 activeTab === tab
                                     ? 'bg-[#0f0f0f] text-[#fafafa] border-[#EDEDED]'
                                     : 'border-[#555555] text-[#555555] '

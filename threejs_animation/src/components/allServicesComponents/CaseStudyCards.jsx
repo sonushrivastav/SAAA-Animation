@@ -30,7 +30,7 @@ const CaseStudyCards = ({ caseStudies = [], className = '' }) => {
                     >
                         <div className="flex flex-col w-full">
                             <div className="w-full px-6 flex justify-between items-center">
-                                <h3 className="text-lg md:text-2xl uppercase font-semibold text-[#0f0f0f]">
+                                <h3 className="text-lg md:text-xl lg:text-2xl uppercase font-semibold text-[#0f0f0f]">
                                     {item.title}
                                 </h3>
 

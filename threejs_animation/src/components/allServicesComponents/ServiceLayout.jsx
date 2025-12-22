@@ -13,6 +13,7 @@ import FaqAccordion from '../../components/allServicesComponents/FaqAccordion';
 import OtherServices from '../../components/allServicesComponents/OtherServices';
 import DotGrid from '../../components/socialMedia/DotGrid';
 import useDeviceType from '../hooks/useDeviceType';
+import StatCard from './StatCard';
 gsap.registerPlugin(ScrollTrigger);
 
 const platformImages = [
@@ -291,72 +292,9 @@ const ServiceLayout = ({ data }) => {
         initSpiralAnimation(slicesRef, isMobile, isTablet);
     }, [isMobile, isTablet]);
 
-    const StatCard = ({ stat, label, hasContent, roundedClass }) => {
-        const [isHovered, setIsHovered] = useState(false);
-
-        return (
-            <div
-                className={`relative p-4 md:p-6 lg:p-10 ${roundedClass} bg-transparent transition-colors duration-300 w-full h-[250px] md:h-[300px] lg:h-[400px] ${
-                    hasContent
-                        ? `border ${isHovered ? 'border-[#fafafa]' : 'border-[#555555]'}`
-                        : isHovered
-                        ? 'border border-[#555555]'
-                        : 'border border-[#555555]'
-                }`}
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-            >
-                {/* Dot Grid - only show when conditions are met */}
-                <div className="absolute inset-0 overflow-hidden">
-                    {(!hasContent || (hasContent && isHovered)) && (
-                        <DotGrid
-                            dotSize={2}
-                            gap={8}
-                            baseColor={!hasContent ? '#271e37' : '#271e37'}
-                            activeColor={
-                                !hasContent ? '#fafafa' : isHovered ? '#844de9' : '#271e37'
-                            }
-                            proximity={120}
-                            shockRadius={250}
-                            shockStrength={5}
-                            resistance={750}
-                            returnDuration={1.5}
-                        />
-                    )}
-                </div>
-
-                {/* Content */}
-                {hasContent && (
-                    <div className="relative z-10 flex flex-col justify-end h-full">
-                        <h2
-                            className={`text-3xl md:text-4xl lg:text-4xl font-bold transition-colors duration-300 ${
-                                isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
-                            }`}
-                        >
-                            {stat}
-                        </h2>
-                        <p
-                            className={`text-sm md:text-base lg:text-lg mt-2 transition-colors duration-300 ${
-                                isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
-                            }`}
-                        >
-                            {label}
-                        </p>
-                        <span
-                            className={`absolute top-[-6px] right-[2px] md:top-[-9px] md:right-[-2px]  lg:top-[-15px] lg:right-[-8px] text-3xl md:text-4xl lg:text-5xl font-bold transition-colors duration-300 ${
-                                isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
-                            }`}
-                        >
-                            #
-                        </span>
-                    </div>
-                )}
-            </div>
-        );
-    };
     return (
         <div>
-            <section className="relative w-full overflow-hidden bg-[#fafafa] min-h-screen flex items-center justify-center">
+            <section className="relative w-full overflow-hidden bg-[#fafafa] md:min-h-screen flex items-center justify-center">
                 <div className="flex flex-col-reverse md:flex-row w-full  self-stretch items-center ">
                     <div className="absolute inset-0 ">
                         <DotGrid
@@ -384,7 +322,7 @@ const ServiceLayout = ({ data }) => {
                                 Marketing */}
                             </h1>
 
-                            <p className="text-[#555555] mt-6 max-w-lg mx-auto md:mx-0 md:text-xl">
+                            <p className="text-[#555555] mt-6 max-w-lg mx-auto md:mx-0 text-lg md:text-xl lg:text-2xl">
                                 {data.heroDescription}
                             </p>
                         </div>
@@ -392,23 +330,23 @@ const ServiceLayout = ({ data }) => {
 
                     {/* Right Section */}
                     <div className="z-10 flex items-center justify-center self-stretch w-full md:w-[35%] ">
-                        <div className="w-full flex items-center justify-center ">
-                            <Image
+                        <video
+                            src="/videos/Big_Buck_Bunny_1080_10s_5MB.mp4"
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className="w-full h-full object-cover  "
+                        />
+                        {/* <div className="w-full flex items-center justify-center "> */}
+                        {/* <Image
                                 src={'/images/socialMedia/image 3.png'}
                                 alt={'dummy image'}
                                 width={400}
                                 height={400}
                                 className="object-contain w-full mx-0 md:mx-4"
-                            ></Image>
-                            {/* <video
-                                src="/videos/social-media.mp4"
-                                autoPlay
-                                loop
-                                muted
-                                playsInline
-                                className="w-full h-auto rounded-2xl "
-                            /> */}
-                        </div>
+                            ></Image> */}
+                        {/* </div> */}
                     </div>
                 </div>
             </section>
@@ -504,7 +442,7 @@ const ServiceLayout = ({ data }) => {
                 </div>
 
                 <div className="w-full flex items-center justify-center mt-12 ">
-                    <button className="bg-[#0f0f0f] text-[#fafafa] rounded-full px-6 py-2">
+                    <button className="bg-[#0f0f0f] text-[#fafafa] rounded-full px-6 py-2 text-base md:text-lg lg:text-xl">
                         View More
                     </button>
                 </div>
@@ -519,11 +457,11 @@ const ServiceLayout = ({ data }) => {
                             </div>{' '}
                             up?
                         </h1>
-                        <p className="text-[#555555] text-xl w-sm mt-2">
+                        <p className="text-[#555555] text-base md:text-lg lg:text-xl w-sm mt-2">
                             You’ve got the vision, we’ve got the creative power. Let’s turn your
                             brand into something people can’t scroll past
                         </p>
-                        <button className="bg-[#0f0f0f] text-[#fafafa] rounded-full px-6 py-2 w-fit mt-4">
+                        <button className="bg-[#0f0f0f] text-[#fafafa] rounded-full px-6 py-2 w-fit mt-4 text-base md:text-lg lg:text-xl">
                             Schedule A Call
                         </button>
                     </div>

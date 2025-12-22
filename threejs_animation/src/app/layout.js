@@ -10,14 +10,6 @@ const grift = localFont({
             path: '../assets/fonts/grift/Grift-Regular.woff2',
             weight: '400',
         },
-        {
-            path: '../assets/fonts/grift/Grift-Medium.woff2',
-            weight: '600',
-        },
-        {
-            path: '../assets/fonts/grift/Grift-Bold.woff2',
-            weight: '700',
-        },
     ],
     display: 'swap',
     variable: '--font-grift',
@@ -33,7 +25,7 @@ export default function RootLayout({ children }) {
         <html lang="en" className="scroll-smooth">
             <body className={grift.variable}>
                 <Navbar />
-
+                {/* <SmoothScroller /> */}
                 {children}
                 <Footer />
             </body>

@@ -3,8 +3,8 @@
 'use client';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import CardStack from '../components/servicePage/CardStack';
-import DotGrid from '../components/socialMedia/DotGrid';
+import { useEffect } from 'react';
+import StarfieldBackground from '../components/oldcode/Starfield';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -51,46 +51,80 @@ const cards = [
     },
 ];
 export default function Home() {
+    useEffect(() => {
+        if (!window.starfieldUniforms) return;
+
+        const uniforms = window.starfieldUniforms;
+
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: '.services',
+                start: 'top center',
+                end: '+=200%',
+                scrub: true,
+                // markers: true, // enable for debugging
+            },
+        });
+
+        // 1️⃣ Z → Y direction change
+        tl.to(uniforms.uDirection.value, {
+            x: 0,
+            y: -1,
+            z: 0,
+            duration: 0.6,
+            ease: 'power2.inOut',
+        });
+
+        // 2️⃣ Freeze star motion & switch to morph mode
+        tl.to(
+            uniforms.uMode,
+            {
+                value: 1,
+                duration: 0.01,
+            },
+            '>-0.1'
+        );
+
+        // 3️⃣ Morph particles into GLB
+        tl.to(uniforms.uMorph, {
+            value: 1,
+            duration: 1.4,
+            ease: 'power3.out',
+        });
+
+        return () => {
+            tl.kill();
+            ScrollTrigger.kill();
+        };
+    }, []);
     return (
-        <main>
-            {/* HERO SECTION */}
-            <section className="h-screen flex items-center justify-center bg-black text-white">
-                <h1 className="text-5xl font-bold">Hero Section</h1>
+        <main className="relative w-full overflow-x-hidden bg-black text-white">
+            {/* 🌌 STARFIELD BACKGROUND */}
+            <div className="fixed inset-0 z-10">
+                {/* <StarfieldBackground /> */}
+            </div>
+
+            {/* 🟣 HERO */}
+            <section className="relative flex h-screen items-center justify-center">
+                <h1 className="text-5xl md:text-7xl font-bold tracking-tight">Scroll Down</h1>
             </section>
 
-            {/* CARD STACK */}
-            <section className="relative bg-[#0f0f0f] flex min-h-screen px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
-                <div className="absolute inset-0 z-1">
-                    <DotGrid
-                        dotSize={2}
-                        gap={8}
-                        baseColor="#271e37"
-                        activeColor="#5227FF"
-                        proximity={120}
-                        shockRadius={250}
-                        shockStrength={5}
-                        resistance={750}
-                        returnDuration={1.5}
-                    />
-                </div>
+            {/* ⭐ SCROLL SPACE */}
+            <section className="h-[100vh]" />
 
-                <div className="z-10 flex flex-col w-full  ">
-                    <h2 className="text-3xl  md:text-4xl lg:text-5xl text-[#fafafa]   font-semibold  lg:leading-[60px] ">
-                        <span className="bg-[#844de9] inline px-2 rounded-md text-[#fafafa]">
-                            Questions?
-                        </span>{' '}
-                        We're Here To Help
-                    </h2>
-                    <div className="mt-12 md:mt-14 flex flex-col gap-6">
-                        <CardStack cards={cards} />
-                    </div>
+            {/* 🔮 MORPH TRIGGER */}
+            <section className="services relative flex h-[200vh] items-center justify-center">
+                <div className="text-center space-y-4">
+                    <h2 className="text-4xl md:text-6xl font-semibold">Particles Morph</h2>
+                    <p className="text-white/70 text-lg max-w-xl mx-auto">
+                        Same starfield particles smoothly morph into a GLB logo.
+                    </p>
                 </div>
-                {/* Accordion */}
             </section>
 
-            {/* OUTRO SECTION */}
-            <section className="h-screen flex items-center justify-center bg-neutral-900 text-white">
-                <h2 className="text-4xl font-semibold">Next Section</h2>
+            {/* 🟢 AFTER MORPH */}
+            <section className="relative flex h-[120vh] items-center justify-center">
+                <h2 className="text-4xl md:text-6xl font-semibold">Logo Formed</h2>
             </section>
         </main>
     );

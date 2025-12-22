@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Image from 'next/image';
 import { Suspense, useLayoutEffect, useRef, useState } from 'react';
+import useDeviceType from '../../components/hooks/useDeviceType';
 import DotGrid from '../../components/socialMedia/DotGrid';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -53,6 +54,36 @@ const teamMembers = [
         name: 'Puja Naik',
         role: 'Co-Head, Website Development',
     },
+    {
+        image: '/images/about/saurav.webp',
+        name: 'Saurav Singh',
+        role: 'Co-Head, Digital Marketing',
+    },
+    {
+        image: '/images/about/rohan.webp',
+        name: 'Rohan Matle',
+        role: 'Co-Head, Website Development',
+    },
+    {
+        image: '/images/about/saurabh.webp',
+        name: 'Saurabh Rajguru',
+        role: 'Head, UI/UX Design',
+    },
+    {
+        image: '/images/about/harsh.webp',
+        name: 'Harsh Pathak',
+        role: 'Head, Design',
+    },
+    {
+        image: '/images/about/tejas.webp',
+        name: 'Tejas Naik Satham',
+        role: 'Co-Head, Digital Marketing',
+    },
+    {
+        image: '/images/about/puja.webp',
+        name: 'Puja Naik',
+        role: 'Co-Head, Website Development',
+    },
 ];
 
 const TeamCard = ({
@@ -66,18 +97,24 @@ const TeamCard = ({
     return (
         <div
             ref={cardRef}
-            className="team-card relative lg:w-[300px] md:w-[250px]  w-[120px] md:h-[300px] h-[200px] mt-4 lg:mt-0 mx-auto will-change-transform overflow-hidden"
+            className="team-card relative     will-change-transform overflow-hidden"
             style={{ transformStyle: 'preserve-3d' }}
         >
             {/* Base Image */}
-            <Image src={image} alt={name} fill sizes="300px" className="front-image object-cover" />
+            <Image
+                src={image}
+                alt={name}
+                width={200}
+                height={200}
+                className="front-image object-cover"
+            />
 
             {/* Hover Reveal Image */}
             <Image
                 src={bgImage}
                 alt={name}
-                fill
-                sizes="300px"
+                width={200}
+                height={200}
                 className="hover-img object-cover absolute inset-0"
             />
             {/* Info */}
@@ -100,12 +137,12 @@ const TeamCard = ({
 //     );
 // };
 
-const StatCard = ({ stat, label, hasContent, roundedClass }) => {
+const StatCard = ({ title, description, hasContent, roundedClass }) => {
     const [isHovered, setIsHovered] = useState(false);
 
     return (
         <div
-            className={`relative p-4 md:p-6 lg:p-10 ${roundedClass} bg-transparent transition-colors duration-300 w-full  h-[250px] md:h-[400px] ${
+            className={`relative p-4 md:p-6 lg:p-10 ${roundedClass} bg-transparent transition-colors duration-300 w-full   ${
                 hasContent
                     ? `border ${isHovered ? 'border-[#fafafa]' : 'border-[#555555]'}`
                     : isHovered
@@ -134,20 +171,20 @@ const StatCard = ({ stat, label, hasContent, roundedClass }) => {
 
             {/* Content */}
             {hasContent && (
-                <div className="relative z-10 flex flex-col justify-between h-full">
+                <div className="relative z-10 flex flex-col lg:gap-10  md:gap-6  gap-4 justify-between h-full">
                     <h2
-                        className={`text-3xl md:text-2xl lg:text-4xl font-bold transition-colors duration-300 ${
+                        className={`text-2xl md:text-2xl lg:text-4xl font-bold transition-colors duration-300 ${
                             isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
                         }`}
                     >
-                        {stat}
+                        {title}
                     </h2>
                     <p
-                        className={`text-sm md:text-base lg:text-lg mt-2 transition-colors  duration-300 ${
+                        className={`text-base md:text-lg lg:text-xl mt-2 transition-colors  duration-300 ${
                             isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
                         }`}
                     >
-                        {label}
+                        {description}
                     </p>
                 </div>
             )}
@@ -155,10 +192,9 @@ const StatCard = ({ stat, label, hasContent, roundedClass }) => {
     );
 };
 const About = () => {
-    let start, end;
+    const { isMobile, isTablet, isDesktop } = useDeviceType();
 
     useLayoutEffect(() => {
-        const isMobile = window.innerWidth < 768;
         let ctx;
         const setup = async () => {
             requestAnimationFrame(() => {
@@ -168,51 +204,35 @@ const About = () => {
             ctx = gsap.context(() => {
                 const parent = document.querySelector('.team-parent');
 
-                const rows = gsap.utils.toArray('.team-row');
+                const cards = gsap.utils.toArray('.team-card');
 
-                rows.forEach(row => {
-                    const cards = row.querySelectorAll('.team-card');
+                const columns = isDesktop ? 6 : 3;
 
-                    const parentRect = parent.getBoundingClientRect();
-                    const parentCenterX = parentRect.left + parentRect.width / 2;
-                    const parentCenterY = parentRect.top + parentRect.height / 2;
+                // split cards into virtual rows
+                const rows = cards.reduce((acc, card, index) => {
+                    const rowIndex = Math.floor(index / columns);
+                    acc[rowIndex] ??= [];
+                    acc[rowIndex].push(card);
+                    return acc;
+                }, []);
 
-                    const initialOffsets = [];
-
-                    cards.forEach(card => {
-                        const rect = card.getBoundingClientRect();
-                        const cardCenterX = rect.left + rect.width / 2;
-                        const cardCenterY = rect.top + rect.height / 2;
-
-                        initialOffsets.push({
-                            x: parentCenterX - cardCenterX + 200,
-                            y: parentCenterY - cardCenterY + 200,
-                        });
-                    });
-                    if (isMobile) {
-                        start = 'top 80%';
-                        end = 'top top';
-                    } else {
-                        start = 'top 70%';
-                        end = 'top top';
-                    }
-                    gsap.from(cards, {
+                rows.forEach((rowCards, rowIndex) => {
+                    gsap.from(rowCards, {
                         opacity: 0,
                         scale: 0.1,
-                        // x: 200,
                         y: 250,
                         z: -4000,
                         rotateX: 160,
                         rotateY: 110,
                         rotate: 65,
-                        duration: 8.64,
+                        duration: 8.65,
                         ease: 'power3.out',
                         stagger: 1.15,
 
                         scrollTrigger: {
-                            trigger: row,
-                            start,
-                            end,
+                            trigger: rowCards[0], // first card in row
+                            start: isMobile ? 'top 100%' : 'top 110%',
+                            end: isMobile ? 'bottom center' : 'bottom 60%',
                             scrub: 1,
                         },
                     });
@@ -225,7 +245,7 @@ const About = () => {
         return () => {
             if (ctx) ctx.revert();
         };
-    }, []);
+    }, [isDesktop]);
 
     return (
         <div>
@@ -248,7 +268,7 @@ const About = () => {
                     that
                 </h2>
 
-                <div className="mt-12 md:mt-14 bg-[#0f0f0f] text-[#9c9c9c] text-lg md:text-xl lg:text-xl font-semibold">
+                <div className="mt-12 md:mt-14 bg-[#0f0f0f] text-[#9c9c9c] text-lg md:text-xl lg:text-2xl font-semibold">
                     <p className="pb-6 ">
                         SAAA Consultants is a multidisciplinary creative team built on one belief:
                         different perspectives create better outcomes. We approach every brief with
@@ -356,8 +376,8 @@ const About = () => {
 
                 <div className=" relative mt-12 md:mt-14  grid grid-cols-1 md:grid-cols-3 bg-[#0f0f0f] rounded-2xl overflow-hidden">
                     <StatCard
-                        stat="Innovative Customization"
-                        label="Our strategy centers on a research-focused approach, delving deep to gather insights. By understanding your business and market trends, we craft a customized strategy for relentless growth and long-term brand success."
+                        title="Innovative Customization"
+                        description="Our strategy centers on a research-focused approach, delving deep to gather insights. By understanding your business and market trends, we craft a customized strategy for relentless growth and long-term brand success."
                         hasContent={true}
                         roundedClass="rounded-t-2xl sm:rounded-r-none"
                     />
@@ -370,8 +390,8 @@ const About = () => {
 
                     {/* Card 3 */}
                     <StatCard
-                        stat="Pinnacle Performance"
-                        label="Committed to excellence, our team has satisfied over 100 clients with relentless dedication. We strive for perfection, consistently exceeding expectations."
+                        title="Pinnacle Performance"
+                        description="Committed to excellence, our team has satisfied over 100 clients with relentless dedication. We strive for perfection, consistently exceeding expectations."
                         hasContent={true}
                         roundedClass="sm:rounded-tr-2xl"
                     />
@@ -381,8 +401,8 @@ const About = () => {
 
                     {/* Card 5 */}
                     <StatCard
-                        stat="Insightful Strategy"
-                        label="Thriving on creativity, our innovative process sets us apart. We craft customized strategies for a personalized experience tailored to your unique requirements."
+                        title="Insightful Strategy"
+                        description="Thriving on creativity, our innovative process sets us apart. We craft customized strategies for a personalized experience tailored to your unique requirements."
                         hasContent={true}
                         roundedClass="rounded-b-2xl sm:rounded-b-none"
                     />
@@ -402,48 +422,7 @@ const About = () => {
                     className="team-parent px-4 relative w-full mt-12 md:mt-14"
                     style={{ perspective: '1200px', perspectiveOrigin: 'center center' }}
                 >
-                    {' '}
-                    <div className="team-row flex items-center flex-row flex-wrap  justify-center  md:gap-2 gap-0 lg:py-1 py-0 ">
-                        {teamMembers.map((member, index) => (
-                            <TeamCard
-                                key={index}
-                                image={member.image}
-                                name={member.name}
-                                role={member.role}
-                            />
-                        ))}
-                    </div>
-                    <div className="team-row flex items-center flex-row flex-wrap md:flex-row  justify-center  md:gap-2 gap-0 lg:py-1 py-0  ">
-                        {teamMembers.map((member, index) => (
-                            <TeamCard
-                                key={index}
-                                image={member.image}
-                                name={member.name}
-                                role={member.role}
-                            />
-                        ))}
-                    </div>
-                    <div className="team-row flex items-center flex-row flex-wrap md:flex-row  justify-center  md:gap-2 gap-0 lg:py-1 py-0 ">
-                        {teamMembers.map((member, index) => (
-                            <TeamCard
-                                key={index}
-                                image={member.image}
-                                name={member.name}
-                                role={member.role}
-                            />
-                        ))}
-                    </div>
-                    <div className="team-row flex items-center flex-row flex-wrap md:flex-row  justify-center  md:gap-2 gap-0 lg:py-1 py-0 ">
-                        {teamMembers.map((member, index) => (
-                            <TeamCard
-                                key={index}
-                                image={member.image}
-                                name={member.name}
-                                role={member.role}
-                            />
-                        ))}
-                    </div>
-                    <div className="team-row flex items-center flex-row flex-wrap md:flex-row  justify-center  md:gap-2 lg:py-1 py-0 ">
+                    <div className="team-grid grid grid-cols-3 lg:grid-cols-6 gap-2  justify-center ">
                         {teamMembers.map((member, index) => (
                             <TeamCard
                                 key={index}

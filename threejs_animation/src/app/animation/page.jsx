@@ -164,6 +164,7 @@ const Animation = () => {
 
         const loader = new GLTFLoader();
         let particlesMaterial = null;
+        let rawModel;
         const logoMaterials = [];
         const initialSlicePositions = [];
         const initialSliceRotations = [];
@@ -171,12 +172,13 @@ const Animation = () => {
         const spiralTarget = isMobile
             ? {
                   //  x for left right , z for up down
-                  position: { x: 0.015, y: 0.05, z: -0.29 },
+                  position: { x: -0.015, y: 0.05, z: -0.33 },
                   rotation: {
                       x: -0.2,
                       y: -1.5,
                       z: 0,
                   },
+                //   scale: { x: 10, y: 10, z: 5 },
                   duration: 4,
               }
             : isTablet
@@ -203,7 +205,7 @@ const Animation = () => {
         loader.load(
             '/models/model.glb',
             gltf => {
-                const rawModel = gltf.scene;
+                rawModel = gltf.scene;
 
                 // const modelGroup = new THREE.Group();
                 scene.add(rawModel);
@@ -480,7 +482,6 @@ const Animation = () => {
                 depthWrite: false,
             });
         }
-        const modelScale = { value: 1 };
 
         function setupScrollAnimation(materials, particlesMaterial, camera) {
             // Make sure starfield starts hidden
@@ -492,7 +493,7 @@ const Animation = () => {
                     trigger: '#scroll-spacer',
                     start: 'top top',
                     end: '100% bottom',
-                    scrub: 0.82, // smooth scroll-scrub
+                    scrub: 1, // smooth scroll-scrub
                     snap: {
                         snapTo: 'labelsDirectional',
                         duration: 2.9, // instant transition to snap point
@@ -515,12 +516,23 @@ const Animation = () => {
             tl.addLabel('initial');
             // Animate each spiral individually to center with rotation
             slicesRef.current.forEach((slice, index) => {
-                let delay = index * 0.6;
+                let delay = index * 0.3;
                 // if (index === slicesRef.length - 1) {
                 //     delay = index * 0.02;
                 // }
 
                 // Move each spiral to center
+                    tl.to(
+                        rawModel.scale,
+                        {
+                            x: 10,
+                            y: 10,
+                            z: 5,
+                            duration: 3.5,
+                            ease: 'power1.inOut',
+                        },
+                        '<'
+                    );
                 tl.to(
                     slice.position,
                     {
@@ -540,17 +552,6 @@ const Animation = () => {
                     },
                     delay
                 );
-                if (isMobile) {
-                    tl.to(
-                        modelScale,
-                        {
-                            value: 0.58, // 🔽 slight scale down (tweak: 0.85–0.9)
-                            duration: 2,
-                            ease: 'power1.inOut',
-                        },
-                        0 // sync with rotation start
-                    );
-                }
             });
 
             tl.to(
@@ -563,6 +564,7 @@ const Animation = () => {
                 },
                 '<-3'
             );
+
             tl.to(
                 '.second-text',
                 {
@@ -573,6 +575,7 @@ const Animation = () => {
                 },
                 '>+1'
             );
+
             tl.addLabel('rotation');
             tl.to('.second-text', { opacity: 0, duration: 3.5, ease: 'power1.inOut' }, '>');
 
@@ -1048,7 +1051,7 @@ const Animation = () => {
                         className="absolute top-0 h-full w-full  pointer-events-none"
                     />
                     <div className="absolute right-0 top-[20%] md:right-3 md:top-[38%]   initial-text items-center justify-center w-full md:w-fit pr-0 md:pr-10 md:px-16 lg:px-20   xl:px-32">
-                        <h1 className="text-center    lg:text-6xl md:text-5xl text-5xl font-semibold leading-tight text-[#0f0f0f] ">
+                        <h1 className="text-center    lg:text-6xl md:text-5xl text-4xl font-semibold leading-tight text-[#0f0f0f] ">
                             What you envision, <br />
                             We help you become.
                         </h1>

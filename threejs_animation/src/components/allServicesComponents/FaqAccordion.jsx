@@ -14,13 +14,15 @@ const FaqAccordion = ({ faqData = [], defaultActiveIndex = 0 }) => {
             {faqData.map((item, index) => (
                 <div
                     key={index}
-                    className={`border border-[#9C9C9C] bg-[#55555533] backdrop-blur-xs rounded-xl overflow-hidden transition-all duration-300`}
+                    className={`border border-[#fafafa] bg-[#55555533] backdrop-blur-xs rounded-xl overflow-hidden transition-all duration-300`}
                 >
-                    <button
-                        className="w-full flex justify-between items-center px-6 py-4 text-left text-[#fafafa] text-lg md:text-2xl focus:outline-none"
+                    <div
+                        className="w-full  flex justify-between items-center gap-2 px-6 py-4 text-left text-[#fafafa] focus:outline-none"
                         onClick={() => toggleAccordion(index)}
                     >
-                        {item.question}
+                        <span className="text-lg md:text-xl lg:text-2xl font-semibold ">
+                            {item.question}
+                        </span>
 
                         <span
                             className={`transform transition-transform duration-300 ${
@@ -41,10 +43,10 @@ const FaqAccordion = ({ faqData = [], defaultActiveIndex = 0 }) => {
                                 />
                             </svg>
                         </span>
-                    </button>
+                    </div>
 
                     <div
-                        className={`px-6 pb-4 text-[#9c9c9c] text-xl flex flex-col leading-relaxed transition-all duration-300 ${
+                        className={`px-6 pb-4 text-[#9c9c9c] text-base md:text-lg lg:text-xl flex flex-col leading-relaxed transition-all duration-300 ${
                             activeIndex === index
                                 ? 'max-h-[500px] opacity-100 flex'
                                 : 'max-h-0 opacity-0 hidden'
