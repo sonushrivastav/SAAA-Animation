@@ -164,7 +164,6 @@ const Animation = () => {
 
         const loader = new GLTFLoader();
         let particlesMaterial = null;
-        let rawModel;
         const logoMaterials = [];
         const initialSlicePositions = [];
         const initialSliceRotations = [];
@@ -172,13 +171,12 @@ const Animation = () => {
         const spiralTarget = isMobile
             ? {
                   //  x for left right , z for up down
-                  position: { x: -0.015, y: 0.05, z: -0.33 },
+                  position: { x: 0.015, y: 0.05, z: -0.29 },
                   rotation: {
                       x: -0.2,
                       y: -1.5,
                       z: 0,
                   },
-                //   scale: { x: 10, y: 10, z: 5 },
                   duration: 4,
               }
             : isTablet
@@ -205,7 +203,7 @@ const Animation = () => {
         loader.load(
             '/models/model.glb',
             gltf => {
-                rawModel = gltf.scene;
+                const rawModel = gltf.scene;
 
                 // const modelGroup = new THREE.Group();
                 scene.add(rawModel);
@@ -482,6 +480,7 @@ const Animation = () => {
                 depthWrite: false,
             });
         }
+        const modelScale = { value: 1 };
 
         function setupScrollAnimation(materials, particlesMaterial, camera) {
             // Make sure starfield starts hidden
@@ -493,14 +492,14 @@ const Animation = () => {
                     trigger: '#scroll-spacer',
                     start: 'top top',
                     end: '100% bottom',
-                    scrub: 1, // smooth scroll-scrub
-                    snap: {
-                        snapTo: 'labelsDirectional',
-                        duration: 2.9, // instant transition to snap point
-                        delay: 0, // start snapping immediately when scroll stops
-                        ease: 'none',
-                        inertia: false,
-                    },
+                    scrub: 1.8, // smooth scroll-scrub
+                    // snap: {
+                    //     snapTo: 'labelsDirectional',
+                    //     duration: 2.9, // instant transition to snap point
+                    //     delay: 0, // start snapping immediately when scroll stops
+                    //     ease: 'none',
+                    //     inertia: false,
+                    // },
 
                     onUpdate: self => {
                         gsap.to(flowAnimation.current, {
@@ -514,25 +513,23 @@ const Animation = () => {
 
             // --- STEP 1: Move logo to center ---
             tl.addLabel('initial');
+            if (isMobile) {
+                tl.to(camera.position, {
+                    x: 0,
+                    y: 0,
+                    z: 8,
+                    ease: 'power1.inOut',
+                    onUpdate: () => camera.updateProjectionMatrix(),
+                });
+            }
             // Animate each spiral individually to center with rotation
             slicesRef.current.forEach((slice, index) => {
-                let delay = index * 0.3;
+                let delay = index * 0.6;
                 // if (index === slicesRef.length - 1) {
                 //     delay = index * 0.02;
                 // }
 
                 // Move each spiral to center
-                    tl.to(
-                        rawModel.scale,
-                        {
-                            x: 10,
-                            y: 10,
-                            z: 5,
-                            duration: 3.5,
-                            ease: 'power1.inOut',
-                        },
-                        '<'
-                    );
                 tl.to(
                     slice.position,
                     {
@@ -564,7 +561,6 @@ const Animation = () => {
                 },
                 '<-3'
             );
-
             tl.to(
                 '.second-text',
                 {
@@ -575,7 +571,6 @@ const Animation = () => {
                 },
                 '>+1'
             );
-
             tl.addLabel('rotation');
             tl.to('.second-text', { opacity: 0, duration: 3.5, ease: 'power1.inOut' }, '>');
 
@@ -617,20 +612,20 @@ const Animation = () => {
                 { value: 0, duration: 0.5, ease: 'power2.in' },
                 '>-3'
             );
-            if (
-                flowingParticlesMaterialRef.current &&
-                flowingParticlesMaterialRef.current.uniforms
-            ) {
-                tl.to(
-                    flowingParticlesMaterialRef.current.uniforms.uOpacity,
-                    {
-                        value: 0,
-                        duration: 1.5,
-                        ease: 'power2.inOut',
-                    },
-                    '<'
-                );
-            }
+            // if (
+            //     flowingParticlesMaterialRef.current &&
+            //     flowingParticlesMaterialRef.current.uniforms
+            // ) {
+            //     tl.to(
+            //         flowingParticlesMaterialRef.current.uniforms.uOpacity,
+            //         {
+            //             value: 0,
+            //             duration: 1.5,
+            //             ease: 'power2.inOut',
+            //         },
+            //         '<'
+            //     );
+            // }
             tl.to(
                 particlesMaterial.uniforms.uVisibility,
                 { value: 0, duration: 0.7, ease: 'power2.inOut' },
@@ -674,8 +669,9 @@ const Animation = () => {
                             ease: 'power2.out',
                             duration: textDuration,
                         },
-                        `>-${labelName}`
+                        `afterSecondText`
                     );
+                    tl.addLabel('thirdTextHold', '+=3');
 
                     tl.to(
                         el,
@@ -686,10 +682,9 @@ const Animation = () => {
                             duration: textDuration,
                             ease: 'power2.inOut',
                         },
-                        `>${textDuration * 0.4}`
+                        `thirdTextHold`
                     );
                 } else {
-                    // 🔸 Normal animation for first 2 flying texts
                     tl.addLabel(labelName, startTime);
                     tl.fromTo(
                         el,
@@ -712,6 +707,8 @@ const Animation = () => {
 
                 // 🌌 Change Starfield direction after 2nd flying text
                 if (i === 1) {
+                    tl.addLabel('afterSecondText', '>');
+
                     // index 1 = 2nd text
                     tl.to(
                         window.starfieldUniforms.uDirection.value,
@@ -727,6 +724,28 @@ const Animation = () => {
                 }
                 // ✅ After final flying text disappears → start starfield morph
             });
+
+            const starfieldMorphState = { value: 0 };
+
+            tl.to(
+                starfieldMorphState,
+                {
+                    value: 1,
+                    duration: 12,
+                    ease: 'power2.inOut',
+                    onUpdate: () => {
+                        if (window.starfieldMorphUniform) {
+                            window.starfieldMorphUniform.value = starfieldMorphState.value;
+                        }
+                    },
+                    onReverseUpdate: () => {
+                        if (window.starfieldMorphUniform) {
+                            window.starfieldMorphUniform.value = starfieldMorphState.value;
+                        }
+                    },
+                },
+                'afterSecondText+=1'
+            );
 
             tl.to(
                 '.starfield-layer',
@@ -778,7 +797,7 @@ const Animation = () => {
                         }
                     },
                 },
-                '<-2.5'
+                'thirdTextHold+=1'
             );
 
             tl.eventCallback('onReverseUpdate', () => {

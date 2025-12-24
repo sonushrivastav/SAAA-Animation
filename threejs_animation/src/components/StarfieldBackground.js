@@ -1,16 +1,18 @@
 'use client';
 
-import { BlendFunction, BloomEffect, EffectComposer, EffectPass, RenderPass } from 'postprocessing';
 import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
+import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler';
 
 // 💡 Add the import for useControls from Leva
 import { Leva, useControls } from 'leva';
 import useDeviceType from './hooks/useDeviceType';
 
-export default function StarfieldBackground({}) {
+export default function StarfieldBackground({ activeIndex = -1 }) {
     const canvasRef = useRef(null);
+    const { isMobile, isTablet, isDesktop } = useDeviceType();
 
     // 🌟 LEVA Controls Integration
     const controls = useControls({
@@ -22,12 +24,10 @@ export default function StarfieldBackground({}) {
             step: 0.01,
             label: 'Base Speed',
         },
-        spacing: { value: 87, min: 10, max: 200, step: 1, label: 'Grid Spacing' }, // New control
-        count: { value: 15, min: 1, max: 50, step: 1, label: 'Grid Count' }, // New control
-        // spacing: { value: 50, min: 10, max: 200, step: 1, label: 'Grid Spacing' }, // New control
-        // count: { value: 18, min: 1, max: 50, step: 1, label: 'Grid Count' }, // New control
+        spacing: { value: 87, min: 10, max: 200, step: 1, label: 'Grid Spacing' },
+        count: { value: 15, min: 1, max: 50, step: 1, label: 'Grid Count' },
         sizeScale: {
-            value: 200.0, // Used in uSizeScale uniform
+            value: 350.0, // Used in uSizeScale uniform
             min: 100,
             max: 2000,
             step: 10,
@@ -78,10 +78,6 @@ export default function StarfieldBackground({}) {
         },
     });
 
-    const { isMobile, isTablet, isDesktop } = useDeviceType();
-
-    // ---
-
     function createCircleTexture() {
         const size = 128;
         const canvas = document.createElement('canvas');
@@ -120,7 +116,9 @@ export default function StarfieldBackground({}) {
 
     const starData = useMemo(() => {
         const starPositions = [];
-        const { spacing, count } = controls;
+        const count = isMobile ? 18 : 15;
+        const spacing = isMobile ? 50 : 87;
+
         const totalDepth = count * 10;
 
         for (let x = -count; x <= count; x++) {
@@ -129,7 +127,7 @@ export default function StarfieldBackground({}) {
                 for (let zLayer = -count; zLayer <= count; zLayer++) {
                     const jitter = (Math.random() - 0.5) * 30;
                     const z = zLayer * 40 + jitter;
-                    starPositions.push(x * spacing, y * spacing, z); // Using spacing control
+                    starPositions.push(x * spacing, y * spacing, z);
                 }
             }
         }
@@ -158,7 +156,7 @@ export default function StarfieldBackground({}) {
         }
 
         return { starPositions, sizes, totalDepth, total };
-    }, [controls.spacing, controls.count]);
+    }, [controls.spacing, controls.count, isMobile]);
 
     useEffect(() => {
         // We use the destructured values from the controls
@@ -169,7 +167,7 @@ export default function StarfieldBackground({}) {
         window.globalStarPositions = starPositions;
 
         const loader = new THREE.TextureLoader();
-        const star = loader.load('/images/testImages/sp2.png');
+        // const star = loader.load('/images/testImages/sp2.png'); // Unused
         const scene = new THREE.Scene();
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
         scene.add(ambientLight);
@@ -183,7 +181,7 @@ export default function StarfieldBackground({}) {
             scene.environment = hdrMap;
         });
         const camera = new THREE.PerspectiveCamera(
-            75,
+            65,
             window.innerWidth / window.innerHeight,
             0.1,
             1000
@@ -198,38 +196,6 @@ export default function StarfieldBackground({}) {
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
 
-        // 🌟 Add postprocessing composer
-        const composer = new EffectComposer(renderer);
-        composer.addPass(new RenderPass(scene, camera));
-
-        const bloomEffect = new BloomEffect({
-            intensity: 1.8, // controls glow brightness
-            luminanceThreshold: 0.02, // lower = more glow
-            luminanceSmoothing: 1.9,
-            blendFunction: BlendFunction.ADD,
-        });
-
-        const bloomPass = new EffectPass(camera, bloomEffect);
-        composer.addPass(bloomPass);
-
-        // const colors = new Float32Array(total * 3);
-        // const color = new THREE.Color();
-
-        // for (let i = 0; i < total; i++) {
-        //   // ✨ Generate a random color for each star
-        //   color.setHSL(Math.random(), 0.7, 0.6);
-
-        //   // ✨ Store the R, G, B components in the array
-        //   colors[i * 3] = color.r;
-        //   colors[i * 3 + 1] = color.g;
-        //   colors[i * 3 + 2] = color.b;
-        // }
-
-        // starsGeometry.setAttribute(
-        //   "color",
-        //   new THREE.Float32BufferAttribute(colors, 3)
-        // );
-
         // 🌈 Set single color for all particles
         const colors = new Float32Array(total * 3);
         const color = new THREE.Color();
@@ -241,16 +207,108 @@ export default function StarfieldBackground({}) {
             colors[i * 3 + 2] = color.b;
         }
 
-        // Attach color attribute to geometry
-
         const starsGeometry = new THREE.BufferGeometry();
         starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
         starsGeometry.setAttribute('aSize', new THREE.Float32BufferAttribute(sizes, 1));
         starsGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
 
         const starTexture = createCircleTexture();
+        const gltfLoader = new GLTFLoader();
+        const meshes = [];
+
+        gltfLoader.load('/models/model.glb', gltf => {
+            // 1️⃣ Apply transforms EXACTLY like rendered logo
+            if (isMobile) {
+                gltf.scene.position.set(-1.5, -0, 0);
+                gltf.scene.rotation.set(0, 0, -Math.PI / 2);
+                gltf.scene.scale.set(10, 10, 7);
+            } else if (isTablet) {
+                gltf.scene.position.set(-2, -2.5, 0);
+                gltf.scene.rotation.set(0, 0, -0.25);
+                gltf.scene.scale.set(14, 14, 9);
+            } else {
+                gltf.scene.position.set(-3, -3.3, 0);
+                gltf.scene.rotation.set(0, 0, -0.6);
+                gltf.scene.scale.set(20, 20, 10);
+            }
+            gltf.scene.updateWorldMatrix(true, true);
+
+            const geometries = [];
+
+            // 2️⃣ Collect geometries with world transform baked in
+            gltf.scene.traverse(child => {
+                if (!child.isMesh) return;
+
+                const geo = child.geometry.clone();
+                geo.applyMatrix4(child.matrixWorld); // 🔥 bake transform ONCE
+                geometries.push(geo);
+                meshes.push(child);
+            });
+            const order = {
+                Curve001: 2,
+                Curve002: 1,
+                Curve_1: 3,
+                Curve003: 4,
+                Curve004: 5,
+                Curve005: 6,
+                Curve006: 7,
+            };
+            meshes.sort((a, b) => {
+                return order[a.name] - order[b.name];
+            });
+
+            if (!geometries.length) return;
+
+            if (meshes.length === 0) return;
+
+            // 💡 CHANGE 2: Sample proportionally from each mesh and TAG them
+            const targetPositions = new Float32Array(total * 3);
+            const shapeIndices = new Float32Array(total); // New array to store ID (0-6)
+
+            const tempPosition = new THREE.Vector3();
+            let currentOffset = 0;
+
+            // We distribute the total particles across the 7 meshes
+            // (Simple division, or you can calculate surface area for perfect evenness)
+            const particlesPerMesh = Math.floor(total / meshes.length);
+
+            meshes.forEach((mesh, meshIndex) => {
+                // Apply world matrix to geometry for sampling
+                const samplerMesh = new THREE.Mesh(
+                    mesh.geometry.clone(),
+                    new THREE.MeshBasicMaterial()
+                );
+                samplerMesh.geometry.applyMatrix4(mesh.matrixWorld);
+
+                const sampler = new MeshSurfaceSampler(samplerMesh).build();
+
+                // Determine how many dots this specific mesh gets
+                // The last mesh gets the remainder to ensure we fill the array
+                const count =
+                    meshIndex === meshes.length - 1 ? total - currentOffset : particlesPerMesh;
+
+                for (let i = 0; i < count; i++) {
+                    sampler.sample(tempPosition);
+
+                    const index = currentOffset + i;
+                    targetPositions[index * 3 + 0] = tempPosition.x;
+                    targetPositions[index * 3 + 1] = tempPosition.y;
+                    targetPositions[index * 3 + 2] = tempPosition.z;
+
+                    // TAG THIS PARTICLE with the mesh index!
+                    shapeIndices[index] = meshIndex;
+                }
+                currentOffset += count;
+            });
+
+            starsGeometry.setAttribute('aTarget', new THREE.BufferAttribute(targetPositions, 3));
+
+            // Add the new attribute to geometry
+            starsGeometry.setAttribute('aShapeIndex', new THREE.BufferAttribute(shapeIndices, 1));
+        });
 
         // 💡 Use sizeScale from controls
+
         const material = new THREE.ShaderMaterial({
             uniforms: {
                 uTexture: { value: starTexture },
@@ -260,9 +318,12 @@ export default function StarfieldBackground({}) {
                 uTime: { value: 0 },
                 uSpiralProgress: { value: 0 },
                 uMergeProgress: { value: 0 },
-                uDirection: { value: new THREE.Vector3(0, 0, 1) }, // starts moving along Z-axis
+                uDirection: { value: new THREE.Vector3(0, 0, 1) },
                 uSpeed: { value: controls.baseSpeed },
-
+                uMorph: { value: 0 },
+                uMeshPosition: { value: new THREE.Vector3(0, 0, 0) },
+                uActiveIndex: { value: { activeIndex } }, // Passed from prop
+                uHighlightColor: { value: new THREE.Color('#ffffff') },
                 uMinOpacity: { value: controls.minOpacity },
                 uMaxOpacity: { value: controls.maxOpacity },
                 uOpacityFalloff: { value: controls.opacityFalloff },
@@ -273,44 +334,62 @@ export default function StarfieldBackground({}) {
         attribute float aSize;
         attribute float aSpiral;
         attribute vec3 color;
-
+        attribute vec3 aTarget;
+attribute float aShapeIndex;
         varying vec3 vColor;
         varying float vDepth;
-
+        varying float vMorphFactor; // Pass morph state to fragment
+varying float vShapeIndex;
         uniform float uSizeScale;
         uniform float uTime;
         uniform float uSpiralProgress;
         uniform float uMergeProgress;
+        uniform float uMorph;
+        uniform vec3 uMeshPosition;
 
         void main() {
           vec3 pos = position;
-
           vColor = color;
+          vShapeIndex = aShapeIndex;
+          vMorphFactor = uMorph;
 
-          // Spiral effect (unchanged)
+          // Spiral effect
           if (aSpiral > 0.5) {
             float angle = uTime * 2.0 + pos.z * 0.05;
             float radius = length(pos.xy) * (1.0 - uMergeProgress);
-
-            vec3 spiralPos = vec3(
-              cos(angle) * radius,
-              sin(angle) * radius,
-              pos.z
-            );
-
+            vec3 spiralPos = vec3(cos(angle) * radius, sin(angle) * radius, pos.z);
             pos = mix(pos, spiralPos, uSpiralProgress);
           }
 
+          // Morphing Logic
+          vec3 localTarget = aTarget - uMeshPosition;
+          pos = mix(pos, localTarget, uMorph);
+
           vec4 mvPos = modelViewMatrix * vec4(pos, 1.0);
           float depth = -mvPos.z;
+
+          // -------------------------------------------------------------
+          // 💡 KEY FIX: Dynamic Sizing
+          // -------------------------------------------------------------
+          // 1. Defined a fixed, smaller size for the logo shape (e.g., 20.0)
+          // 2. Mix between the random star size (aSize) and the fixed shape size
+          float shapeBaseSize = 0.1; // Adjust this number to make shape points smaller/larger
+          float currentBaseSize = mix(aSize, shapeBaseSize, uMorph);
+
+          // Apply perspective
           float safeDepth = max(8.0, depth);
           float perspective = uSizeScale / safeDepth;
+          float size = currentBaseSize * perspective;
 
-          float size = aSize * perspective;
-          size = clamp(size, 1.0, 160.0);
+          // -------------------------------------------------------------
+          // 💡 KEY FIX: Clamping
+          // -------------------------------------------------------------
+          // When morphed, we allow points to be smaller to define edges better
+          float minSize = mix(1.0, 0.5, uMorph);
+          float maxSize = mix(160.0, 50.0, uMorph); // Cap max size heavily when morphed
 
           gl_Position = projectionMatrix * mvPos;
-          gl_PointSize = size;
+          gl_PointSize = clamp(size, minSize, maxSize);
 
           vDepth = depth;
         }
@@ -319,13 +398,18 @@ export default function StarfieldBackground({}) {
         uniform sampler2D uTexture;
         uniform float uStretchX;
         uniform float uShrinkY;
+
         varying vec3 vColor;
         varying float vDepth;
-
+        varying float vMorphFactor; // Receive morph state
+varying float vShapeIndex;
         uniform float uMinOpacity;
         uniform float uMaxOpacity;
         uniform float uOpacityFalloff;
         uniform float uOpacityOffset;
+
+        uniform float uActiveIndex;
+                uniform vec3 uHighlightColor;
 
         void main() {
           vec2 uv = gl_PointCoord - 0.5;
@@ -337,32 +421,39 @@ export default function StarfieldBackground({}) {
           uv += 0.5;
 
           vec4 tex = texture2D(uTexture, uv);
-          if (tex.a < 0.05) discard;
+
+          // 💡 KEY FIX: Sharpen texture when morphed
+          // If we are fully morphed, we discard soft edges more aggressively
+          // to prevent the "blob" look
+          float alphaThreshold = mix(0.05, 0.2, vMorphFactor);
+          if (tex.a < alphaThreshold) discard;
 
           // Calculate opacity based on depth
           float normalizedDepth = clamp((vDepth + uOpacityOffset) / uOpacityFalloff, 0.0, 1.0);
           float finalOpacity = mix(uMaxOpacity, uMinOpacity, normalizedDepth);
 
-          gl_FragColor = tex * vec4(vColor, finalOpacity);
+          // Optional: Boost opacity slightly when formed to make it crisp
+          finalOpacity = mix(finalOpacity, 1.0, vMorphFactor * 0.5);
+          vec3 finalColor = vColor;
+          if (abs(vShapeIndex - uActiveIndex) < 0.1) {
+                        // Mix based on morph factor so it only highlights when formed
+                        finalColor = mix(vColor, uHighlightColor, vMorphFactor);
+                    }
+
+          gl_FragColor = tex * vec4(finalColor, finalOpacity);
         }
       `,
             transparent: true,
             depthWrite: false,
-            blending: THREE.AdditiveBlending,
         });
+
         window.starfieldUniforms = material.uniforms;
         window.starfieldTotalDepth = totalDepth;
+        window.starfieldMorphUniform = material.uniforms.uMorph;
+
         const stars = new THREE.Points(starsGeometry, material);
         scene.add(stars);
-        // gsap.to(camera.position, {
-        //     z: 0,
-        //     duration: 4,
-        //     ease: 'power2.out',
-        //     delay: 0.2,
-        //     onUpdate: () => {
-        //         camera.updateProjectionMatrix();
-        //     },
-        // });
+
         let lastScroll = window.scrollY;
         let scrollSpeed = 0;
         let velocity = 0;
@@ -373,8 +464,6 @@ export default function StarfieldBackground({}) {
             velocity = newScroll - lastScroll;
             lastScroll = newScroll;
             scrollSpeed += velocity * 0.05;
-
-
         });
 
         // 🖱 Mouse parallax
@@ -389,21 +478,25 @@ export default function StarfieldBackground({}) {
 
             // Smoothly interpolate to target speed for fluid motion
             scrollSpeed += (targetSpeed - scrollSpeed) * 0.1;
+            const morph = material.uniforms.uMorph.value;
 
             // Always move forward with baseSpeed, add scroll speed for reverse effect
             const currentSpeed = baseSpeed + scrollSpeed;
 
-            // Move stars backward/forward based on total speed
-            // Move stars along the current direction
             // 🌌 Move stars along direction vector
             const dir = material.uniforms.uDirection.value;
-            stars.position.addScaledVector(dir, currentSpeed);
+
+            // Only move the container if we are NOT fully morphed
+            if (morph < 0.99) {
+                stars.position.addScaledVector(dir, currentSpeed);
+            }
+
+            // Update the uniform so the shader knows where the container is
+            material.uniforms.uMeshPosition.value.copy(stars.position);
 
             // 🌠 Axis-agnostic wrapping
             const total = window.starfieldTotalDepth || totalDepth;
-
             const half = total / 2;
-            // console.log('half', half);
 
             if (Math.abs(dir.z) >= Math.abs(dir.x) && Math.abs(dir.z) >= Math.abs(dir.y)) {
                 if (stars.position.z > half) stars.position.z -= total;
@@ -419,13 +512,7 @@ export default function StarfieldBackground({}) {
             // Decay scroll speed - returns to 0, leaving only baseSpeed
             targetSpeed *= 0.85;
 
-            camera.position.x += (mouse.x * 15 - camera.position.x) * 0.03;
-            camera.position.y += (mouse.y * 15 - camera.position.y) * 0.03;
-            // stars.position.x += (mouse.x * 15 - stars.position.x) * 0.03;
-            // stars.position.y += (mouse.y * 15 - stars.position.y) * 0.03;
-
-            // renderer.render(scene, camera);
-            composer.render();
+            renderer.render(scene, camera);
         };
         renderer.setAnimationLoop(animate);
 
@@ -434,25 +521,29 @@ export default function StarfieldBackground({}) {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
-            composer.setSize(window.innerWidth, window.innerHeight);
         };
         window.addEventListener('resize', onResize);
 
         return () => {
-            renderer.setAnimationLoop(null); // Use null instead of cancelAnimationFrame(animate) for modern usage
-            window.removeEventListener('scroll', () => {}); // Need to properly remove the scroll listener
+            renderer.setAnimationLoop(null);
+            window.removeEventListener('scroll', () => {});
             window.removeEventListener('resize', onResize);
             renderer.dispose();
             starTexture.dispose();
             material.dispose();
             starsGeometry.dispose();
         };
-    }, [controls, starData]);
-
+    }, [controls, starData, isMobile]); // added isMobile to dependency
+    // 💡 NEW EFFECT: Updates the shader color instantly when activeIndex changes
+    useEffect(() => {
+        // Check if the uniforms have been created and assigned to window
+        if (window.starfieldUniforms) {
+            window.starfieldUniforms.uActiveIndex.value = activeIndex;
+        }
+    }, [activeIndex]);
     return (
         <>
             <Leva hidden />
-
             <div className=" pointer-events-none ">
                 <canvas ref={canvasRef} className="w-full h-full pointer-events-none" />
             </div>
