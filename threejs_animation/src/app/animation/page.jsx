@@ -1,10 +1,7 @@
 'use client';
-import { Environment } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
-import { Bloom, EffectComposer } from '@react-three/postprocessing';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { BlendFunction } from 'postprocessing';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -13,7 +10,6 @@ import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
 import useDeviceType from '../../components/hooks/useDeviceType';
 import FlowingParticles from '../../components/ParticleBackground';
-import ParticlesMorphPerSlice from '../../components/ScrollServiceLogo';
 import StarfieldBackground from '../../components/StarfieldBackground';
 import StatsSection from '../../components/Stats';
 // ✅ It's good practice to register the plugin once
@@ -725,6 +721,16 @@ const Animation = () => {
                 // ✅ After final flying text disappears → start starfield morph
             });
 
+            // tl.to(
+            //     '.starfield-layer',
+            //     {
+            //         opacity: 1,
+            //         duration: 2,
+            //         ease: 'power2.inOut',
+            //         onComplete: () => gsap.set('.starfield-layer', { pointerEvents: 'none' }),
+            //     },
+            //     '>-1'
+            // );
             const starfieldMorphState = { value: 0 };
 
             tl.to(
@@ -744,60 +750,7 @@ const Animation = () => {
                         }
                     },
                 },
-                'afterSecondText+=1'
-            );
-
-            tl.to(
-                '.starfield-layer',
-                {
-                    opacity: 0,
-                    duration: 2,
-                    ease: 'power2.inOut',
-                    onComplete: () => gsap.set('.starfield-layer', { pointerEvents: 'none' }),
-                },
-                '>-1'
-            );
-
-            // tl.addLabel('starfieldFadeOut');
-
-            // tl.to(
-            //     flowingParticlesMaterialRef.current.uniforms.uOpacity,
-            //     {
-            //         value: 0,
-            //         duration: 1.5,
-            //         ease: 'power2.inOut',
-            //     },
-            //     '<-3'
-            // );
-            // tl.addLabel('serviceSectionReveal');
-            tl.to(
-                '.next-section',
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 2,
-                    ease: 'power2.inOut',
-                },
-                '<-4'
-            );
-
-            const morphState = { value: 0 }; // proxy variable for morph progress
-
-            tl.to(
-                morphState,
-                {
-                    value: 1,
-                    duration: 18, // adjust for slower morph
-                    ease: 'power2.inOut',
-                    onUpdate: () => {
-                        if (window.particleMorphUniforms) {
-                            window.particleMorphUniforms.forEach(u => {
-                                u.uMorph.value = morphState.value;
-                            });
-                        }
-                    },
-                },
-                'thirdTextHold+=1'
+                '<'
             );
 
             tl.eventCallback('onReverseUpdate', () => {
@@ -815,7 +768,6 @@ const Animation = () => {
 
             // reset all texts and logo
             gsap.set('.service-text', { opacity: 0 });
-            gsap.set('.service-logo', { opacity: 1 });
 
             // start from the LAST one
             setActiveServiceIndex(0);
@@ -895,19 +847,6 @@ const Animation = () => {
                     },
                 },
                 'serviceEnd'
-            );
-            // 5️⃣ Transition after last (7th) service text
-            // tl.addLabel('afterLastService', '>+1'); // small scroll gap after 7th text
-
-            // Fade out flowing particles, service texts, and logo model
-            tl.to(
-                flowingParticlesMaterialRef.current.uniforms.uOpacity,
-                {
-                    value: 0,
-                    duration: 4,
-                    ease: 'power2.inOut',
-                },
-                '>+1'
             );
 
             // Slight upward movement for smooth exit
@@ -1082,8 +1021,8 @@ const Animation = () => {
                     </div>
                 </div>
 
-                <div className="starfield-layer fixed inset-0 z-[25] opacity-0 pointer-events-none bg-[#0f0f0f]">
-                    <StarfieldBackground />
+                <div className="starfield-layer fixed inset-0 z-[25] opacity-0 pointer-events-none bg-[#0f0f0f] text-[#fafafa]">
+                    <StarfieldBackground activeIndex={activeServiceIndex} />
                     <div
                         ref={flyingTextRef}
                         className="absolute top-0 h-full w-full    pointer-events-none z-[25]"
@@ -1093,16 +1032,34 @@ const Animation = () => {
                                 key={i}
                                 className="absolute top-[45%] sm:top-[47%] px-10 md:px-16 lg:px-32  text-wrapper w-full text-center "
                             >
-                                <h1 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-[#fafafa] ">
+                                <h1 className="text-3xl md:text-4xl lg:text-5xl font-semibold  ">
                                     {t}
                                 </h1>
                             </div>
                         ))}
                     </div>
+                    {/* Service Texts beside logo */}
+                    <div className="absolute bottom-15 md:bottom-[29%] lg:bottom-[33%]  lg:right-[12%] md:right-[2%] w-full  h-[200px] md:w-[400px] md:h-[250px] flex items-center justify-center text-left   service-texts  ">
+                        {SERVICE_DATA.map((service, i) => (
+                            <div
+                                key={i}
+                                className={`absolute top-0 h-full w-full transition-opacity duration-700 service-text service-${i} opacity-0  flex flex-col items-center md:text-start  md:justify-center justify-start `}
+                            >
+                                <h2
+                                    className={`text-3xl md:text-4xl lg:text-5xl font-semibold w-full text-center md:text-left`}
+                                >
+                                    {service.title}
+                                </h2>
+                                <p className=" text-lg md:text-xl lg:text-2xl mt-2  md:w-full w-[70%] text-center md:text-left">
+                                    {service.subtext}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
-                <div className="next-section  pointer-events-none bg-[#0f0f0f]   text-white fixed inset-0  flex items-center justify-center opacity-0 z-[20] ">
-                    <div className="service-logo h-full w-full  opacity-0 ">
+                {/* <div className="next-section  pointer-events-none bg-[#0f0f0f]   text-white fixed inset-0  flex items-center justify-center opacity-0 z-[20] "> */}
+                {/* <div className="service-logo h-full w-full  opacity-0 ">
                         <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
                             <color attach="background" args={['#0f0f0f']} />
                             <ambientLight intensity={0.8} />
@@ -1131,10 +1088,10 @@ const Animation = () => {
                             </EffectComposer>
                             <Environment preset="city" />
                         </Canvas>
-                    </div>
+                    </div> */}
 
-                    {/* Service Texts beside logo */}
-                    <div className="absolute bottom-15 md:bottom-[29%] lg:bottom-[33%] right-[18%] lg:right-[12%] w-[250px] h-[200px] lg:w-[400px] lg:h-[250px] flex items-center justify-center text-left   service-texts  ">
+                {/* Service Texts beside logo */}
+                {/* <div className="absolute bottom-15 md:bottom-[29%] lg:bottom-[33%] right-[18%] lg:right-[12%] w-[250px] h-[200px] lg:w-[400px] lg:h-[250px] flex items-center justify-center text-left   service-texts  ">
                         {SERVICE_DATA.map((service, i) => (
                             <div
                                 key={i}
@@ -1146,8 +1103,8 @@ const Animation = () => {
                                 <p className=" text-base lg:text-xl mt-2">{service.subtext}</p>
                             </div>
                         ))}
-                    </div>
-                </div>
+                    </div> */}
+                {/* </div> */}
                 <div className="statSection relative opacity-0 z-[50] pointer-events-auto ">
                     <StatsSection />
                 </div>

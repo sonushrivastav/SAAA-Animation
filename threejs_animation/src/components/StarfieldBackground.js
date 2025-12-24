@@ -181,7 +181,7 @@ export default function StarfieldBackground({ activeIndex = -1 }) {
             scene.environment = hdrMap;
         });
         const camera = new THREE.PerspectiveCamera(
-            65,
+            75,
             window.innerWidth / window.innerHeight,
             0.1,
             1000
@@ -323,7 +323,7 @@ export default function StarfieldBackground({ activeIndex = -1 }) {
                 uMorph: { value: 0 },
                 uMeshPosition: { value: new THREE.Vector3(0, 0, 0) },
                 uActiveIndex: { value: { activeIndex } }, // Passed from prop
-                uHighlightColor: { value: new THREE.Color('#ffffff') },
+                uHighlightColor: { value: new THREE.Color('#844DE9') },
                 uMinOpacity: { value: controls.minOpacity },
                 uMaxOpacity: { value: controls.maxOpacity },
                 uOpacityFalloff: { value: controls.opacityFalloff },
