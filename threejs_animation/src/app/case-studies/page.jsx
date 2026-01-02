@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import CaseStudyCards from '../../components/allServicesComponents/CaseStudyCards';
 
 // --------------------------
@@ -89,47 +89,34 @@ const staticData = {
     ],
 };
 
-const tabs = ['Digital Marketing', 'Website Development', 'UI / UX', 'Graphic Design'];
-
-const slugify = title =>
-    title
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9\s-]/g, '') // remove special chars
-        .replace(/\s+/g, '-') // replace spaces with -
-        .replace(/-+/g, '-'); // remove duplicate hyphens
+const tabs = ['Social Media Marketing', 'Website Development', 'UI / UX', 'Graphic Design'];
 
 const CaseStudies = () => {
-    const [activeTab, setActiveTab] = useState('Digital Marketing');
-    const [caseStudies, setCaseStudies] = useState(staticData[activeTab]);
+    const [activeTab, setActiveTab] = useState('Social Media Marketing');
+    const [caseStudies, setCaseStudies] = useState([]);
+    console.log('API URL:', process.env.NEXT_PUBLIC_PORT_URL);
 
-    // --------------------------
-    // ⭐ FUTURE: FETCH FROM STRAPI
-    // --------------------------
-    /*
     useEffect(() => {
         const fetchCaseStudies = async () => {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/case-studies?filters[category][$eq]=${activeTab}&populate=*`);
-            const data = await res.json();
+            try {
+                const res = await fetch(
+                    `${process.env.NEXT_PUBLIC_PORT_URL}/api/case-studies?populate=*`
+                );
+                const data = await res.json();
 
-            const formatted = data.data.map(item => ({
-                title: item.attributes.title,
-                tag: item.attributes.tag,
-                img: item.attributes.image.data.attributes.url,
-                href: `/case-study/${item.id}`,
-            }));
-
-            setCaseStudies(formatted);
+                setCaseStudies(data?.data || []);
+            } catch (error) {
+                console.log('Error fetching case studies:', error);
+            }
         };
-
         fetchCaseStudies();
-    }, [activeTab]);
-    */
-
-    // When tab changes, update from static data
-    useEffect(() => {
-        setCaseStudies(staticData[activeTab]);
-    }, [activeTab]);
+    }, []);
+    const filteredCaseStudies = useMemo(() => {
+        return caseStudies.filter(item => {
+            const tag = item?.tag;
+            return tag === activeTab;
+        });
+    }, [caseStudies, activeTab]);
 
     return (
         <div>
@@ -149,7 +136,7 @@ const CaseStudies = () => {
 
             {/* Case studies */}
             <section className="w-full bg-[#fafafa] text-[#0f0f0f] px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
-                <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold lg:leading-[60px]">
+                <h2 className="text-3xl md:text-4xl xl:text-5xl font-semibold lg:leading-[60px]">
                     Case{' '}
                     <span className="bg-[#844de9] inline px-2 rounded-md text-[#fafafa]">
                         Studies
@@ -162,7 +149,7 @@ const CaseStudies = () => {
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`px-5 py-2 rounded-full border transition whitespace-nowrap text-base md:text-lg lg:text-xl ${
+                            className={`px-5 py-2 rounded-full border transition whitespace-nowrap text-base md:text-lg xl:text-xl ${
                                 activeTab === tab
                                     ? 'bg-[#0f0f0f] text-[#fafafa] border-[#EDEDED]'
                                     : 'border-[#555555] text-[#555555] '
@@ -175,12 +162,15 @@ const CaseStudies = () => {
 
                 {/* cards */}
                 <div className="mt-12 md:mt-14 grid gap-12 md:gap-6 lg:gap-10 md:grid-cols-3 items-stretch">
-                    <CaseStudyCards
-                        caseStudies={caseStudies.map(item => ({
-                            ...item,
-                            href: `case-studies/${slugify(item.slug)}`,
-                        }))}
-                    />
+                    {filteredCaseStudies && filteredCaseStudies.length > 0 ? (
+                        <>
+                            <CaseStudyCards caseStudies={filteredCaseStudies} />
+                        </>
+                    ) : (
+                        <>
+                            <h1>No Case Study Available</h1>
+                        </>
+                    )}
                 </div>
             </section>
         </div>

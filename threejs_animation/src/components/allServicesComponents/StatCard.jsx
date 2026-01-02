@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from "react";
-import DotGrid from "../socialMedia/DotGrid";
+import { useState } from 'react';
+import DotGrid from '../socialMedia/DotGrid';
 
-const StatCard = ({ stat, label, hasContent, roundedClass }) => {
+const StatCard = ({ stat, label, hasContent, roundedClass, isMobile = false }) => {
     const [isHovered, setIsHovered] = useState(false);
     return (
         <div
@@ -19,7 +19,7 @@ const StatCard = ({ stat, label, hasContent, roundedClass }) => {
         >
             {/* Dot Grid - only show when conditions are met */}
             <div className="absolute inset-0 overflow-hidden">
-                {(!hasContent || (hasContent && isHovered)) && (
+                {(!hasContent || (hasContent && isHovered) || isMobile) && (
                     <DotGrid
                         dotSize={2}
                         gap={8}
@@ -38,21 +38,21 @@ const StatCard = ({ stat, label, hasContent, roundedClass }) => {
             {hasContent && (
                 <div className="relative z-10 flex flex-col justify-end h-full">
                     <h2
-                        className={`text-3xl md:text-4xl lg:text-5xl font-semibold transition-colors duration-300 ${
+                        className={`text-3xl md:text-4xl xl:text-5xl font-semibold transition-colors duration-300 ${
                             isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
                         }`}
                     >
                         {stat}
                     </h2>
                     <p
-                        className={`text-sm md:text-base lg:text-lg mt-2 transition-colors duration-300 ${
+                        className={`text-sm md:text-base xl:text-lg mt-2 transition-colors duration-300 ${
                             isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
                         }`}
                     >
                         {label}
                     </p>
                     <span
-                        className={`absolute top-[-6px] right-[2px] md:top-[-9px] md:right-[-2px]  lg:top-[-15px] lg:right-[-8px] text-3xl md:text-4xl lg:text-5xl font-semibold transition-colors duration-300 ${
+                        className={`absolute top-[-6px] right-[2px] md:top-[-9px] md:right-[-2px]  lg:top-[-15px] lg:right-[-8px] text-3xl md:text-4xl xl:text-5xl font-semibold transition-colors duration-300 ${
                             isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
                         }`}
                     >

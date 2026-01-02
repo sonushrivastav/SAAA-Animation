@@ -37,7 +37,6 @@ export const servicesData = {
                 img: '/images/socialMedia/Device 14PM.webp',
                 href: '/services/seo',
             },
-
         ],
         faqData: [
             {
@@ -997,9 +996,10 @@ export const servicesData = {
     },
 
     // GROW
-    'social-media-marketing': {
+    'socialmedia-marketing': {
         title: 'Social Media Marketing',
-        heroDescription: 'Service description will be updated.',
+        heroDescription:
+            ' We turn your feed into a fan club. From hashtags that travel to posts that trend, we make your brand impossible to ignore. Every scroll becomes a moment worth remembering. Because online, consistency is the real celebrity',
         image: '/images/default/service.webp',
         platformImages: [
             '/images/socialMedia/Instagram.svg',

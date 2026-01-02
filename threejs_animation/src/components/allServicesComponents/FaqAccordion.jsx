@@ -20,7 +20,7 @@ const FaqAccordion = ({ faqData = [], defaultActiveIndex = 0 }) => {
                         className="w-full  flex justify-between items-center gap-2 px-6 py-4 text-left text-[#fafafa] focus:outline-none"
                         onClick={() => toggleAccordion(index)}
                     >
-                        <span className="text-lg md:text-xl lg:text-2xl font-semibold ">
+                        <span className="text-lg md:text-xl xl:text-2xl font-semibold ">
                             {item.question}
                         </span>
 
@@ -46,7 +46,7 @@ const FaqAccordion = ({ faqData = [], defaultActiveIndex = 0 }) => {
                     </div>
 
                     <div
-                        className={`px-6 pb-4 text-[#9c9c9c] text-base md:text-lg lg:text-xl flex flex-col leading-relaxed transition-all duration-300 ${
+                        className={`px-6 pb-4 text-[#9c9c9c] text-base md:text-lg xl:text-xl flex flex-col leading-relaxed transition-all duration-300 ${
                             activeIndex === index
                                 ? 'max-h-[500px] opacity-100 flex'
                                 : 'max-h-0 opacity-0 hidden'

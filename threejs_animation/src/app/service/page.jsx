@@ -1,10 +1,12 @@
 'use client';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Suspense, useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import OtherServices from '../../components/allServicesComponents/OtherServices';
-import DotGrid from '../../components/servicePage/DotGrid';
+import useDeviceType from '../../components/hooks/useDeviceType';
+import Card from '../../components/servicePage/Card';
 import HeroSerivce from '../../components/servicePage/HeroSerivce';
+import DotGrid from '../../components/socialMedia/DotGrid';
 
 if (typeof window !== 'undefined') {
     gsap.registerPlugin(ScrollTrigger);
@@ -30,11 +32,132 @@ const servicesArray = [
         href: '/services/seo',
     },
 ];
+const cards = [
+    {
+        title: 'DESIGN',
+        description:
+            'We build brands that speak before they’re introduced. From identity to visuals, we craft every detail to make your presence unforgettable. Because every great impression starts with a design that feels alive.',
+        items: [
+            'UI / UX',
+            'BRANDING',
+            '3D MODELING',
+            'MOTION GRAPHICS / EDITING',
+            'PRINT MEDIA',
+            'CREATIVE / MARKETING COLLATERALS',
+        ],
+        modelUrl: '/models/design.glb',
+    },
+    {
+        title: 'BUILD',
+        description:
+            'Our developers are part artists, part architects. They code, craft, and fine-tune every pixel until your site feels alive. Built to perform beautifully, no matter the screen or scale. ',
+        items: [
+            'BASIC WEBSITE',
+            'E-COMMERCE WEBSITE',
+            'CUSTOM CMS',
+            'LANDING PAGES',
+            'WEB / MOBILE APPLICATIONS',
+            'AMC',
+        ],
+        modelUrl: '/models/build.glb',
+    },
+    {
+        title: 'GROW',
+        description:
+            'We build brands that speak before they’re introduced. From identity to visuals, we craft every detail to make your presence unforgettable. Because every great impression starts with a design that feels alive.',
+        items: [
+            'SOCIAL MEDIA MARKETING',
+            'PAID ADS / PERFORMANCE MARKETING',
+            'SEO',
+            'EMAIL & WHATSAPP MARKETING',
+        ],
+        modelUrl: '/models/grow.glb',
+    },
+];
 const Service = () => {
     const gradientRef1 = useRef(null);
     const gradientRef2 = useRef(null);
     const dotGridContainerRef = useRef(null);
     const HORIZONTAL_STRETCH = 130; // consistent for full width coverage
+    const cardRefs = useRef([]);
+    const [activeIndex, setActiveIndex] = useState(0);
+    const { isMobile } = useDeviceType();
+    const rootRef = useRef(null);
+    const titleRef = useRef(null);
+
+    useEffect(() => {
+        if (!rootRef.current) return;
+        cardRefs.current = cardRefs.current.slice(0, cards.length);
+
+        const ctx = gsap.context(() => {
+            const stackOffset = window.innerHeight * 0.03;
+            const topDistance = isMobile ? window.innerHeight * 0.05 : -window.innerHeight * 0.05;
+            // The first card starts at its final "resting" position
+            gsap.set(cardRefs.current[0], {
+                y: isMobile ? window.innerHeight * 0.08 : -window.innerHeight * 0.05,
+                scale: 1,
+                zIndex: 1,
+            });
+
+            // The rest of the cards start below the viewport
+            cardRefs.current.slice(1).forEach((card, idx) => {
+                gsap.set(card, {
+                    y: window.innerHeight,
+                    scale: 1,
+                    zIndex: idx + 2,
+                });
+            });
+
+            // 2. TIMELINE
+            const tl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: rootRef.current,
+                    start: 'top top',
+                    end: () => `+=${window.innerHeight * cards.length + 1}`,
+                    pin: true,
+                    scrub: 1,
+                    // onUpdate: self => {
+                    //     // Determine active index based on scroll progress
+                    //     const progress = self.progress * (cards.length - 1);
+                    //     setActiveIndex(Math.round(progress));
+                    //     console.log('active ', activeIndex);
+                    // },
+                    pinSpacing: true,
+                    anticipatePin: 1,
+                },
+            });
+
+            // Title animation
+            tl.to(titleRef.current, {
+                y: isMobile ? 0 : -20,
+                opacity: 1,
+                ease: 'power2.out',
+                duration: 0.5,
+            });
+
+            // 3. ANIMATE ONLY CARDS 2 AND 3
+            cards.slice(1).forEach((_, i) => {
+                const cardIndex = i + 1;
+                const cardElement = cardRefs.current[cardIndex];
+
+                tl.to(
+                    cardElement,
+                    {
+                        y: topDistance + stackOffset * cardIndex,
+                        scale: 1,
+                        ease: 'power2.inOut',
+                        duration: 1,
+                    },
+                    '-=0.2'
+                ); // Slight overlap for smoother flow
+            });
+            tl.to({}, { duration: 0.5 });
+
+            // Extra buffer at the end
+        }, rootRef);
+
+        return () => ctx.revert();
+    }, [isMobile]);
 
     // Helper to create gradient with variable curve depth
     const createGradientStyle = (colors, ellipseY) => {
@@ -125,23 +248,49 @@ const Service = () => {
         COMBINED HERO + DOTGRID WRAPPER
         This wrapper spans both sections so the gradient can extend across them
       */}
-            <div
-                ref={dotGridContainerRef}
-                className="relative w-full"
-                style={{ backgroundColor: '#0f0f0f' }}
-            >
-                <DotGrid
-                    dotSize={2}
-                    gap={8}
-                    baseColor="#323234"
-                    activeColor="#5227FF"
-                    proximity={120}
-                    shockRadius={250}
-                    shockStrength={5}
-                    resistance={750}
-                    returnDuration={1.5}
-                    className="relative h-screen w-full"
-                />
+            <div ref={rootRef} className="relative w-full bg-[#0f0f0f] overflow-hidden ">
+                <div
+                    ref={dotGridContainerRef}
+                    className="relative h-[100vh] xl:h-screen w-full bg-[#0f0f0f] overflow-hidden"
+                >
+                    <div className="absolute inset-0 h-screen w-full z-0">
+                        <DotGrid
+                            dotSize={2}
+                            gap={8}
+                            baseColor="#323234"
+                            activeColor="#5227FF"
+                            proximity={120}
+                            shockRadius={250}
+                            shockStrength={5}
+                            resistance={750}
+                            returnDuration={1.5}
+                            className="h-full w-full"
+                        />
+                    </div>
+                    <div className="absolute inset-0 z-10 flex flex-col items-center  px-8 py-24 md:px-14 lg:px-28 md:py-16 lg:py-20">
+                        {/* Title / Header */}
+                        <div ref={titleRef} className="relative z-10 w-full ">
+                            <h2 className="text-3xl md:text-4xl lg:text-4xl xl:text-5xl text-left font-semibold text-[#fafafa] tracking-tight  md:mb-20 ">
+                                What we do
+                            </h2>
+                        </div>
+
+                        {/* The Actual Cards */}
+                        <div className="relative w-full  flex-1 flex items-stretch justify-center">
+                            {cards.map((c, i) => (
+                                <Card
+                                    key={i}
+                                    ref={el => (cardRefs.current[i] = el)}
+                                    title={c.title}
+                                    description={c.description}
+                                    items={c.items}
+                                    modelUrl={c.modelUrl}
+                                    // isVisible={Math.abs(i - activeIndex) <= 1}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* First Gradient Section */}
@@ -158,7 +307,7 @@ const Service = () => {
             </div>
 
             <section className="flex flex-col  bg-[#fafafa]  px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
-                <h2 className="text-3xl  md:text-4xl lg:text-5xl text-[#0f0f0f]   font-semibold  lg:leading-[60px] ">
+                <h2 className="text-3xl  md:text-4xl xl:text-5xl text-[#0f0f0f]   font-semibold  lg:leading-[60px] ">
                     Other Related{' '}
                     <span className="bg-[#844de9] inline px-2  rounded-md text-[#fafafa]">
                         Services

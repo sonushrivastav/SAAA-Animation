@@ -14,7 +14,7 @@ const CaseStudyCards = ({ caseStudies = [], className = '' }) => {
     return (
         <>
             {caseStudies.map((item, index) => (
-                <div key={index} className="relative">
+                <div key={item.id} className="relative">
                     {/* Dotted border */}
                     <div
                         className="absolute w-full h-full rounded-xl transform translate-x-3 translate-y-3 pointer-events-none"
@@ -25,12 +25,12 @@ const CaseStudyCards = ({ caseStudies = [], className = '' }) => {
 
                     {/* Main card */}
                     <Link
-                        href={`/case-studies/${slugify(item.title)}`}
+                        href={`/case-studies/${slugify(item.title)}-${slugify(item.tag)}`}
                         className="relative bg-white pt-6 rounded-xl border border-[#0f0f0f] flex flex-col items-start justify-between h-full"
                     >
                         <div className="flex flex-col w-full">
                             <div className="w-full px-6 flex justify-between items-center">
-                                <h3 className="text-lg md:text-xl lg:text-2xl uppercase font-semibold text-[#0f0f0f]">
+                                <h3 className="text-lg md:text-xl xl:text-2xl uppercase font-semibold text-[#0f0f0f]">
                                     {item.title}
                                 </h3>
 
@@ -52,7 +52,7 @@ const CaseStudyCards = ({ caseStudies = [], className = '' }) => {
                             </div>
 
                             <div className="px-6 py-2">
-                                <span className="px-2 py-1 text-sm rounded-lg bg-[#ededed] text-[#555555]   self-start">
+                                <span className="px-2 py-1 text-xs xl:text-sm rounded-lg bg-[#ededed] text-[#555555]   self-start">
                                     {item.tag}
                                 </span>
                             </div>
@@ -60,7 +60,7 @@ const CaseStudyCards = ({ caseStudies = [], className = '' }) => {
 
                         <div className="w-full flex items-center justify-center rounded-b-2xl">
                             <Image
-                                src={item.img}
+                                src={`http://localhost:1337${item.coverImage.url}`}
                                 alt={item.title || 'case study image'}
                                 width={200}
                                 height={200}

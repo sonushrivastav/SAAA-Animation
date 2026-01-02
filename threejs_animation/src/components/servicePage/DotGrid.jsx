@@ -348,102 +348,70 @@ const DotGrid = ({
         },
     ];
     useEffect(() => {
-        // Prepare refs array
         cardRefs.current = cardRefs.current.slice(0, cards.length);
 
         const ctx = gsap.context(() => {
-            const stackOffset = 25;
-            const totalStackHeight = stackOffset * (cards.length - 1);
-
-            // const getInner = cardEl => cardEl?.querySelector?.('.cardInner') ?? cardEl;
-
-            // Basic starting state: every card centered, slightly down, invisible, low scale
+            const stackOffset = window.innerHeight * 0.03;
+            const topDistance = isMobile ? window.innerHeight * 0.05 : -window.innerHeight * 0.05;
+            // The first card starts at its final "resting" position
             gsap.set(cardRefs.current[0], {
-                y: window.innerHeight,
+                y: isMobile ? window.innerHeight * 0.08 : -window.innerHeight * 0.05,
                 scale: 1,
-                transformOrigin: 'center center',
-                zIndex: 1, // top card highest z
+                zIndex: 1,
             });
 
-            // Other cards start below viewport in reverse z-order
+            // The rest of the cards start below the viewport
             cardRefs.current.slice(1).forEach((card, idx) => {
                 gsap.set(card, {
-                    y: window.innerHeight,
+                    y: window.innerHeight * 0.9,
                     scale: 1,
-                    // transformOrigin: 'center center',
-                    zIndex: cards.length + (idx + 1),
+                    zIndex: idx + 2,
                 });
             });
 
-            // Create timeline to control stacking
+            // 2. TIMELINE
             const tl = gsap.timeline({
                 scrollTrigger: {
                     trigger: rootRef.current,
                     start: 'top top',
-                    // Pin for enough distance: one viewport per card + a little extra
-                    end: () => `+=${window.innerHeight * (cards.length + 0.5)}`,
+                    end: () => `+=${window.innerHeight * cards.length}`,
                     pin: true,
                     scrub: true,
                     pinSpacing: true,
                     anticipatePin: 1,
-                    fastScrollEnd: true, // Better handling of fast scrolls
-                    preventOverlaps: true, // Prevent animation conflicts
-                    // onLeave: () => {
-                    //     // Ensure clean state when leaving
-                    //     ScrollTrigger.refresh();
-                    // },
-                    // onLeaveBack: () => {
-                    //     // Ensure clean state when scrolling back
-                    //     ScrollTrigger.refresh();
-                    // },
                 },
             });
 
-            // move title upward and stick before first card appears
+            // Title animation
             tl.to(titleRef.current, {
-                y: `${isMobile ? 0 : -20}`, // adjust upward distance (you can tweak)
+                y: isMobile ? 0 : -20,
                 opacity: 1,
                 ease: 'power2.out',
-                duration: 0.8,
+                duration: 0.5,
             });
 
-            // Animate first card to center position
-            const topDistance = isMobile ? 30 : -40;
-            tl.to(
-                cardRefs.current[0],
-                {
-                    y: topDistance,
-                    scale: 1,
-                    ease: 'power2.out',
-                    duration: cards.length - 1,
-                },
-                0
-            );
-
+            // 3. ANIMATE ONLY CARDS 2 AND 3
             cards.slice(1).forEach((_, i) => {
                 const cardIndex = i + 1;
-                const inner = cardRefs.current[cardIndex];
-                const cardsAbove = cards.length - 1 - cardIndex;
-                const topDistance = isMobile ? 0 : -40;
+                const cardElement = cardRefs.current[cardIndex];
 
                 tl.to(
-                    inner,
+                    cardElement,
                     {
                         y: topDistance + stackOffset * cardIndex,
                         scale: 1,
-                        ease: 'power2.out',
+                        ease: 'power2.inOut',
                         duration: 1,
                     },
-                    '>'
-                );
+                    '-=0.2'
+                ); // Slight overlap for smoother flow
             });
 
-            // Add extra scroll space at the end before unpinning
-            tl.to({}, { duration: 0.5 });
+            // Extra buffer at the end
         }, rootRef);
 
         return () => ctx.revert();
-    }, [cards]);
+    }, [cards, isMobile]);
 
     return (
         <section

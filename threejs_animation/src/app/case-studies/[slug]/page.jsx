@@ -1,31 +1,60 @@
 'use client';
 
 import Image from 'next/image';
+import { useParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import CaseStudyCards from '../../../components/allServicesComponents/CaseStudyCards';
 import useDeviceType from '../../../components/hooks/useDeviceType';
 import DotGrid from '../../../components/socialMedia/DotGrid';
 
-const caseStudies = [
-    {
-        title: 'Creative Newtech',
-        tag: 'SMM',
-        img: '/images/socialMedia/CNL.webp',
-        slug: 'Creative Newtech',
-    },
-    {
-        title: 'Ruark Audio',
-        tag: 'SMM',
-        img: '/images/socialMedia/iPhone 15 Mockup Poster 1.webp',
-        slug: 'Creative Newtech',
-    },
-    {
-        title: 'Share India',
-        tag: 'SMM',
-        img: '/images/socialMedia/Device 14PM.webp',
-        slug: 'Creative Newtech',
-    },
-];
+// const caseStudies = [
+//     {
+//         title: 'Creative Newtech',
+//         tag: 'SMM',
+//         img: '/images/socialMedia/CNL.webp',
+//         slug: 'Creative Newtech',
+//     },
+//     {
+//         title: 'Ruark Audio',
+//         tag: 'SMM',
+//         img: '/images/socialMedia/iPhone 15 Mockup Poster 1.webp',
+//         slug: 'Creative Newtech',
+//     },
+//     {
+//         title: 'Share India',
+//         tag: 'SMM',
+//         img: '/images/socialMedia/Device 14PM.webp',
+//         slug: 'Creative Newtech',
+//     },
+// ];
+const MarkdownRenderer = ({ children }) => (
+    <ReactMarkdown
+        components={{
+            h2: ({ children }) => (
+                <h2 className="text-2xl md:text-3xl xl:text-4xl text-[#fafafa] font-[500] mb-6">
+                    {children}
+                </h2>
+            ),
+            p: ({ children }) => (
+                <p className="text-[#9c9c9c] text-lg leading-relaxed py-3">{children}</p>
+            ),
+            ul: ({ children }) => (
+                <ul className="list-disc ml-8 space-y-4 text-[#9c9c9c] font-[500] py-2 text-lg xl:text-xl ">
+                    {children}
+                </ul>
+            ),
+            li: ({ children }) => <li className="">{children}</li>,
+            strong: ({ children }) => (
+                <strong className="text-[#fafafa] font-semibold text-lg md:text-xl xl:text-xl ">
+                    {children}
+                </strong>
+            ),
+        }}
+    >
+        {children}
+    </ReactMarkdown>
+);
 
 const slugify = title =>
     title
@@ -36,71 +65,138 @@ const slugify = title =>
         .replace(/-+/g, '-'); // remove duplicate hyphens
 
 export default function CaseStudyDetails() {
-    const sections = [
-        { id: 'campaign-setup', label: 'Campaign Setup' },
-        { id: 'pain-points', label: 'Pain Points' },
-        { id: 'solution', label: 'Solution' },
-        { id: 'optimization', label: 'Optimization Strategy' },
-        { id: 'results', label: 'Results' },
-        { id: 'conclusion', label: 'Conclusion' },
-    ];
+    const [caseStudies, setCaseStudies] = useState([]);
+    const [filteredCaseStudy, setFilteredCaseStudy] = useState(null);
+    const [sections, setSections] = useState([]);
+    const [active, setActive] = useState('');
 
-    const [active, setActive] = useState(sections[0].id);
     const { isMobile, isTablet } = useDeviceType();
     const headingsRef = useRef({});
+    const { slug } = useParams();
 
     const sidebarRef = useRef(null);
     const footerRef = useRef(null);
 
     useEffect(() => {
-        const sidebar = sidebarRef.current;
-        const footer = footerRef.current;
-        if (!sidebar || !footer) return;
+        const fetchCaseStudies = async () => {
+            try {
+                const res = await fetch(
+                    `${process.env.NEXT_PUBLIC_PORT_URL}/api/case-studies?` +
+                        `populate[sections][populate]=*&` +
+                        `populate[logo][fields][0]=url&populate[logo][fields][1]=alternativeText&` +
+                        `populate[coverImage][fields][0]=url&populate[coverImage][fields][1]=alternativeText`
+                );
 
-        let sidebarTop = 0;
-        let footerTop = 0;
-        let sidebarHeight = 0;
-        let maxY = 0;
+                const data = await res.json();
 
-        const calculate = () => {
-            sidebarTop = sidebar.getBoundingClientRect().top + window.scrollY;
-            footerTop = footer.getBoundingClientRect().top + window.scrollY;
-            sidebarHeight = sidebar.offsetHeight;
-            maxY = footerTop - sidebarHeight;
+                const selected = data.data.find(
+                    item => `${slugify(item.title)}-${slugify(item.tag)}` === slug
+                );
+
+                // const selected = data.data[0];
+                setFilteredCaseStudy(selected);
+
+                setCaseStudies(Array.isArray(data.data) ? data.data : []);
+
+                const mapped = selected.sections.map(section => ({
+                    id: section.__component.split('.').pop(),
+                    type: section.__component,
+                    label: section.title,
+                    description: section.description || null,
+                    beforeDescription: section.before_description || null,
+                    afterDescription: section.after_description || null,
+                    beforeImage: section.result_before_image || null,
+                    afterImage: section.result_after_image || null,
+                }));
+
+                setSections(mapped);
+                setActive(mapped[0]?.id);
+            } catch (err) {
+                console.error(err);
+            }
         };
 
-        calculate();
+        fetchCaseStudies();
+    }, [slug]);
+
+    // Add 'sections' and 'filteredCaseStudy' to dependencies so this reruns when data loads
+    useEffect(() => {
+        const sidebar = sidebarRef.current;
+        const footer = footerRef.current;
+
+        // 1. Guard clause: Don't run logic if data isn't ready or refs are missing
+        if (!sidebar || !footer || sections.length === 0) return;
+
+        let initialSidebarTop = 0;
+        let sidebarWidth = 0;
+
+        const calculateDimensions = () => {
+            // Get the sidebar's parent width to prevent width collapse when fixed
+            sidebarWidth = sidebar.parentElement.getBoundingClientRect().width;
+
+            // Calculate the initial top position relative to the document
+            // We add scrollY to handle cases where user reloads halfway down the page
+            const rect = sidebar.getBoundingClientRect();
+            initialSidebarTop = rect.top + window.scrollY;
+        };
 
         const onScroll = () => {
             const scrollY = window.scrollY;
 
-            if (scrollY > sidebarTop) {
-                if (scrollY < maxY) {
-                    sidebar.classList.add('sidebar-fixed');
-                    sidebar.style.position = '';
-                    sidebar.style.top = '';
+            const footerRect = footer.getBoundingClientRect();
+            const footerTopAbsolute = footerRect.top + window.scrollY;
+            const sidebarHeight = sidebar.offsetHeight;
+            const gap = 40; // Optional buffer from footer
+
+            // The stopping point (footer top - sidebar height)
+            const maxScrollY = footerTopAbsolute - sidebarHeight - gap;
+
+            if (scrollY >= initialSidebarTop) {
+                // SCENARIO 1: We are scrolling past the start point
+
+                if (scrollY < maxScrollY) {
+                    // SCENARIO 2: Floating Fixed
+                    sidebar.style.position = 'fixed';
+                    sidebar.style.top = '0px';
+                    sidebar.style.width = `${sidebarWidth}px`; // FIX: Force width
+                    sidebar.classList.add('sidebar-fixed'); // Keeps your background color
                 } else {
-                    sidebar.classList.remove('sidebar-fixed');
+                    // SCENARIO 3: Hit the bottom (Footer) - Lock it absolutely relative to container
                     sidebar.style.position = 'absolute';
-                    sidebar.style.top = `${maxY - sidebarTop}px`;
+                    // We need to position it relative to the parent section, not viewport
+                    // A rough calculation: stick it to the bottom of the container minus footer offset
+                    sidebar.style.top = `${maxScrollY - initialSidebarTop}px`;
+                    sidebar.style.width = `${sidebarWidth}px`;
+                    sidebar.classList.remove('sidebar-fixed');
                 }
             } else {
-                sidebar.classList.remove('sidebar-fixed');
+                // SCENARIO 4: Back at the top
                 sidebar.style.position = '';
                 sidebar.style.top = '';
+                sidebar.style.width = '';
+                sidebar.classList.remove('sidebar-fixed');
             }
         };
 
+        // Run initial calculation
+        calculateDimensions();
+
         window.addEventListener('scroll', onScroll);
-        window.addEventListener('resize', calculate);
+        window.addEventListener('resize', calculateDimensions);
 
         return () => {
             window.removeEventListener('scroll', onScroll);
-            window.removeEventListener('resize', calculate);
+            window.removeEventListener('resize', calculateDimensions);
+            // Clean up styles on unmount
+            if (sidebar) {
+                sidebar.style.position = '';
+                sidebar.style.width = '';
+            }
         };
-    }, []);
+    }, [sections, filteredCaseStudy]);
 
     useEffect(() => {
+        if (sections.length === 0) return;
         const observerOptions = {
             root: null,
             rootMargin: '0px 0px -60% 0px',
@@ -119,7 +215,7 @@ export default function CaseStudyDetails() {
         elems.forEach(el => el && observer.observe(el));
 
         return () => observer.disconnect();
-    }, []);
+    }, [sections]);
 
     function handleClick(id) {
         const el = headingsRef.current[id];
@@ -132,12 +228,13 @@ export default function CaseStudyDetails() {
 
         setActive(id);
     }
+    console.log(filteredCaseStudy);
 
     return (
         <main className="">
             {/* Hero Video Section */}
             <section className="relative w-full overflow-hidden bg-[#fafafa]  flex items-center justify-center">
-                <div className="flex flex-col md:flex-row w-full lg:h-screen  self-stretch items-center md:justify-between ">
+                <div className="flex flex-col md:flex-row w-full md:h-screen  self-stretch items-center md:justify-between ">
                     <div className="absolute inset-0 ">
                         <DotGrid
                             dotSize={2}
@@ -152,33 +249,35 @@ export default function CaseStudyDetails() {
                         />
                     </div>
                     {/* left section */}
-                    <div className="z-10 relative w-full md:w-[60%] self-stretch flex items-center    text-[#0f0f0f] ">
-                        <div className="px-8 pt-35 md:px-14 lg:px-28 md:py-0 lg:py-0 ">
-                            <h1 className="text-4xl lg:text-7xl  text-[#0f0f0f] font-semibold lg:leading-[85px] ">
-                                Meta Campaign <br /> for{' '}
+                    <div className="z-10 relative w-full md:w-[50%] self-stretch flex items-center    text-[#0f0f0f] ">
+                        <div className="px-8 pt-35 md:pl-14 md:pr-0 lg:pl-28 lg:pr-0 md:py-0 lg:py-0 ">
+                            <h1 className="text-4xl lg:text-6xl xl:text-7xl  text-[#0f0f0f] font-semibold lg:leading-[85px] ">
+                                {filteredCaseStudy?.heading} <br /> for{' '}
                                 <span className="bg-[#844de9] inline text-[#fafafa] px-2  rounded-md">
-                                    Lugda By DiHi
+                                    {filteredCaseStudy?.color_heading}
                                 </span>
                             </h1>
 
-                            <p className="text-[#555555] mt-6 max-w-lg mx-auto md:mx-0 text-lg md:text-xl lg:text-2xl">
-                                Lugda By DiHi, a sustainable ethnic wear brand, wanted to drive
-                                high-quality sales and revenue growth from their Meta Ads campaigns
-                                by targeting fashion-forward women across India.
+                            <p className="text-[#555555] mt-6 max-w-lg mx-auto md:mx-0 text-lg md:text-xl xl:text-2xl">
+                                {filteredCaseStudy?.sub_description}
                             </p>
                         </div>
                     </div>
 
                     {/* Right Section */}
-                    <div className="z-10 flex  py-25 md:py-0 items-center justify-center self-stretch w-full  md:w-[40%] px-8   ">
+                    <div className="z-10 flex  py-25 md:py-0 items-center justify-center self-stretch w-full  md:w-[50%] px-8   ">
                         <div className="w-full  flex items-center justify-center   ">
                             <Image
-                                src={'/images/casestudy/lugda.png'}
-                                alt={'dummy image'}
+                                src={
+                                    filteredCaseStudy?.logo?.url
+                                        ? `http://localhost:1337${filteredCaseStudy.logo.url}`
+                                        : '/images/dummy-image.jpg'
+                                }
+                                alt="Case Study Logo"
                                 width={600}
                                 height={600}
                                 className="object-contain w-full"
-                            ></Image>
+                            />
                         </div>
                     </div>
                 </div>
@@ -198,7 +297,7 @@ export default function CaseStudyDetails() {
                                         >
                                             <button
                                                 onClick={() => handleClick(s.id)}
-                                                className={`text-center lg:text-left text-lg md:text-xl lg:text-xl   w-full transition-all duration-150 px-4 py-1 rounded-md block hover:text-[#fafafa] focus:outline-none whitespace-nowrap  ${
+                                                className={`text-center lg:text-left text-lg md:text-xl xl:text-xl   w-full transition-all duration-150 px-4 py-1 rounded-md block hover:text-[#fafafa] focus:outline-none whitespace-nowrap  ${
                                                     active === s.id
                                                         ? 'text-[#fafafa] font-[500]'
                                                         : 'text-[#555555]'
@@ -216,321 +315,64 @@ export default function CaseStudyDetails() {
 
                     {/* RIGHT: Blog content */}
                     <section className="w-full lg:w-[70%] flex flex-col px-8 md:px-14 lg:px-0">
-                        {sections.map((s, idx) => (
-                            <article
-                                key={s.id}
-                                id={s.id}
-                                ref={el => (headingsRef.current[s.id] = el)}
-                                className="my-6 "
-                            >
-                                <h2 className="text-2xl md:text-3xl lg:text-4xl text-[#fafafa] font-[500] mb-6">
-                                    {s.label}
-                                </h2>
+                        {sections.map(section => {
+                            const isResults = section.type === 'case-studies.results';
 
-                                <div className="space-y-4 text-[#9c9c9c] font-[500] text-lg md:text-xl lg:text-xl">
-                                    {s.id === 'campaign-setup' && (
-                                        <>
-                                            <ul className="list-disc ml-8 space-y-6 text-[#9c9c9c] py-2">
-                                                <li>Type Of Campaign - Meta Campaign</li>
-                                                <li>Bidding Strategy - Website Purchase</li>
-                                                <li>
-                                                    Geographical Targeting - India (focus on Tier 1
-                                                    & Tier 2 cities with high fashion affinity)
-                                                </li>
-                                                <li>
-                                                    Channel Targeting - Meta Platforms (Facebook &
-                                                    Instagram) with emphasis on Catalog Ads,
-                                                    Retargeting, and Lookalike Audiences
-                                                </li>
-                                            </ul>
-                                        </>
-                                    )}
-                                    {s.id === 'pain-points' && (
-                                        <>
-                                            <ul className="list-disc ml-8 space-y-6 text-[#9c9c9c] py-2">
-                                                <li>
-                                                    Heavy Ad Spend, Low Returns: Invested over ₹3.28
-                                                    Lakhs but generated only ~₹3.02 Lakhs in sales,
-                                                    running at a loss.
-                                                </li>
-                                                <li>
-                                                    Unprofitable Campaigns: Average ROAS of just
-                                                    0.92 (spending more than earning).
-                                                </li>
-                                                <li>
-                                                    Inefficient Strategy: Too many campaigns without
-                                                    a clear structure or optimization, leading to
-                                                    scattered performance.
-                                                </li>
-                                                <li>
-                                                    Cash Flow Stress: Continuous losses were eating
-                                                    into margins, making the business unsustainable.
-                                                </li>
-                                                <li>
-                                                    Near Business Shutdown: The client was close to
-                                                    stopping operations due to lack of profitability
-                                                    from ads.
-                                                </li>
-                                            </ul>
-                                        </>
-                                    )}
+                            const beforeImg = section.beforeImage?.url;
+                            const afterImg = section.afterImage?.url;
+                            return (
+                                <section
+                                    key={section.id}
+                                    id={section.id}
+                                    ref={el => (headingsRef.current[section.id] = el)}
+                                    className="my-6"
+                                >
+                                    <h2 className="text-2xl md:text-3xl xl:text-4xl text-[#fafafa] font-[500] mb-6">
+                                        {section.label}
+                                    </h2>
 
-                                    {s.id === 'solution' && (
-                                        <>
-                                            <ol className="list-decimal ml-8 space-y-6 text-[#9c9c9c] py-2">
-                                                <li>
-                                                    <p>
-                                                        <strong className="text-[#fafafa]">
-                                                            SAAA’s Intervention:{' '}
-                                                        </strong>
-                                                        We restructured the entire advertising
-                                                        strategy with a focus on profitability. Our
-                                                        approach included:
-                                                    </p>
-
-                                                    <ul className="list-disc ml-8 space-y-2 text-[#9c9c9c] py-4">
-                                                        <li>
-                                                            Streamlined campaign structure for
-                                                            efficiency and clarity
-                                                        </li>
-                                                        <li>
-                                                            Advanced retargeting strategies to
-                                                            capture high-intent buyers
-                                                        </li>
-                                                        <li>
-                                                            Catalog sales campaigns to scale
-                                                            conversions systematically
-                                                        </li>
-                                                        <li>
-                                                            Ongoing optimization for maximum ROAS
-                                                            and sustainable growth
-                                                        </li>
-                                                    </ul>
-                                                </li>
-
-                                                <li>
-                                                    <p>
-                                                        <strong className=" text-[#fafafa]">
-                                                            After SAAA:{' '}
-                                                        </strong>
-                                                        Within just 10 months, the business saw a
-                                                        complete turnaround:
-                                                    </p>
-
-                                                    <ul className="list-disc ml-8 space-y-2 text-[#9c9c9c] py-4">
-                                                        <li>
-                                                            Ad spend of ~₹3.61 Lakhs delivered over
-                                                            ₹13.3 Lakhs in purchase conversions
-                                                        </li>
-                                                        <li>
-                                                            Average ROAS increased to 3.7–3.8, with
-                                                            multiple campaigns achieving 4–5+
-                                                        </li>
-                                                        <li>
-                                                            Marketing became a profit center rather
-                                                            than a cost burden
-                                                        </li>
-                                                        <li>
-                                                            The client not only regained stability
-                                                            but scaled their business confidently
-                                                            with consistent, predictable returns
-                                                        </li>
-                                                    </ul>
-                                                </li>
-                                            </ol>
-                                        </>
-                                    )}
-
-                                    {s.id === 'optimization' && (
-                                        <>
-                                            <ul className="list-disc ml-8 space-y-6 text-[#9c9c9c] py-2">
-                                                <li>
-                                                    <strong className="text-[#fafafa] ">
-                                                        Ad Targeting Refinement:{' '}
-                                                    </strong>
-                                                    Initially focused on fashion-forward women
-                                                    interested in ethnic and sustainable wear.
-                                                    Targeted audiences based on interest in sarees,
-                                                    kurta sets, handloom, and eco-friendly fashion
-                                                    to ensure ads reached high-intent buyers.
-                                                </li>
-
-                                                <li>
-                                                    <strong className="text-[#fafafa] ">
-                                                        Exclusion of Irrelevant Placements:{' '}
-                                                    </strong>
-                                                    Continuously monitored ad performance to exclude
-                                                    underperforming placements and audience
-                                                    segments. This helped minimize wasted spend and
-                                                    improved cost efficiency.
-                                                </li>
-
-                                                <li>
-                                                    <strong className="text-[#fafafa] ">
-                                                        Inclusion of Additional Targeting Regions:{' '}
-                                                    </strong>
-                                                    Leveraged Meta Analytics to identify
-                                                    high-performing demographics and expanded
-                                                    targeting to Lookalike Audiences of website
-                                                    visitors, add-to-cart users, and past
-                                                    purchasers.
-                                                </li>
-
-                                                <li>
-                                                    <strong className="text-[#fafafa] ">
-                                                        Increased Budget in High-Performing Cities:{' '}
-                                                    </strong>
-                                                    Increased budgets in campaigns achieving ROAS
-                                                    above 4.0 (such as festive launches and
-                                                    catalogue sales) to maximize revenue and
-                                                    capitalize on winning strategies.
-                                                </li>
-
-                                                <li>
-                                                    <strong className="text-[#fafafa] ">
-                                                        Performance Monitoring:{' '}
-                                                    </strong>
-                                                    Regularly reviewed campaign metrics such as
-                                                    purchases, ROAS, and cost per purchase to track
-                                                    effectiveness across catalog, prospecting, and
-                                                    retargeting campaigns.
-                                                </li>
-
-                                                <li>
-                                                    <strong className="text-[#fafafa] ">
-                                                        Budget Reallocation:{' '}
-                                                    </strong>
-                                                    Shifted budgets toward high-performing campaigns
-                                                    (ROAS &gt; 4.0), particularly festive launches
-                                                    and catalog ads, while reducing spend on
-                                                    underperforming ad sets to ensure maximum
-                                                    efficiency.
-                                                </li>
-
-                                                <li>
-                                                    <strong className="text-[#fafafa] ">
-                                                        Ad Creative Adjustments:{' '}
-                                                    </strong>
-                                                    Continuously tested new creatives, including
-                                                    product lifestyle images, festive collection
-                                                    highlights, and storytelling videos. Optimized
-                                                    ad copy to highlight sustainability and
-                                                    exclusivity, resulting in improved engagement
-                                                    and higher purchase intent.
-                                                </li>
-
-                                                <li>
-                                                    <strong className="text-[#fafafa] ">
-                                                        Frequency Capping:{' '}
-                                                    </strong>
-                                                    Applied frequency capping on retargeting
-                                                    campaigns to prevent ad fatigue, ensuring the
-                                                    audience was engaged without being overwhelmed
-                                                    by repeated ads.
-                                                </li>
-                                            </ul>
-                                        </>
-                                    )}
-                                    {s.id === 'results' && (
+                                    {/* 🔥 RESULTS LAYOUT */}
+                                    {isResults ? (
                                         <>
                                             <div className="w-full flex flex-col gap-4 lg:gap-0 lg:flex-row items-stretch justify-center py-4">
                                                 <div className="relative  w-full lg:w-[35%]">
-                                                    <h3 className=" text-lg md:text-xl lg:text-xl font-semibold text-[#fafafa]">
-                                                        Before SAAA (Jan–Nov 2024):
-                                                    </h3>
-                                                    <ul className="list-disc ml-8 space-y-4 text-neutral-400 py-2 font-[500]">
-                                                        <li>Total Spend: ₹328,187</li>
-                                                        <li>
-                                                            Purchases Conversion Value: ~₹302,357
-                                                        </li>
-                                                        <li>
-                                                            Average ROAS: ~0.92 (low efficiency)
-                                                        </li>
-                                                        <li>Many campaigns but weak returns</li>
-                                                    </ul>
+                                                    <MarkdownRenderer>
+                                                        {section.beforeDescription}
+                                                    </MarkdownRenderer>
                                                 </div>
-                                                <div className="relative w-full lg:w-[65%] h-[350px] lg:h-auto">
+                                                <div className="relative w-full lg:w-[65%] h-[200px] lg:h-auto">
                                                     <Image
-                                                        src="/images/casestudy/c3618f8e668fa4e6ed267a3fa3ba7dd89606fcf2.png"
+                                                        src={`http://localhost:1337${beforeImg}`}
                                                         alt="Reach out"
                                                         fill
                                                         sizes="(max-width: 1024px) 100vw, 50vw"
-                                                        className="object-cover"
+                                                        className="object-contain"
                                                     />
                                                 </div>
                                             </div>
                                             <div className="w-full flex flex-col gap-4 lg:gap-0 lg:flex-row items-stretch justify-center py-4">
                                                 <div className="relative  w-full lg:w-[35%]">
-                                                    <h3 className=" text-lg md:text-xl lg:text-xl font-semibold text-[#fafafa]">
-                                                        After SAAA (Dec 2024 – Sep 2025 with us):
-                                                    </h3>
-                                                    <ul className="list-disc ml-8 space-y-4 text-neutral-400 py-2 font-[500]">
-                                                        <li>Total Spend: ₹3,61,573 + ₹23,630</li>
-                                                        <li>
-                                                            Purchases Conversion Value: ₹13,37,934 +
-                                                            ₹90,584
-                                                        </li>
-                                                        <li>Average ROAS: 3.7 – 3.8</li>
-                                                        <li>
-                                                            Multiple campaigns hitting ROAS 4–5+
-                                                        </li>
-                                                        <li>
-                                                            Highly efficient retargeting & catalog
-                                                            campaigns
-                                                        </li>
-                                                    </ul>
+                                                    <MarkdownRenderer>
+                                                        {section.afterDescription}
+                                                    </MarkdownRenderer>
                                                 </div>
-                                                <div className="relative w-full lg:w-[65%] h-[350px] lg:h-auto border">
+                                                <div className="relative w-full lg:w-[65%] h-[200px] lg:h-auto border">
                                                     <Image
-                                                        src="/images/casestudy/c3618f8e668fa4e6ed267a3fa3ba7dd89606fcf2.png"
+                                                        src={`http://localhost:1337${afterImg}`}
                                                         alt="Reach out"
                                                         fill
                                                         sizes="(max-width: 1024px) 100vw, 50vw"
-                                                        className="object-cover"
+                                                        className="object-contain"
                                                     />
                                                 </div>
                                             </div>
                                         </>
+                                    ) : (
+                                        <MarkdownRenderer>{section.description}</MarkdownRenderer>
                                     )}
-
-                                    {s.id === 'conclusion' && (
-                                        <>
-                                            <ul className="list-disc ml-8 space-y-6 text-[#9c9c9c] py-2">
-                                                <li>
-                                                    By focusing on fashion-conscious women and
-                                                    audiences with a strong interest in ethnic and
-                                                    sustainable wear, the campaigns successfully
-                                                    attracted a highly relevant audience, leading to
-                                                    stronger purchase intent and improved ROAS.
-                                                    Optimized campaign distribution involved
-                                                    excluding underperforming ad sets and
-                                                    reallocating spend towards high-performing
-                                                    catalog and festive campaigns.
-                                                </li>
-                                                <li>
-                                                    Regular analysis of performance metrics enabled
-                                                    data-driven budget shifts, ensuring maximum
-                                                    efficiency by scaling campaigns that
-                                                    consistently delivered ROAS above 4.0.
-                                                    Additionally, creative testing and ad rotations
-                                                    kept the audience engaged while preventing ad
-                                                    fatigue, which further strengthened campaign
-                                                    performance.
-                                                </li>
-                                                <li>
-                                                    The strategic increase in budgets for festive
-                                                    launches, retargeting, and catalog sales
-                                                    campaigns, coupled with continuous optimization,
-                                                    contributed to achieving over ₹14 lakh in
-                                                    revenue at an average ROAS of 3.7+ — well above
-                                                    industry benchmarks.
-                                                </li>
-                                            </ul>
-                                        </>
-                                    )}
-                                </div>
-                            </article>
-                        ))}
+                                </section>
+                            );
+                        })}
                     </section>
                 </div>
             </section>
@@ -538,9 +380,9 @@ export default function CaseStudyDetails() {
             {/* Case Studies Section */}
             <section
                 ref={footerRef}
-                className="w-full min-h-screen bg-[#fafafa] px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20 "
+                className="w-full  bg-[#fafafa] px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20 "
             >
-                <h2 className="text-3xl md:text-4xl  lg:text-5xl font-semibold  lg:leading-[60px]">
+                <h2 className="text-3xl md:text-4xl  xl:text-5xl font-semibold  lg:leading-[60px]">
                     Case{' '}
                     <span className="bg-[#844de9] inline px-2  rounded-md text-[#fafafa]">
                         Studies
@@ -548,12 +390,7 @@ export default function CaseStudyDetails() {
                 </h2>
 
                 <div className="mt-12 md:mt-14 grid gap-12 md:gap-6 lg:gap-10 md:grid-cols-3 items-stretch">
-                    <CaseStudyCards
-                        caseStudies={caseStudies.map(item => ({
-                            ...item,
-                            href: `case-studies/${slugify(item.slug)}`,
-                        }))}
-                    />
+                    {caseStudies?.length > 0 && <CaseStudyCards caseStudies={caseStudies} />}
                 </div>
 
                 <div className="w-full flex items-center justify-center mt-12">

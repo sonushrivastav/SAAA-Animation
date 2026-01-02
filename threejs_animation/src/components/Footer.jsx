@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function Footer() {
     return (
         <footer className="w-full relative bg-[#0F0F0F] text-[#FAFAFA] px-6 md:px-16 py-12 z-[55]">
@@ -13,21 +15,21 @@ export default function Footer() {
 
                 {/* Navigation */}
                 <div className="flex item-start flex-col gap-3 text-lg">
-                    <a href="#" className="hover:text-[#844de9] transition ">
-                        HOME
-                    </a>
-                    <a href="#" className="hover:text-[#844de9] transition">
-                        ABOUT
-                    </a>
-                    <a href="#" className="hover:text-[#844de9] transition">
-                        SERVICES
-                    </a>
-                    <a href="#" className="hover:text-[#844de9] transition">
-                        WORK
-                    </a>
-                    <a href="#" className="hover:text-[#844de9] transition">
-                        CONTACT
-                    </a>
+                    <Link href="/animation" className="hover:text-[#844de9] transition ">
+                        Home
+                    </Link>
+                    <Link href="/animation" className="hover:text-[#844de9] transition ">
+                        About
+                    </Link>
+                    <Link href="/service" className="hover:text-[#844de9] transition ">
+                        Services
+                    </Link>
+                    <Link href="/contact" className="hover:text-[#844de9] transition ">
+                        Contact
+                    </Link>
+                    <Link href="/case-studies" className="hover:text-[#844de9] transition ">
+                        Case Studies
+                    </Link>
                 </div>
 
                 {/* Contact Section */}

@@ -67,7 +67,7 @@ const Contact = () => {
                         <div className="flex flex-col">
                             <div className="flex flex-row justify-between items-center">
                                 <h2
-                                    className={`text-2xl md:text-4xl lg:text-4xl font-semibold transition-colors duration-300  ${
+                                    className={`text-2xl md:text-4xl xl:text-4xl font-semibold transition-colors duration-300  ${
                                         isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
                                     }`}
                                 >
@@ -75,7 +75,7 @@ const Contact = () => {
                                 </h2>
                                 {headQurter && (
                                     <p
-                                        className={`text-lg md:text-xl lg:text-2xl font-bold transition-colors duration-300 ${
+                                        className={`text-lg md:text-xl xl:text-2xl font-bold transition-colors duration-300 ${
                                             isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
                                         }`}
                                     >
@@ -85,7 +85,7 @@ const Contact = () => {
                             </div>
 
                             <p
-                                className={`text-base md:text-lg lg:text-xl mt-4 transition-colors duration-300  ${
+                                className={`text-base md:text-lg xl:text-xl mt-4 transition-colors duration-300  ${
                                     isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
                                 }`}
                             >
@@ -96,7 +96,7 @@ const Contact = () => {
                             <p className="  text-sm md:text-base   text-[#9c9c9c]">Email</p>
                             <div className="flex  md:flex-row items-center  gap-2">
                                 <p
-                                    className={`text-base md:text-lg lg:text-xl font-[500]  transition-colors duration-300  ${
+                                    className={`text-base md:text-lg xl:text-xl font-[500]  transition-colors duration-300  ${
                                         isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
                                     }`}
                                 >
@@ -123,7 +123,7 @@ const Contact = () => {
                         <div className="flex flex-col">
                             <div className="flex flex-row justify-between items-center">
                                 <h2
-                                    className={`text-2xl md:text-4xl lg:text-4xl font-bold transition-colors duration-300 ${
+                                    className={`text-2xl md:text-4xl xl:text-4xl font-bold transition-colors duration-300 ${
                                         isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
                                     }`}
                                 >
@@ -132,7 +132,7 @@ const Contact = () => {
                             </div>
 
                             <p
-                                className={`text-sm md:text-base lg:text-xl mt-4 transition-colors duration-300 ${
+                                className={`text-sm md:text-base xl:text-xl mt-4 transition-colors duration-300 ${
                                     isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
                                 }`}
                             >
@@ -156,13 +156,13 @@ const Contact = () => {
                                 <div className="flex flex-row justify-between items-center lg:w-[70%] ">
                                     <div className="flex flex-col justify-center ">
                                         <h3
-                                            className={`text-sm md:text-lg lg:text-2xl font-bold transition-colors duration-300 ${
+                                            className={`text-sm md:text-lg xl:text-2xl font-bold transition-colors duration-300 ${
                                                 isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
                                             }`}
                                         >
                                             {contactPerson.name}
                                         </h3>
-                                        <p className="text-[#9C9C9C] text-sm md:text-base lg:text-base">
+                                        <p className="text-[#9C9C9C] text-sm md:text-base xl:text-base">
                                             {contactPerson.role}
                                         </p>
                                     </div>
@@ -212,7 +212,7 @@ const Contact = () => {
     return (
         <div>
             <section className="bg-[#0f0f0f] px-8 pt-28 pb-10 md:px-14 lg:px-28 md:pt-32 md:pb-16 lg:pt-44 lg:pb-20">
-                <h2 className="text-3xl md:text-4xl lg:text-6xl  text-[#fafafa] font-semibold lg:leading-[75px] ">
+                <h2 className="text-3xl md:text-4xl xl:text-6xl  text-[#fafafa] font-semibold xl:leading-[75px] ">
                     Let's imagine,{' '}
                     <span className="bg-[#844de9] inline text-[#fafafa] px-2 rounded-md">
                         work together,
@@ -259,13 +259,13 @@ const Contact = () => {
 
             <section className="w-full min-h-screen bg-[#fafafa] flex flex-col lg:flex-row gap-5 lg:gap-0 items-stretch justify-center px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
                 <div className=" w-full lg:w-[50%]  overflow-hidden">
-                    <h2 className="text-3xl  md:text-4xl lg:text-5xl text-[#0f0f0f]   font-semibold  lg:leading-[60px] ">
+                    <h2 className="text-3xl  md:text-4xl xl:text-5xl text-[#0f0f0f]   font-semibold  lg:leading-[60px] ">
                         Have a project to{' '}
                         <span className="bg-[#844de9] inline px-2 rounded-md text-[#fafafa]">
                             discuss?
                         </span>{' '}
                     </h2>
-                    <p className="text-base md:text-lg lg:text-xl text-[#9c9c9c] ">
+                    <p className="text-base md:text-lg xl:text-xl text-[#9c9c9c] ">
                         If you’d like to know more then please get in touch with us.
                     </p>
                 </div>

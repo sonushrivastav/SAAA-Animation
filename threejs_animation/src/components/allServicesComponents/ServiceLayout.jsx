@@ -283,7 +283,7 @@ function initSpiralAnimation(slicesRef, isMobile, isTablet) {
     animate();
 }
 
-const ServiceLayout = ({ data }) => {
+const ServiceLayout = ({ data, caseStudies }) => {
     const [activeIndex, setActiveIndex] = useState(0);
     const slicesRef = useRef([]);
     const { isMobile, isTablet } = useDeviceType();
@@ -354,7 +354,7 @@ const ServiceLayout = ({ data }) => {
             {/* Key Figures Section */}
 
             <section className="w-full  bg-[#0f0f0f] text-[#fafafa] px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
-                <h2 className="text-3xl md:text-4xl lg:text-5xl   font-semibold  lg:leading-[60px]">
+                <h2 className="text-3xl md:text-4xl xl:text-5xl   font-semibold  lg:leading-[60px]">
                     Here are some{' '}
                     <span className="bg-[#844de9]  px-2  rounded-md">key figures</span> that
                     illustrate our growth and commitment to our clients.
@@ -367,6 +367,7 @@ const ServiceLayout = ({ data }) => {
                         label={data.stats[0].label}
                         hasContent={true}
                         roundedClass="rounded-t-2xl sm:rounded-tr-none"
+                        isMobile={isMobile}
                     />
 
                     {/* Card 2 */}
@@ -374,6 +375,7 @@ const ServiceLayout = ({ data }) => {
                         stat={data.stats[1].stat}
                         label={data.stats[2].label}
                         hasContent={true}
+                        isMobile={isMobile}
                         roundedClass=""
                     />
 
@@ -389,6 +391,7 @@ const ServiceLayout = ({ data }) => {
                         label={data.stats[2].label}
                         hasContent={true}
                         roundedClass=""
+                        isMobile={isMobile}
                     />
 
                     {/* Card 6 */}
@@ -397,13 +400,14 @@ const ServiceLayout = ({ data }) => {
                         label={data.stats[3].label}
                         hasContent={true}
                         roundedClass="rounded-b-2xl sm:rounded-bl-none"
+                        isMobile={isMobile}
                     />
                 </div>
 
                 {/* Platforms we manage */}
 
                 <div className="mt-12 md:mt-14 flex flex-col items-center gap-8 md:gap-12">
-                    <h1 className="text-3xl md:text-4xl lg:text-5xl   font-semibold  lg:leading-[65px] text-center">
+                    <h1 className="text-3xl md:text-4xl xl:text-5xl   font-semibold  lg:leading-[65px] text-center">
                         Platforms we manage
                     </h1>
                     <div className="grid grid-cols-3  md:grid-cols-6 justify-center gap-6">
@@ -429,7 +433,7 @@ const ServiceLayout = ({ data }) => {
             {/* case stuides */}
 
             <section className="w-full  bg-[#fafafa] px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20 ">
-                <h2 className="text-3xl md:text-4xl  lg:text-5xl font-semibold  lg:leading-[60px]">
+                <h2 className="text-3xl md:text-4xl  xl:text-5xl font-semibold  lg:leading-[60px]">
                     Case{' '}
                     <span className="bg-[#844de9] inline px-2  rounded-md text-[#fafafa]">
                         Studies
@@ -438,11 +442,11 @@ const ServiceLayout = ({ data }) => {
 
                 <div className="mt-12 md:mt-14 grid gap-12 md:gap-6 lg:gap-10 md:grid-cols-3 items-stretch">
                     {' '}
-                    <CaseStudyCards caseStudies={data.caseStudies} />
+                    <CaseStudyCards caseStudies={caseStudies} />
                 </div>
 
                 <div className="w-full flex items-center justify-center mt-12 ">
-                    <button className="bg-[#0f0f0f] text-[#fafafa] rounded-full px-6 py-2 text-base md:text-lg lg:text-xl">
+                    <button className="bg-[#0f0f0f] text-[#fafafa] rounded-full px-6 py-2 text-base md:text-lg xl:text-xl">
                         View More
                     </button>
                 </div>
@@ -450,18 +454,18 @@ const ServiceLayout = ({ data }) => {
                 {/* Ready to level */}
                 <div className="mt-12 md:mt-14 flex flex-col md:flex-row items-center text-[#0f0f0f]  ">
                     <div className="flex flex-col w-full md:w-[50%] lg:w-[40%]">
-                        <h1 className="text-3xl  md:text-4xl lg:text-5xl   font-semibold  lg:leading-[60px]">
+                        <h1 className="text-3xl  md:text-4xl xl:text-5xl   font-semibold  lg:leading-[60px]">
                             Ready to{' '}
                             <div className="bg-[#844de9] inline px-2  rounded-md text-[#fafafa]">
                                 level
                             </div>{' '}
                             up?
                         </h1>
-                        <p className="text-[#555555] text-base md:text-lg lg:text-xl w-sm mt-2">
+                        <p className="text-[#555555] text-base md:text-lg xl:text-xl w-sm mt-2">
                             You’ve got the vision, we’ve got the creative power. Let’s turn your
                             brand into something people can’t scroll past
                         </p>
-                        <button className="bg-[#0f0f0f] text-[#fafafa] rounded-full px-6 py-2 w-fit mt-4 text-base md:text-lg lg:text-xl">
+                        <button className="bg-[#0f0f0f] text-[#fafafa] rounded-full px-6 py-2 w-fit mt-4 text-base md:text-lg xl:text-xl">
                             Schedule A Call
                         </button>
                     </div>
@@ -493,7 +497,7 @@ const ServiceLayout = ({ data }) => {
                 </div>
 
                 <div className="z-10 flex flex-col w-full  ">
-                    <h2 className="text-3xl  md:text-4xl lg:text-5xl text-[#fafafa]   font-semibold  lg:leading-[60px] ">
+                    <h2 className="text-3xl  md:text-4xl xl:text-5xl text-[#fafafa]   font-semibold  lg:leading-[60px] ">
                         <span className="bg-[#844de9] inline px-2 rounded-md text-[#fafafa]">
                             Questions?
                         </span>{' '}
@@ -509,7 +513,7 @@ const ServiceLayout = ({ data }) => {
             {/* Other Related */}
 
             <section className="flex flex-col  bg-[#fafafa]  px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
-                <h2 className="text-3xl  md:text-4xl lg:text-5xl text-[#0f0f0f]   font-semibold  lg:leading-[60px] ">
+                <h2 className="text-3xl  md:text-4xl xl:text-5xl text-[#0f0f0f]   font-semibold  xl:leading-[60px] ">
                     Other Related{' '}
                     <span className="bg-[#844de9] inline px-2  rounded-md text-[#fafafa]">
                         Services
@@ -519,7 +523,7 @@ const ServiceLayout = ({ data }) => {
                     <OtherServices services={data.servicesArray} />
                 </div>
                 <div className="mt-12 md:mt-14 flex flex-col items-center justify-center">
-                    <h2 className="text-3xl  md:text-4xl lg:text-5xl text-[#0f0f0f]   font-semibold  lg:leading-[60px] ">
+                    <h2 className="text-3xl  md:text-4xl xl:text-5xl text-[#0f0f0f]   font-semibold  lg:leading-[60px] ">
                         <span className="bg-[#844de9] inline px-2 rounded-md text-[#fafafa]">
                             Reach
                         </span>{' '}

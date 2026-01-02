@@ -61,7 +61,7 @@ export default function Navbar(props) {
         {
             title: 'Grow',
             items: [
-                { label: 'Social Media Marketing', href: '/socialmedia' },
+                { label: 'Social Media Marketing', href: '/socialmedia-marketing' },
                 {
                     label: 'Paid Ads / Performance Marketing',
                     href: '/paid-ads-performance-marketing',
@@ -73,9 +73,9 @@ export default function Navbar(props) {
         {
             title: 'More',
             items: [
-                { label: 'Investor Relations', href: '/dynamic/investor-relations' },
-                { label: 'Financial Advisory', href: '/dynamic/financial-advisory' },
-                { label: 'Legal & Compliance', href: '/dynamic/legal-compliance' },
+                { label: 'Investor Relations', href: '/investor-relations' },
+                { label: 'Financial Advisory', href: '/financial-advisory' },
+                { label: 'Legal & Compliance', href: '/legal-compliance' },
             ],
         },
     ];
@@ -224,7 +224,7 @@ export default function Navbar(props) {
                                 className="border-t lg:border-t-0 border-white/10  md:px-8 px-4 overflow-y-auto max-h-[90vh]"
                             >
                                 <div className="flex flex-col md:flex-row md:justify-between py-6 gap-8 ">
-                                    <div className="w-full md:w-[20%] flex flex-col rounded-xl border border-[#555555] px-10 py-2   ">
+                                    <div className="w-full md:w-[20%] flex flex-col rounded-xl border border-[#555555] px-10  py-2   ">
                                         {smallMenu.map(item => (
                                             <Link
                                                 key={item.href}
@@ -232,7 +232,7 @@ export default function Navbar(props) {
                                                 href={item.href}
                                                 className="border-b-2 border-dashed border-[#555555] py-4 "
                                             >
-                                                <h3 className="text-3xl font-semibold text-[#fafafa] hover-underline-animation ">
+                                                <h3 className="text-2xl lg:text-xl xl:text-3xl font-semibold text-[#fafafa] hover-underline-animation ">
                                                     {item.label}
                                                 </h3>
                                             </Link>
@@ -248,11 +248,11 @@ export default function Navbar(props) {
                                                         : 'border-b-2'
                                                 }  border-dashed border-[#555555] py-4  pr-2`}
                                             >
-                                                <h3 className="text-3xl font-semibold text-[#555555] ">
+                                                <h3 className="text-2xl lg:text-xl xl:text-3xl font-semibold text-[#555555] ">
                                                     {section.title}
                                                 </h3>
 
-                                                <ul className="flex flex-col lg:flex-row flex-wrap items-start gap-3 lg:gap-6 pt-1">
+                                                <ul className="flex flex-col lg:flex-row flex-wrap items-start gap-3 xl:gap-6 pt-1">
                                                     {section.items.map(item => (
                                                         <li
                                                             key={item.href}
@@ -261,7 +261,7 @@ export default function Navbar(props) {
                                                             <Link
                                                                 href={item.href}
                                                                 onClick={handleToggle}
-                                                                className="text-base  text-[#fafafa] uppercase "
+                                                                className="text-base lg:text-sm xl:text-base  text-[#fafafa] uppercase "
                                                             >
                                                                 {item.label}
                                                             </Link>

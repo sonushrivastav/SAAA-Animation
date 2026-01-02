@@ -171,56 +171,72 @@
 
 // Code Seperator new implementation for 3Dglass GLB
 
-import { Environment, PerspectiveCamera } from '@react-three/drei';
-import { Canvas, useFrame, useLoader } from '@react-three/fiber';
-import { Suspense, useEffect, useRef } from 'react';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+'use client';
+import { Environment, PerspectiveCamera, useGLTF } from '@react-three/drei';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { Suspense, useEffect, useMemo, useRef } from 'react';
+
+// Pre-loading helps prevent the "jump" when a user scrolls to the section
+// Replace these with your actual compressed model paths
+// useGLTF.preload('/models/investor.glb');
+// useGLTF.preload('/models/finance.glb');
+// useGLTF.preload('/models/grow.glb');
 
 function GlassModel({
     url,
     floating = true,
     speed = 1,
     amplitude = 0.05,
-    rotationSpeed = 0.002,
     motionVariant = 0,
     mouseInfluence = true,
 }) {
-    const gltf = useLoader(GLTFLoader, url);
+    // Dynamic Preloader
+    useEffect(() => {
+        if (url) useGLTF.preload(url);
+    }, [url]);
+
+    // 1. Optimized Loading with Draco support
+    // This uses a public CDN for the decoder so you don't have to host it
+
+    const { scene: originalScene } = useGLTF(
+        url,
+        'https://www.gstatic.com/draco/versioned/decoders/1.5.5/'
+    );
+
+    // 2. Memoize the cloned scene to prevent memory leaks on re-render
+    const scene = useMemo(() => {
+        const clone = originalScene.clone();
+        clone.traverse(child => {
+            if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                // child.material.transparent = true;
+                // child.material.opacity = 0.9;
+            }
+        });
+        return clone;
+    }, [originalScene]);
+
     const ref = useRef();
-
-    const scene = gltf.scene.clone();
-
-    const canvas = document.createElement('canvas');
-    canvas.width = 256;
-    canvas.height = 256;
-
-    scene.traverse(child => {
-        if (child.isMesh) {
-            // Get the original material's color
-            const originalColor = child.material.color;
-            const originalMap = child.material.map || null;
-        }
-    });
-
     const mouse = useRef({ x: 0, y: 0 });
+
     useEffect(() => {
         if (!mouseInfluence) return;
-
         const handleMouseMove = e => {
             mouse.current.x = (e.clientX / window.innerWidth) * 2 - 1;
             mouse.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
         };
-
-        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mousemove', handleMouseMove, { passive: true });
         return () => window.removeEventListener('mousemove', handleMouseMove);
     }, [mouseInfluence]);
 
     useFrame(({ clock }) => {
-        if (!floating || !ref.current) return;
+        if (!ref.current) return;
 
         const t = clock.getElapsedTime() * speed;
         const mesh = ref.current;
 
+        // Base floating logic
         switch (motionVariant) {
             case 0:
                 mesh.position.x = Math.sin(t) * amplitude;
@@ -260,42 +276,45 @@ function GlassModel({
 function Loader() {
     return (
         <mesh>
-            <boxGeometry args={[1, 1, 1]} />
-            <meshStandardMaterial color="#888888" wireframe />
+            <sphereGeometry args={[0.5, 16, 16]} />
+            <meshStandardMaterial color="#844de9" wireframe />
         </mesh>
     );
 }
 
 export default function ThreeGlass({
-    modelUrl = '/models/grow.glb',
+    modelUrl,
     speed = 1,
     amplitude = 0.05,
-    rotationSpeed = 0.002,
     motionVariant = 0,
     mouseInfluence = false,
 }) {
-    // bg-gradient-to-r from-[#010a20] via-[#15a9b0] to-[#0f4d63]
     return (
-        <div className="w-full h-full ">
-            <Canvas gl={{ alpha: true }}>
+        <div className="w-full h-full">
+            {/* 4. Canvas Optimization: powerPreference and dpr */}
+            <Canvas
+                gl={{
+                    alpha: true,
+                    antialias: true,
+                    powerPreference: 'high-performance',
+                }}
+                dpr={[1, 2]} // Limits resolution on high-density screens for speed
+            >
                 <PerspectiveCamera makeDefault position={[0, 0, 5]} />
-                {/* <OrbitControls enableZoom={false} enablePan={false} /> */}
-
                 <ambientLight intensity={0.5} />
-                <directionalLight position={[10, 10, 5]} intensity={1} />
-                <directionalLight position={[-10, -10, -5]} intensity={0.5} />
+                <pointLight position={[10, 10, 10]} intensity={1} />
+                <spotLight position={[-10, 10, 10]} angle={0.15} penumbra={1} />
+
                 <Environment preset="sunset" />
+
                 <Suspense fallback={<Loader />}>
                     <GlassModel
                         url={modelUrl}
-                        floating={true}
                         speed={speed}
                         amplitude={amplitude}
-                        rotationSpeed={rotationSpeed}
                         motionVariant={motionVariant}
                         mouseInfluence={mouseInfluence}
                     />
-                    {/* color="#844de9" gradientColor="#844de9" */}
                 </Suspense>
             </Canvas>
         </div>

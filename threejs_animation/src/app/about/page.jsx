@@ -142,7 +142,7 @@ const StatCard = ({ title, description, hasContent, roundedClass }) => {
 
     return (
         <div
-            className={`relative p-4 md:p-6 lg:p-10 ${roundedClass} bg-transparent transition-colors duration-300 w-full   ${
+            className={`relative p-4 md:p-6 lg:p-10 ${roundedClass} bg-transparent transition-colors duration-300 w-full xl:h-[350px]   ${
                 hasContent
                     ? `border ${isHovered ? 'border-[#fafafa]' : 'border-[#555555]'}`
                     : isHovered
@@ -173,14 +173,14 @@ const StatCard = ({ title, description, hasContent, roundedClass }) => {
             {hasContent && (
                 <div className="relative z-10 flex flex-col lg:gap-10  md:gap-6  gap-4 justify-between h-full">
                     <h2
-                        className={`text-2xl md:text-2xl lg:text-4xl font-bold transition-colors duration-300 ${
+                        className={`text-2xl md:text-2xl xl:text-4xl font-bold transition-colors duration-300 ${
                             isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
                         }`}
                     >
                         {title}
                     </h2>
                     <p
-                        className={`text-base md:text-lg lg:text-xl mt-2 transition-colors  duration-300 ${
+                        className={`text-base md:text-lg xl:text-xl mt-2 transition-colors  duration-300 ${
                             isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
                         }`}
                     >
@@ -263,12 +263,12 @@ const About = () => {
 
             {/* bit about us */}
             <section className="w-full  bg-[#0f0f0f] text-[#fafafa] px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
-                <h2 className="text-3xl md:text-4xl lg:text-5xl   font-semibold  lg:leading-[60px]">
+                <h2 className="text-3xl md:text-4xl xl:text-5xl   font-semibold  lg:leading-[60px]">
                     A Bit <span className="bg-[#844de9] inline px-2  rounded-md">About Us</span>{' '}
                     that
                 </h2>
 
-                <div className="mt-12 md:mt-14 bg-[#0f0f0f] text-[#9c9c9c] text-lg md:text-xl lg:text-2xl font-semibold">
+                <div className="mt-12 md:mt-14 bg-[#0f0f0f] text-[#9c9c9c] text-lg md:text-xl xl:text-2xl font-semibold">
                     <p className="pb-6 ">
                         SAAA Consultants is a multidisciplinary creative team built on one belief:
                         different perspectives create better outcomes. We approach every brief with
@@ -307,7 +307,7 @@ const About = () => {
 
             {/* our vision */}
             <section className=" bg-[#fafafa] w-full  px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
-                <h2 className="text-3xl md:text-4xl lg:text-5xl   font-semibold  lg:leading-[60px]">
+                <h2 className="text-3xl md:text-4xl xl:text-5xl   font-semibold  lg:leading-[60px]">
                     Quotes That Gave Us{' '}
                     <span className="bg-[#844de9] text-[#fafafa] inline px-2  rounded-md">
                         Our Vision
@@ -340,7 +340,7 @@ const About = () => {
                                     </div>
                                     {/* text */}
                                     <div className="relative w-full px-6 flex justify-between items-center pb-4">
-                                        <h3 className="text-lg md:text-xl lg:text-2xl uppercase font-semibold italic  text-[#0f0f0f] ">
+                                        <h3 className="text-lg md:text-xl xl:text-2xl uppercase font-semibold italic  text-[#0f0f0f] ">
                                             {item.title}
                                         </h3>
                                         <svg
@@ -367,7 +367,7 @@ const About = () => {
 
             {/* collective */}
             <section className="bg-[#0f0f0f]  text-[#fafafa] w-full  px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
-                <h2 className="text-3xl md:text-4xl lg:text-5xl   font-semibold  lg:leading-[60px]">
+                <h2 className="text-3xl md:text-4xl xl:text-5xl   font-semibold  lg:leading-[60px]">
                     We are a{' '}
                     <span className="bg-[#844de9] inline px-2  rounded-md">collective</span> of
                     dedicated individuals committed to transforming ideas into captivating digital
@@ -414,7 +414,7 @@ const About = () => {
 
             {/* Team */}
             <section className="bg-[#fafafa]  text-[#0f0f0f] w-full min-h-screen   py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
-                <h2 className="text-3xl md:text-4xl lg:text-5xl   font-semibold  lg:leading-[60px] px-8">
+                <h2 className="text-3xl md:text-4xl xl:text-5xl   font-semibold  lg:leading-[60px] px-8">
                     Meet The Team That Turns Work Into{' '}
                     <span className="bg-[#844de9] text-[#fafafa] inline px-2  rounded-md">Wow</span>
                 </h2>

@@ -13,17 +13,17 @@ const OtherServices = ({ services = [], buttonText = 'Know More', onButtonClick 
                     />
 
                     <div className="relative bg-white p-6 rounded-xl border border-[#0f0f0f] flex flex-col h-full">
-                        <h3 className="text-lg md:text-xl lg:text-2xl font-semibold mb-3 uppercase">
+                        <h3 className="text-lg md:text-xl xl:text-2xl font-semibold mb-3 uppercase">
                             {item.title}
                         </h3>
 
-                        <p className="text-base md:text-lg lg:text-xl text-[#555555] flex-grow">
+                        <p className="text-base md:text-lg xl:text-xl text-[#555555] flex-grow">
                             {item.description}
                         </p>
 
                         <Link
                             href={item.href}
-                            className=" w-fit mt-12 px-4 py-2 rounded-full bg-[#0f0f0f] text-[#fafafa] text-base md:text-lg lg:text-xl  "
+                            className=" w-fit mt-12 px-4 py-2 rounded-full bg-[#0f0f0f] text-[#fafafa] text-base md:text-lg xl:text-xl  "
                         >
                             {buttonText}
                         </Link>
