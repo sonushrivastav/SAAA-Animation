@@ -117,7 +117,7 @@ function NewCode() {
         //     map: star,
         //     transparent: true,
         //     opacity: 1,
-        //     sizeAttenuation: true,
+    
         // });
 
         // const stars = new THREE.Points(geometry, material);
