@@ -4,7 +4,7 @@ import { Canvas } from '@react-three/fiber';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useEffect } from 'react';
-import ParticlesMorphPerSlice from '../components/ScrollServiceLogo';
+import ParticlesMorphPerSlice from '../components/homepage/ScrollServiceLogo';
 
 gsap.registerPlugin(ScrollTrigger);
 

@@ -9,9 +9,9 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 import CaseStudyCards from '../../components/allServicesComponents/CaseStudyCards';
 import ContactForm from '../../components/allServicesComponents/ContactForm';
+import DotGrid from '../../components/allServicesComponents/DotGrid';
 import FaqAccordion from '../../components/allServicesComponents/FaqAccordion';
 import OtherServices from '../../components/allServicesComponents/OtherServices';
-import DotGrid from '../../components/socialMedia/DotGrid';
 gsap.registerPlugin(ScrollTrigger);
 
 const platformImages = [

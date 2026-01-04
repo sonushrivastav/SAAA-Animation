@@ -1,10 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import DotGrid from '../socialMedia/DotGrid';
+import DotGrid from './DotGrid';
 
-const StatCard = ({ stat, label, hasContent, roundedClass, isMobile = false }) => {
+const StatCard = ({
+    stat,
+    label,
+    hasContent,
+    roundedClass,
+    isMobile = false,
+    isTablet = false,
+}) => {
     const [isHovered, setIsHovered] = useState(false);
+    const showEffects = isHovered || isMobile || isTablet;
+    const textHighlightClass = showEffects ? 'text-[#fafafa]' : 'text-[#9C9C9C]';
+
     return (
         <div
             className={`relative p-4 md:p-6 lg:p-10 ${roundedClass} bg-transparent transition-colors duration-300 w-full h-[250px] md:h-[300px] lg:h-[400px] ${
@@ -38,23 +48,17 @@ const StatCard = ({ stat, label, hasContent, roundedClass, isMobile = false }) =
             {hasContent && (
                 <div className="relative z-10 flex flex-col justify-end h-full">
                     <h2
-                        className={`text-3xl md:text-4xl xl:text-5xl font-semibold transition-colors duration-300 ${
-                            isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
-                        }`}
+                        className={`text-3xl md:text-4xl xl:text-5xl font-semibold transition-colors duration-300 ${textHighlightClass}`}
                     >
                         {stat}
                     </h2>
                     <p
-                        className={`text-sm md:text-base xl:text-lg mt-2 transition-colors duration-300 ${
-                            isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
-                        }`}
+                        className={`text-sm md:text-base xl:text-lg mt-2 transition-colors duration-300 ${textHighlightClass}`}
                     >
                         {label}
                     </p>
                     <span
-                        className={`absolute top-[-6px] right-[2px] md:top-[-9px] md:right-[-2px]  lg:top-[-15px] lg:right-[-8px] text-3xl md:text-4xl xl:text-5xl font-semibold transition-colors duration-300 ${
-                            isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
-                        }`}
+                        className={`absolute top-[-6px] right-[2px] md:top-[-9px] md:right-[-2px]  lg:top-[-15px] lg:right-[-8px] text-3xl md:text-4xl xl:text-5xl font-semibold transition-colors duration-300 ${textHighlightClass}`}
                     >
                         #
                     </span>

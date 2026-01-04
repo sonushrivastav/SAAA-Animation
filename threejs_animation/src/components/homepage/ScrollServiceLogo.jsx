@@ -5,7 +5,7 @@ import { gsap } from 'gsap';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler.js';
-import useDeviceType from './hooks/useDeviceType';
+import useDeviceType from '../hooks/useDeviceType';
 
 if (typeof window !== 'undefined') gsap.registerPlugin();
 

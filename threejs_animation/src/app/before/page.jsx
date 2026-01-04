@@ -10,12 +10,12 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
-import Footer from '../../components/Footer';
-import Navbar from '../../components/Navbar';
-import FlowingParticles from '../../components/ParticleBackground';
-import ScrollServiceLogo from '../../components/ScrollServiceLogo';
-import StarfieldBackground from '../../components/StarfieldBackground';
-import StatsSection from '../../components/Stats';
+import Footer from '../../components/footer/Footer';
+import FlowingParticles from '../../components/homepage/ParticleBackground';
+import ScrollServiceLogo from '../../components/homepage/ScrollServiceLogo';
+import StarfieldBackground from '../../components/homepage/StarfieldBackground';
+import StatsSection from '../../components/homepage/Stats';
+import Navbar from '../../components/navbar/Navbar';
 
 // ✅ It's good practice to register the plugin once
 gsap.registerPlugin(ScrollTrigger);

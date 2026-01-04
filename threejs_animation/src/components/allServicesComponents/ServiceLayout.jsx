@@ -11,8 +11,8 @@ import CaseStudyCards from '../../components/allServicesComponents/CaseStudyCard
 import ContactForm from '../../components/allServicesComponents/ContactForm';
 import FaqAccordion from '../../components/allServicesComponents/FaqAccordion';
 import OtherServices from '../../components/allServicesComponents/OtherServices';
-import DotGrid from '../../components/socialMedia/DotGrid';
 import useDeviceType from '../hooks/useDeviceType';
+import DotGrid from './DotGrid';
 import StatCard from './StatCard';
 gsap.registerPlugin(ScrollTrigger);
 
@@ -368,6 +368,7 @@ const ServiceLayout = ({ data, caseStudies }) => {
                         hasContent={true}
                         roundedClass="rounded-t-2xl sm:rounded-tr-none"
                         isMobile={isMobile}
+                        isTablet={isTablet}
                     />
 
                     {/* Card 2 */}
@@ -376,6 +377,7 @@ const ServiceLayout = ({ data, caseStudies }) => {
                         label={data.stats[2].label}
                         hasContent={true}
                         isMobile={isMobile}
+                        isTablet={isTablet}
                         roundedClass=""
                     />
 
@@ -392,6 +394,7 @@ const ServiceLayout = ({ data, caseStudies }) => {
                         hasContent={true}
                         roundedClass=""
                         isMobile={isMobile}
+                        isTablet={isTablet}
                     />
 
                     {/* Card 6 */}
@@ -401,6 +404,7 @@ const ServiceLayout = ({ data, caseStudies }) => {
                         hasContent={true}
                         roundedClass="rounded-b-2xl sm:rounded-bl-none"
                         isMobile={isMobile}
+                        isTablet={isTablet}
                     />
                 </div>
 

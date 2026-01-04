@@ -3,8 +3,8 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Image from 'next/image';
 import { Suspense, useLayoutEffect, useRef, useState } from 'react';
+import DotGrid from '../../components/allServicesComponents/DotGrid';
 import useDeviceType from '../../components/hooks/useDeviceType';
-import DotGrid from '../../components/socialMedia/DotGrid';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -113,8 +113,8 @@ const TeamCard = ({
             <Image
                 src={bgImage}
                 alt={name}
-                width={200}
-                height={200}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="hover-img object-cover absolute inset-0"
             />
             {/* Info */}
@@ -137,9 +137,17 @@ const TeamCard = ({
 //     );
 // };
 
-const StatCard = ({ title, description, hasContent, roundedClass }) => {
+const StatCard = ({
+    title,
+    description,
+    hasContent,
+    roundedClass,
+    isMobile = false,
+    isTablet = false,
+}) => {
     const [isHovered, setIsHovered] = useState(false);
-
+    const showEffects = isHovered || isMobile || isTablet;
+    const textHighlightClass = showEffects ? 'text-[#fafafa]' : 'text-[#9C9C9C]';
     return (
         <div
             className={`relative p-4 md:p-6 lg:p-10 ${roundedClass} bg-transparent transition-colors duration-300 w-full xl:h-[350px]   ${
@@ -154,12 +162,12 @@ const StatCard = ({ title, description, hasContent, roundedClass }) => {
         >
             {/* Dot Grid - only show when conditions are met */}
             <div className="absolute inset-0 overflow-hidden">
-                {(!hasContent || (hasContent && isHovered)) && (
+                {(!hasContent || (hasContent && showEffects)) && (
                     <DotGrid
                         dotSize={2}
                         gap={8}
                         baseColor={!hasContent ? '#271e37' : '#271e37'}
-                        activeColor={!hasContent && isHovered ? '#fafafa' : '#844de9'}
+                        activeColor={!hasContent && showEffects ? '#fafafa' : '#844de9'}
                         proximity={120}
                         shockRadius={250}
                         shockStrength={5}
@@ -173,16 +181,12 @@ const StatCard = ({ title, description, hasContent, roundedClass }) => {
             {hasContent && (
                 <div className="relative z-10 flex flex-col lg:gap-10  md:gap-6  gap-4 justify-between h-full">
                     <h2
-                        className={`text-2xl md:text-2xl xl:text-4xl font-bold transition-colors duration-300 ${
-                            isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
-                        }`}
+                        className={`text-2xl md:text-2xl xl:text-4xl font-bold transition-colors duration-300 ${textHighlightClass}`}
                     >
                         {title}
                     </h2>
                     <p
-                        className={`text-base md:text-lg xl:text-xl mt-2 transition-colors  duration-300 ${
-                            isHovered ? 'text-[#fafafa]' : 'text-[#9C9C9C]'
-                        }`}
+                        className={`text-base md:text-lg xl:text-xl mt-2 transition-colors  duration-300 ${textHighlightClass}`}
                     >
                         {description}
                     </p>
@@ -380,6 +384,8 @@ const About = () => {
                         description="Our strategy centers on a research-focused approach, delving deep to gather insights. By understanding your business and market trends, we craft a customized strategy for relentless growth and long-term brand success."
                         hasContent={true}
                         roundedClass="rounded-t-2xl sm:rounded-r-none"
+                        isMobile={isMobile}
+                        isTablet={isTablet}
                     />
 
                     {/* Card 2 */}
@@ -394,6 +400,8 @@ const About = () => {
                         description="Committed to excellence, our team has satisfied over 100 clients with relentless dedication. We strive for perfection, consistently exceeding expectations."
                         hasContent={true}
                         roundedClass="sm:rounded-tr-2xl"
+                        isMobile={isMobile}
+                        isTablet={isTablet}
                     />
 
                     {/* Card 4 */}
@@ -405,6 +413,8 @@ const About = () => {
                         description="Thriving on creativity, our innovative process sets us apart. We craft customized strategies for a personalized experience tailored to your unique requirements."
                         hasContent={true}
                         roundedClass="rounded-b-2xl sm:rounded-b-none"
+                        isMobile={isMobile}
+                        isTablet={isTablet}
                     />
 
                     {/* Card 6 */}

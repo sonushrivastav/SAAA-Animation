@@ -8,7 +8,7 @@ import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler';
 
 // 💡 Add the import for useControls from Leva
 import { Leva, useControls } from 'leva';
-import useDeviceType from './hooks/useDeviceType';
+import useDeviceType from '../hooks/useDeviceType';
 
 export default function StarfieldBackground({ activeIndex = -1 }) {
     const canvasRef = useRef(null);
@@ -76,6 +76,8 @@ export default function StarfieldBackground({ activeIndex = -1 }) {
             step: 1,
             label: 'Max Shrink Y',
         },
+        repulseRadius: { value: 0.5, min: 0.1, max: 10.0, step: 0.1, label: 'Magnet Radius' },
+        repulseStrength: { value: 2.0, min: 0.1, max: 20.0, step: 0.1, label: 'Magnet Strength' },
     });
 
     function createCircleTexture() {
@@ -309,6 +311,11 @@ export default function StarfieldBackground({ activeIndex = -1 }) {
 
         // 💡 Use sizeScale from controls
 
+        const raycaster = new THREE.Raycaster();
+        // Create a plane at Z=0 (where your logo roughly sits)
+        const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+        const planeIntersectPoint = new THREE.Vector3();
+
         const material = new THREE.ShaderMaterial({
             uniforms: {
                 uTexture: { value: starTexture },
@@ -328,6 +335,9 @@ export default function StarfieldBackground({ activeIndex = -1 }) {
                 uMaxOpacity: { value: controls.maxOpacity },
                 uOpacityFalloff: { value: controls.opacityFalloff },
                 uOpacityOffset: { value: controls.opacityOffset },
+                uMousePos: { value: new THREE.Vector3(0, 0, 0) },
+                uRepulseRadius: { value: controls.repulseRadius },
+                uRepulseStrength: { value: controls.repulseStrength },
                 vertexColors: true,
             },
             vertexShader: `
@@ -347,6 +357,11 @@ varying float vShapeIndex;
         uniform float uMorph;
         uniform vec3 uMeshPosition;
 
+        // 👇 NEW UNIFORMS
+    uniform vec3 uMousePos;
+    uniform float uRepulseRadius;
+    uniform float uRepulseStrength;
+
         void main() {
           vec3 pos = position;
           vColor = color;
@@ -364,6 +379,30 @@ varying float vShapeIndex;
           // Morphing Logic
           vec3 localTarget = aTarget - uMeshPosition;
           pos = mix(pos, localTarget, uMorph);
+
+      // -----------------------------------------------------------
+                  // 🧲 INDIVIDUAL PARTICLE MAGNETISM
+                  // -----------------------------------------------------------
+                  // Only apply when the logo is fully formed (> 0.9)
+                  if (uMorph > 0.90) {
+                      // 1. Calculate distance from this SPECIFIC particle to the mouse
+                      // We use 'aTarget' because that is the particle's fixed world position
+                      float dist = distance(aTarget.xy, uMousePos.xy);
+
+                      // 2. If the mouse is close to this particle...
+                      if (dist < uRepulseRadius) {
+                          // 3. Calculate direction: "Run away from mouse!"
+                          vec3 repulseDir = normalize(aTarget - uMousePos);
+
+                          // 4. Calculate force: Stronger at center, weaker at edges
+                          float force = (uRepulseRadius - dist) / uRepulseRadius;
+                          force = pow(force, 2.0) * uRepulseStrength; // Smooth curve
+
+                          // 5. Move ONLY this particle
+                          pos += repulseDir * force;
+                      }
+                  }
+                  // -----------------------------------------------------------
 
           vec4 mvPos = modelViewMatrix * vec4(pos, 1.0);
           float depth = -mvPos.z;
@@ -466,7 +505,7 @@ varying float vShapeIndex;
             scrollSpeed += velocity * 0.05;
         });
 
-        // 🖱 Mouse parallax
+        // ... existing mouse listener ...
         const mouse = { x: 0, y: 0 };
         document.addEventListener('mousemove', e => {
             mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
@@ -508,6 +547,14 @@ varying float vShapeIndex;
                 if (stars.position.x > half) stars.position.x -= total;
                 if (stars.position.x < -half) stars.position.x += total;
             }
+
+            raycaster.setFromCamera(mouse, camera);
+            raycaster.ray.intersectPlane(plane, planeIntersectPoint);
+
+            // Send this 3D point to the shader
+            material.uniforms.uMousePos.value.copy(planeIntersectPoint);
+
+            // Update the uniform
 
             // Decay scroll speed - returns to 0, leaving only baseSpeed
             targetSpeed *= 0.85;

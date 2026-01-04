@@ -2,11 +2,11 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Suspense, useEffect, useRef, useState } from 'react';
+import DotGrid from '../../components/allServicesComponents/DotGrid';
 import OtherServices from '../../components/allServicesComponents/OtherServices';
 import useDeviceType from '../../components/hooks/useDeviceType';
 import Card from '../../components/servicePage/Card';
 import HeroSerivce from '../../components/servicePage/HeroSerivce';
-import DotGrid from '../../components/socialMedia/DotGrid';
 
 if (typeof window !== 'undefined') {
     gsap.registerPlugin(ScrollTrigger);
@@ -251,7 +251,7 @@ const Service = () => {
             <div ref={rootRef} className="relative w-full bg-[#0f0f0f] overflow-hidden ">
                 <div
                     ref={dotGridContainerRef}
-                    className="relative h-[100vh] xl:h-screen w-full bg-[#0f0f0f] overflow-hidden"
+                    className="relative h-[100vh]  w-full bg-[#0f0f0f] overflow-hidden"
                 >
                     <div className="absolute inset-0 h-screen w-full z-0">
                         <DotGrid

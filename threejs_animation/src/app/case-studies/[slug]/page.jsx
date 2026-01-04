@@ -5,8 +5,8 @@ import { useParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import CaseStudyCards from '../../../components/allServicesComponents/CaseStudyCards';
+import DotGrid from '../../../components/allServicesComponents/DotGrid';
 import useDeviceType from '../../../components/hooks/useDeviceType';
-import DotGrid from '../../../components/socialMedia/DotGrid';
 
 // const caseStudies = [
 //     {

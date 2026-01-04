@@ -8,10 +8,10 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
+import FlowingParticles from '../../components/homepage/ParticleBackground';
+import StarfieldBackground from '../../components/homepage/StarfieldBackground';
+import StatsSection from '../../components/homepage/Stats';
 import useDeviceType from '../../components/hooks/useDeviceType';
-import FlowingParticles from '../../components/ParticleBackground';
-import StarfieldBackground from '../../components/StarfieldBackground';
-import StatsSection from '../../components/Stats';
 // ✅ It's good practice to register the plugin once
 gsap.registerPlugin(ScrollTrigger);
 
@@ -753,13 +753,13 @@ const Animation = () => {
                 '<'
             );
 
-            tl.eventCallback('onReverseUpdate', () => {
-                if (window.particleMorphUniforms) {
-                    window.particleMorphUniforms.forEach(u => {
-                        u.uMorph.value = morphState.value;
-                    });
-                }
-            }); // runs while it fades in
+            // tl.eventCallback('onReverseUpdate', () => {
+            //     if (window.particleMorphUniforms) {
+            //         window.particleMorphUniforms.forEach(u => {
+            //             u.uMorph.value = morphState.value;
+            //         });
+            //     }
+            // }); // runs while it fades in
 
             // --- STEP 7: Logo + service text synchronized animation ---
 
@@ -883,37 +883,37 @@ const Animation = () => {
             // ----------------------------------------------------
             ScrollTrigger.refresh(); // keep this here
 
-            const applyMorphLater = setInterval(() => {
-                if (window.particleMorphUniforms) {
-                    window.particleMorphUniforms.forEach(u => {
-                        u.uMorph.value = morphState.value;
-                    });
-                    clearInterval(applyMorphLater);
-                }
-            }, 50);
+            // const applyMorphLater = setInterval(() => {
+            //     if (window.particleMorphUniforms) {
+            //         window.particleMorphUniforms.forEach(u => {
+            //             u.uMorph.value = morphState.value;
+            //         });
+            //         clearInterval(applyMorphLater);
+            //     }
+            // }, 50);
 
             // === INSERT SYNC CODE HERE ===
-            requestAnimationFrame(() => {
-                const morphTween = tl
-                    .getChildren(false, true, false)
-                    .find(t => t.vars?.onUpdate && t.vars.onUpdate.toString().includes('uMorph'));
+            // requestAnimationFrame(() => {
+            //     const morphTween = tl
+            //         .getChildren(false, true, false)
+            //         .find(t => t.vars?.onUpdate && t.vars.onUpdate.toString().includes('uMorph'));
 
-                if (!morphTween) return;
+            //     if (!morphTween) return;
 
-                const t = tl.time();
-                const start = morphTween.startTime();
-                const end = start + morphTween.duration();
-                const localProgress = (t - start) / (end - start);
-                const progress = Math.min(1, Math.max(0, localProgress));
+            //     const t = tl.time();
+            //     const start = morphTween.startTime();
+            //     const end = start + morphTween.duration();
+            //     const localProgress = (t - start) / (end - start);
+            //     const progress = Math.min(1, Math.max(0, localProgress));
 
-                morphState.value = progress;
+            //     morphState.value = progress;
 
-                if (window.particleMorphUniforms) {
-                    window.particleMorphUniforms.forEach(u => {
-                        u.uMorph.value = morphState.value;
-                    });
-                }
-            });
+            //     if (window.particleMorphUniforms) {
+            //         window.particleMorphUniforms.forEach(u => {
+            //             u.uMorph.value = morphState.value;
+            //         });
+            //     }
+            // });
             // ----------------------------------------------------
         }
 

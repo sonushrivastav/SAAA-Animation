@@ -82,7 +82,6 @@ export default function Navbar(props) {
 
     const smallMenu = [
         { label: 'About us', href: '/about' },
-        { label: 'Our Work', href: '/our-work' },
         { label: 'Services', href: '/service' },
         { label: 'Contact', href: '/contact' },
         { label: 'Case Studies', href: '/case-studies' },
