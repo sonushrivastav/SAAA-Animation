@@ -1,42 +1,81 @@
 @import "tailwindcss";
 
-/* @font-face {
-  font-family: "TWKLausanne";
-  src: url("/fonts/TWKLausanne-200.otf") format("opentype");
-  font-weight: 200;
-  font-style: normal;
-  font-display: swap;
-} */
-
-/* h1 {
-    -webkit-font-smoothing: antialiased;
-    transform-style: preserve-3d;
-} */
-
+/* Theme tokens */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* --background: #0a0a0a; */
-    /* --foreground: #ededed; */
-  }
+/* Base styles */
+@layer base {
+    html,
+    body {
+        font-family: var(--font-grift);
+        font-weight: 400;
+        overflow-x: hidden;
+        scroll-behavior: smooth;
+    }
 }
 
-@keyframes float {
-  0%,
-  100% {
+/* Hide scrollbar utility */
+@utility no-scrollbar {
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+/* -----END------- */
+
+/* Our Team Members Starts */
+.team-card .hover-img {
+    opacity: 0;
+    clip-path: inset(50% 50% 50% 50%); /* hidden square */
+    transition: clip-path 0.6s ease, opacity 0.5s ease;
+}
+.team-card:hover .hover-img {
+    opacity: 1;
+    clip-path: inset(0% 0% 0% 0%); /* reveal full */
+}
+.team-card .info {
+    opacity: 0;
+    transform: translateY(100%);
+    transition: 0.6s cubic-bezier(0.77, 0, 0.175, 1);
+}
+.team-card:hover .info {
+    opacity: 1;
     transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
 }
+/* Our Team Members Ends */
 
-.animate-float {
-  animation: float 6s ease-in-out infinite;
+/* Navbar Hover Effect start */
+.hover-underline-animation {
+    display: inline-block;
+    position: relative;
 }
+.hover-underline-animation::after {
+    content: '';
+    position: absolute;
+    height: 2px;
+    left: 0;
+    bottom: 0;
+    top: 100%;
+    width: 100%;
+    transform: scaleX(0);
+    background: #fafafa;
+    transform-origin: 100% 50%;
+    transition: transform 0.25s ease-in-out;
+}
+.hover-underline-animation:hover::after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
+}
+/* Navbar Hover Effect End */
+
+/* Sticky sidebar for case study details */
+.sidebar-fixed {
+    /* position: fixed;
+    top: 0; */
+    padding-right: 0;
+    background-color: #0f0f0f;
+}
+/* -----END------- */

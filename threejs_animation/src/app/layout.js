@@ -1,16 +1,18 @@
-import { Geist, Geist_Mono } from "next/font/google";
-import Footer from "../components/Footer";
-import Navbar from "../components/Navbar";
-import "./globals.css";
+import localFont from 'next/font/local';
+import Footer from '../components/footer/Footer';
+import Navbar from '../components/navbar/Navbar';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+import './globals.css';
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const grift = localFont({
+    src: [
+        {
+            path: '../assets/fonts/grift/Grift-Regular.woff2',
+            weight: '400',
+        },
+    ],
+    display: 'swap',
+    variable: '--font-grift',
 });
 
 export const metadata = {
@@ -19,13 +21,14 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  return (
-    <html lang="en">
-      <body className="">
-        <Navbar />
-        {children}
-        <Footer />
-      </body>
-    </html>
-  );
+    return (
+        <html lang="en" className="scroll-smooth">
+            <body className={grift.variable}>
+                <Navbar />
+                {/* <SmoothScroller /> */}
+                {children}
+                <Footer />
+            </body>
+        </html>
+    );
 }

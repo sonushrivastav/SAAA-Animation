@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
+import StarfieldBackground from '../components/homepage/StarfieldBackground';
 import AlephScrollScene from '../components/oldcode/AlephScrollScene';
-import StarfieldBackground from '../components/StarfieldBackground';
 
 export default function HeroSection() {
     const [spiralTrigger, setSpiralTrigger] = useState(false);
