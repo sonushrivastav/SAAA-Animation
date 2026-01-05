@@ -17,9 +17,9 @@ const StatCard = ({
 
     return (
         <div
-            className={`relative p-4 md:p-6 lg:p-10 ${roundedClass} bg-transparent transition-colors duration-300 w-full h-[250px] md:h-[300px] lg:h-[400px] ${
+            className={`relative p-4 md:p-6 lg:p-10 ${roundedClass} bg-[#55555520] md:bg-transparent transition-colors duration-300 w-full h-[250px] md:h-[300px] lg:h-[400px] ${
                 hasContent
-                    ? `border ${isHovered ? 'border-[#fafafa]' : 'border-[#555555]'}`
+                    ? `border-2 md:border ${isHovered ? 'border-[#fafafa]' : 'border-[#555555]'}`
                     : isHovered
                     ? 'border border-[#555555]'
                     : 'border border-[#555555]'
@@ -53,7 +53,7 @@ const StatCard = ({
                         {stat}
                     </h2>
                     <p
-                        className={`text-sm md:text-base xl:text-lg mt-2 transition-colors duration-300 ${textHighlightClass}`}
+                        className={`text-base md:text-lg xl:text-xl mt-2 transition-colors duration-300 ${textHighlightClass}`}
                     >
                         {label}
                     </p>

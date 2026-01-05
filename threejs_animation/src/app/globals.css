@@ -13,7 +13,6 @@
         font-family: var(--font-grift);
         font-weight: 400;
         overflow-x: hidden;
-        scroll-behavior: smooth;
     }
 }
 
@@ -79,3 +78,7 @@
     background-color: #0f0f0f;
 }
 /* -----END------- */
+
+.dotgrid-mask {
+    mask-image: linear-gradient(to bottom, #0f0f0f 70%, transparent 100%);
+}
