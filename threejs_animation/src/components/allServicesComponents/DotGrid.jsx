@@ -54,6 +54,8 @@ const DotGrid = ({
         lastX: 0,
         lastY: 0,
     });
+    const isVisibleRef = useRef(false);
+    const isScrollingRef = useRef(false);
 
     const baseRgb = useMemo(() => hexToRgb(baseColor), [baseColor]);
     const activeRgb = useMemo(() => hexToRgb(activeColor), [activeColor]);
@@ -104,6 +106,31 @@ const DotGrid = ({
         }
         dotsRef.current = dots;
     }, [dotSize, gap]);
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                isVisibleRef.current = entry.isIntersecting;
+            },
+            { threshold: 0.15 }
+        );
+
+        if (wrapperRef.current) observer.observe(wrapperRef.current);
+
+        return () => observer.disconnect();
+    }, []);
+    useEffect(() => {
+        let t;
+        const onScroll = () => {
+            isScrollingRef.current = true;
+            clearTimeout(t);
+            t = setTimeout(() => {
+                isScrollingRef.current = false;
+            }, 120);
+        };
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
 
     useEffect(() => {
         if (!circlePath) return;
@@ -112,6 +139,10 @@ const DotGrid = ({
         const proxSq = proximity * proximity;
 
         const draw = () => {
+            if (!isVisibleRef.current) {
+                rafId = requestAnimationFrame(draw);
+                return;
+            }
             const canvas = canvasRef.current;
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
@@ -168,6 +199,8 @@ const DotGrid = ({
 
     useEffect(() => {
         const onMove = e => {
+            if (isScrollingRef.current) return;
+
             if (!canvasRef.current) return;
             const now = performance.now();
             const pr = pointerRef.current;

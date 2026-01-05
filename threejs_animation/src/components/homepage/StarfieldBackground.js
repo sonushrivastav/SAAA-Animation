@@ -1,91 +1,103 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from 'react';
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
-import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler';
+import { useEffect, useMemo, useRef } from "react";
+import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
+import { MeshSurfaceSampler } from "three/examples/jsm/math/MeshSurfaceSampler";
 
 // 💡 Add the import for useControls from Leva
-import { Leva, useControls } from 'leva';
-import useDeviceType from '../hooks/useDeviceType';
+import { Leva, useControls } from "leva";
+import useDeviceType from "../hooks/useDeviceType";
 
 export default function StarfieldBackground({ activeIndex = -1 }) {
-    const canvasRef = useRef(null);
-    const { isMobile, isTablet, isDesktop } = useDeviceType();
+  const canvasRef = useRef(null);
+  const { isMobile, isTablet, isDesktop } = useDeviceType();
 
-    // 🌟 LEVA Controls Integration
-    const controls = useControls({
-        // Starfield Controls
-        baseSpeed: {
-            value: 0.5, // Used in the animate loop
-            min: 0.01,
-            max: 5.0,
-            step: 0.01,
-            label: 'Base Speed',
-        },
-        spacing: { value: 87, min: 10, max: 200, step: 1, label: 'Grid Spacing' },
-        count: { value: 15, min: 1, max: 50, step: 1, label: 'Grid Count' },
-        sizeScale: {
-            value: 350.0, // Used in uSizeScale uniform
-            min: 100,
-            max: 2000,
-            step: 10,
-            label: 'Size Scale',
-        },
-        minOpacity: {
-            value: 0.85,
-            min: 0.0,
-            max: 1.0,
-            step: 0.01,
-            label: 'Min Opacity',
-        },
-        maxOpacity: {
-            value: 1.0,
-            min: 0.0,
-            max: 1.0,
-            step: 0.01,
-            label: 'Max Opacity',
-        },
-        opacityFalloff: {
-            value: 500.0,
-            min: 10,
-            max: 2000,
-            step: 10,
-            label: 'Opacity Falloff',
-        },
-        opacityOffset: {
-            value: 140,
-            min: -1000.0,
-            max: 1000.0,
-            step: 10,
-            label: 'Opacity Offset',
-        },
-        // Animation/Distortion Controls
-        maxStretch: {
-            value: 30.0, // Used in scroll listener
-            min: 1.0,
-            max: 100,
-            step: 1,
-            label: 'Max Stretch X',
-        },
-        maxShrink: {
-            value: 15.0, // Used in scroll listener
-            min: 1.0,
-            max: 50,
-            step: 1,
-            label: 'Max Shrink Y',
-        },
-        repulseRadius: { value: 0.5, min: 0.1, max: 10.0, step: 0.1, label: 'Magnet Radius' },
-        repulseStrength: { value: 2.0, min: 0.1, max: 20.0, step: 0.1, label: 'Magnet Strength' },
-    });
+  // 🌟 LEVA Controls Integration
+  const controls = useControls({
+    // Starfield Controls
+    baseSpeed: {
+      value: 0.5, // Used in the animate loop
+      min: 0.01,
+      max: 5.0,
+      step: 0.01,
+      label: "Base Speed",
+    },
+    spacing: { value: 87, min: 10, max: 200, step: 1, label: "Grid Spacing" },
+    count: { value: 15, min: 1, max: 50, step: 1, label: "Grid Count" },
+    sizeScale: {
+      value: 350.0, // Used in uSizeScale uniform
+      min: 100,
+      max: 2000,
+      step: 10,
+      label: "Size Scale",
+    },
+    minOpacity: {
+      value: 0.85,
+      min: 0.0,
+      max: 1.0,
+      step: 0.01,
+      label: "Min Opacity",
+    },
+    maxOpacity: {
+      value: 1.0,
+      min: 0.0,
+      max: 1.0,
+      step: 0.01,
+      label: "Max Opacity",
+    },
+    opacityFalloff: {
+      value: 500.0,
+      min: 10,
+      max: 2000,
+      step: 10,
+      label: "Opacity Falloff",
+    },
+    opacityOffset: {
+      value: 140,
+      min: -1000.0,
+      max: 1000.0,
+      step: 10,
+      label: "Opacity Offset",
+    },
+    // Animation/Distortion Controls
+    maxStretch: {
+      value: 30.0, // Used in scroll listener
+      min: 1.0,
+      max: 100,
+      step: 1,
+      label: "Max Stretch X",
+    },
+    maxShrink: {
+      value: 15.0, // Used in scroll listener
+      min: 1.0,
+      max: 50,
+      step: 1,
+      label: "Max Shrink Y",
+    },
+    repulseRadius: {
+      value: 0.5,
+      min: 0.1,
+      max: 10.0,
+      step: 0.1,
+      label: "Magnet Radius",
+    },
+    repulseStrength: {
+      value: 2.0,
+      min: 0.1,
+      max: 20.0,
+      step: 0.1,
+      label: "Magnet Strength",
+    },
+  });
 
-    function createCircleTexture() {
-        const size = 128;
-        const canvas = document.createElement('canvas');
-        canvas.width = size;
-        canvas.height = size;
-        const ctx = canvas.getContext('2d');
+  function createCircleTexture() {
+    const size = 128;
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
 
     const cx = size / 2;
     const cy = size / 2;
@@ -118,7 +130,9 @@ export default function StarfieldBackground({ activeIndex = -1 }) {
 
   const starData = useMemo(() => {
     const starPositions = [];
-    const { spacing, count } = controls;
+    const count = isMobile ? 18 : 15;
+    const spacing = isMobile ? 50 : 87;
+
     const totalDepth = count * 10;
 
     for (let x = -count; x <= count; x++) {
@@ -127,28 +141,22 @@ export default function StarfieldBackground({ activeIndex = -1 }) {
         for (let zLayer = -count; zLayer <= count; zLayer++) {
           const jitter = (Math.random() - 0.5) * 30;
           const z = zLayer * 40 + jitter;
-          starPositions.push(x * spacing, y * spacing, z); // Using spacing control
+          starPositions.push(x * spacing, y * spacing, z);
         }
       }
     }
 
-    const starData = useMemo(() => {
-        const starPositions = [];
-        const count = isMobile ? 18 : 15;
-        const spacing = isMobile ? 50 : 87;
+    const total = starPositions.length / 3;
+    const sizes = new Float32Array(total);
 
-        const totalDepth = count * 10;
-
-        for (let x = -count; x <= count; x++) {
-            for (let y = -count; y <= count; y++) {
-                if (y === 0 || x === 0) continue;
-                for (let zLayer = -count; zLayer <= count; zLayer++) {
-                    const jitter = (Math.random() - 0.5) * 30;
-                    const z = zLayer * 40 + jitter;
-                    starPositions.push(x * spacing, y * spacing, z);
-                }
-            }
-        }
+    let zMin = Infinity,
+      zMax = -Infinity;
+    for (let i = 0; i < total; i++) {
+      const z = starPositions[i * 3 + 2];
+      if (z < zMin) zMin = z;
+      if (z > zMax) zMax = z;
+    }
+    const zRange = zMax - zMin || 1.0;
 
     const minBase = 1.0;
     const maxBase = 14.0;
@@ -162,31 +170,38 @@ export default function StarfieldBackground({ activeIndex = -1 }) {
     }
 
     return { starPositions, sizes, totalDepth, total };
-  }, [controls.spacing, controls.count]);
+  }, [controls.spacing, controls.count, isMobile]);
 
   useEffect(() => {
     // We use the destructured values from the controls
     const { baseSpeed, spacing, count, sizeScale, maxStretch, maxShrink } =
       controls;
 
-        return { starPositions, sizes, totalDepth, total };
-    }, [controls.spacing, controls.count, isMobile]);
+    const { starPositions, sizes, totalDepth, total } = starData;
+    // Store globally so other component can use
+    window.globalStarPositions = starPositions;
 
     const loader = new THREE.TextureLoader();
-    const star = loader.load("/images/sp2.png");
+    // const star = loader.load('/images/testImages/sp2.png'); // Unused
     const scene = new THREE.Scene();
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
 
-        const { starPositions, sizes, totalDepth, total } = starData;
-        // Store globally so other component can use
-        window.globalStarPositions = starPositions;
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(5, 10, 5);
+    scene.add(directionalLight);
 
-        const loader = new THREE.TextureLoader();
-        // const star = loader.load('/images/testImages/sp2.png'); // Unused
-        const scene = new THREE.Scene();
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-        scene.add(ambientLight);
+    new RGBELoader().load("/images/studio_small_03_1k.hdr", (hdrMap) => {
+      hdrMap.mapping = THREE.EquirectangularReflectionMapping;
+      scene.environment = hdrMap;
+    });
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    );
+    camera.position.z = 5;
 
     const renderer = new THREE.WebGLRenderer({
       canvas: canvasRef.current,
@@ -196,160 +211,166 @@ export default function StarfieldBackground({ activeIndex = -1 }) {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
 
-    // 🌟 Add postprocessing composer
-    const composer = new EffectComposer(renderer);
-    composer.addPass(new RenderPass(scene, camera));
+    // 🌈 Set single color for all particles
+    const colors = new Float32Array(total * 3);
+    const color = new THREE.Color();
+    color.set("#ab76e2"); // 👈 change this hex value to your desired color
 
-    const bloomEffect = new BloomEffect({
-      intensity: 1.8, // controls glow brightness
-      luminanceThreshold: 0.02, // lower = more glow
-      luminanceSmoothing: 1.9,
-      blendFunction: BlendFunction.ADD,
+    for (let i = 0; i < total; i++) {
+      colors[i * 3] = color.r;
+      colors[i * 3 + 1] = color.g;
+      colors[i * 3 + 2] = color.b;
+    }
+
+    const starsGeometry = new THREE.BufferGeometry();
+    starsGeometry.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(starPositions, 3)
+    );
+    starsGeometry.setAttribute(
+      "aSize",
+      new THREE.Float32BufferAttribute(sizes, 1)
+    );
+    starsGeometry.setAttribute(
+      "color",
+      new THREE.Float32BufferAttribute(colors, 3)
+    );
+
+    const starTexture = createCircleTexture();
+    const gltfLoader = new GLTFLoader();
+    const meshes = [];
+
+    gltfLoader.load("/models/model.glb", (gltf) => {
+      // 1️⃣ Apply transforms EXACTLY like rendered logo
+      if (isMobile) {
+        gltf.scene.position.set(-1.5, -0, 0);
+        gltf.scene.rotation.set(0, 0, -Math.PI / 2);
+        gltf.scene.scale.set(10, 10, 7);
+      } else if (isTablet) {
+        gltf.scene.position.set(-2, -2.5, 0);
+        gltf.scene.rotation.set(0, 0, -0.25);
+        gltf.scene.scale.set(14, 14, 9);
+      } else {
+        gltf.scene.position.set(-3, -3.3, 0);
+        gltf.scene.rotation.set(0, 0, -0.6);
+        gltf.scene.scale.set(20, 20, 10);
+      }
+      gltf.scene.updateWorldMatrix(true, true);
+
+      const geometries = [];
+
+      // 2️⃣ Collect geometries with world transform baked in
+      gltf.scene.traverse((child) => {
+        if (!child.isMesh) return;
+
+        const geo = child.geometry.clone();
+        geo.applyMatrix4(child.matrixWorld); // 🔥 bake transform ONCE
+        geometries.push(geo);
+        meshes.push(child);
+      });
+      const order = {
+        Curve001: 2,
+        Curve002: 1,
+        Curve_1: 3,
+        Curve003: 4,
+        Curve004: 5,
+        Curve005: 6,
+        Curve006: 7,
+      };
+      meshes.sort((a, b) => {
+        return order[a.name] - order[b.name];
+      });
+
+      if (!geometries.length) return;
+
+      if (meshes.length === 0) return;
+
+      // 💡 CHANGE 2: Sample proportionally from each mesh and TAG them
+      const targetPositions = new Float32Array(total * 3);
+      const shapeIndices = new Float32Array(total); // New array to store ID (0-6)
+
+      const tempPosition = new THREE.Vector3();
+      let currentOffset = 0;
+
+      // We distribute the total particles across the 7 meshes
+      // (Simple division, or you can calculate surface area for perfect evenness)
+      const particlesPerMesh = Math.floor(total / meshes.length);
+
+      meshes.forEach((mesh, meshIndex) => {
+        // Apply world matrix to geometry for sampling
+        const samplerMesh = new THREE.Mesh(
+          mesh.geometry.clone(),
+          new THREE.MeshBasicMaterial()
+        );
+        samplerMesh.geometry.applyMatrix4(mesh.matrixWorld);
+
+        const sampler = new MeshSurfaceSampler(samplerMesh).build();
+
+        // Determine how many dots this specific mesh gets
+        // The last mesh gets the remainder to ensure we fill the array
+        const count =
+          meshIndex === meshes.length - 1
+            ? total - currentOffset
+            : particlesPerMesh;
+
+        for (let i = 0; i < count; i++) {
+          sampler.sample(tempPosition);
+
+          const index = currentOffset + i;
+          targetPositions[index * 3 + 0] = tempPosition.x;
+          targetPositions[index * 3 + 1] = tempPosition.y;
+          targetPositions[index * 3 + 2] = tempPosition.z;
+
+          // TAG THIS PARTICLE with the mesh index!
+          shapeIndices[index] = meshIndex;
+        }
+        currentOffset += count;
+      });
+
+      starsGeometry.setAttribute(
+        "aTarget",
+        new THREE.BufferAttribute(targetPositions, 3)
+      );
+
+      // Add the new attribute to geometry
+      starsGeometry.setAttribute(
+        "aShapeIndex",
+        new THREE.BufferAttribute(shapeIndices, 1)
+      );
     });
 
-        // 🌈 Set single color for all particles
-        const colors = new Float32Array(total * 3);
-        const color = new THREE.Color();
-        color.set('#ab76e2'); // 👈 change this hex value to your desired color
+    // 💡 Use sizeScale from controls
 
-        for (let i = 0; i < total; i++) {
-            colors[i * 3] = color.r;
-            colors[i * 3 + 1] = color.g;
-            colors[i * 3 + 2] = color.b;
-        }
+    const raycaster = new THREE.Raycaster();
+    // Create a plane at Z=0 (where your logo roughly sits)
+    const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+    const planeIntersectPoint = new THREE.Vector3();
 
-        const starsGeometry = new THREE.BufferGeometry();
-        starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
-        starsGeometry.setAttribute('aSize', new THREE.Float32BufferAttribute(sizes, 1));
-        starsGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-
-        const starTexture = createCircleTexture();
-        const gltfLoader = new GLTFLoader();
-        const meshes = [];
-
-        gltfLoader.load('/models/model.glb', gltf => {
-            // 1️⃣ Apply transforms EXACTLY like rendered logo
-            if (isMobile) {
-                gltf.scene.position.set(-1.5, -0, 0);
-                gltf.scene.rotation.set(0, 0, -Math.PI / 2);
-                gltf.scene.scale.set(10, 10, 7);
-            } else if (isTablet) {
-                gltf.scene.position.set(-2, -2.5, 0);
-                gltf.scene.rotation.set(0, 0, -0.25);
-                gltf.scene.scale.set(14, 14, 9);
-            } else {
-                gltf.scene.position.set(-3, -3.3, 0);
-                gltf.scene.rotation.set(0, 0, -0.6);
-                gltf.scene.scale.set(20, 20, 10);
-            }
-            gltf.scene.updateWorldMatrix(true, true);
-
-            const geometries = [];
-
-            // 2️⃣ Collect geometries with world transform baked in
-            gltf.scene.traverse(child => {
-                if (!child.isMesh) return;
-
-                const geo = child.geometry.clone();
-                geo.applyMatrix4(child.matrixWorld); // 🔥 bake transform ONCE
-                geometries.push(geo);
-                meshes.push(child);
-            });
-            const order = {
-                Curve001: 2,
-                Curve002: 1,
-                Curve_1: 3,
-                Curve003: 4,
-                Curve004: 5,
-                Curve005: 6,
-                Curve006: 7,
-            };
-            meshes.sort((a, b) => {
-                return order[a.name] - order[b.name];
-            });
-
-            if (!geometries.length) return;
-
-            if (meshes.length === 0) return;
-
-            // 💡 CHANGE 2: Sample proportionally from each mesh and TAG them
-            const targetPositions = new Float32Array(total * 3);
-            const shapeIndices = new Float32Array(total); // New array to store ID (0-6)
-
-            const tempPosition = new THREE.Vector3();
-            let currentOffset = 0;
-
-            // We distribute the total particles across the 7 meshes
-            // (Simple division, or you can calculate surface area for perfect evenness)
-            const particlesPerMesh = Math.floor(total / meshes.length);
-
-            meshes.forEach((mesh, meshIndex) => {
-                // Apply world matrix to geometry for sampling
-                const samplerMesh = new THREE.Mesh(
-                    mesh.geometry.clone(),
-                    new THREE.MeshBasicMaterial()
-                );
-                samplerMesh.geometry.applyMatrix4(mesh.matrixWorld);
-
-                const sampler = new MeshSurfaceSampler(samplerMesh).build();
-
-                // Determine how many dots this specific mesh gets
-                // The last mesh gets the remainder to ensure we fill the array
-                const count =
-                    meshIndex === meshes.length - 1 ? total - currentOffset : particlesPerMesh;
-
-                for (let i = 0; i < count; i++) {
-                    sampler.sample(tempPosition);
-
-                    const index = currentOffset + i;
-                    targetPositions[index * 3 + 0] = tempPosition.x;
-                    targetPositions[index * 3 + 1] = tempPosition.y;
-                    targetPositions[index * 3 + 2] = tempPosition.z;
-
-                    // TAG THIS PARTICLE with the mesh index!
-                    shapeIndices[index] = meshIndex;
-                }
-                currentOffset += count;
-            });
-
-            starsGeometry.setAttribute('aTarget', new THREE.BufferAttribute(targetPositions, 3));
-
-            // Add the new attribute to geometry
-            starsGeometry.setAttribute('aShapeIndex', new THREE.BufferAttribute(shapeIndices, 1));
-        });
-
-        // 💡 Use sizeScale from controls
-
-        const raycaster = new THREE.Raycaster();
-        // Create a plane at Z=0 (where your logo roughly sits)
-        const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
-        const planeIntersectPoint = new THREE.Vector3();
-
-        const material = new THREE.ShaderMaterial({
-            uniforms: {
-                uTexture: { value: starTexture },
-                uSizeScale: { value: controls.sizeScale },
-                uStretchX: { value: 1.0 },
-                uShrinkY: { value: 1.0 },
-                uTime: { value: 0 },
-                uSpiralProgress: { value: 0 },
-                uMergeProgress: { value: 0 },
-                uDirection: { value: new THREE.Vector3(0, 0, 1) },
-                uSpeed: { value: controls.baseSpeed },
-                uMorph: { value: 0 },
-                uMeshPosition: { value: new THREE.Vector3(0, 0, 0) },
-                uActiveIndex: { value: { activeIndex } }, // Passed from prop
-                uHighlightColor: { value: new THREE.Color('#844DE9') },
-                uMinOpacity: { value: controls.minOpacity },
-                uMaxOpacity: { value: controls.maxOpacity },
-                uOpacityFalloff: { value: controls.opacityFalloff },
-                uOpacityOffset: { value: controls.opacityOffset },
-                uMousePos: { value: new THREE.Vector3(0, 0, 0) },
-                uRepulseRadius: { value: controls.repulseRadius },
-                uRepulseStrength: { value: controls.repulseStrength },
-                vertexColors: true,
-            },
-            vertexShader: `
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        uTexture: { value: starTexture },
+        uSizeScale: { value: controls.sizeScale },
+        uStretchX: { value: 1.0 },
+        uShrinkY: { value: 1.0 },
+        uTime: { value: 0 },
+        uSpiralProgress: { value: 0 },
+        uMergeProgress: { value: 0 },
+        uDirection: { value: new THREE.Vector3(0, 0, 1) },
+        uSpeed: { value: controls.baseSpeed },
+        uMorph: { value: 0 },
+        uMeshPosition: { value: new THREE.Vector3(0, 0, 0) },
+        uActiveIndex: { value: { activeIndex } }, // Passed from prop
+        uHighlightColor: { value: new THREE.Color("#844DE9") },
+        uMinOpacity: { value: controls.minOpacity },
+        uMaxOpacity: { value: controls.maxOpacity },
+        uOpacityFalloff: { value: controls.opacityFalloff },
+        uOpacityOffset: { value: controls.opacityOffset },
+        uMousePos: { value: new THREE.Vector3(0, 0, 0) },
+        uRepulseRadius: { value: controls.repulseRadius },
+        uRepulseStrength: { value: controls.repulseStrength },
+        vertexColors: true,
+      },
+      vertexShader: `
         attribute float aSize;
         attribute float aSpiral;
         attribute vec3 color;
@@ -491,56 +512,56 @@ varying float vShapeIndex;
           gl_FragColor = tex * vec4(finalColor, finalOpacity);
         }
       `,
-            transparent: true,
-            depthWrite: false,
-        });
+      transparent: true,
+      depthWrite: false,
+    });
 
-        window.starfieldUniforms = material.uniforms;
-        window.starfieldTotalDepth = totalDepth;
-        window.starfieldMorphUniform = material.uniforms.uMorph;
+    window.starfieldUniforms = material.uniforms;
+    window.starfieldTotalDepth = totalDepth;
+    window.starfieldMorphUniform = material.uniforms.uMorph;
 
-        const stars = new THREE.Points(starsGeometry, material);
-        scene.add(stars);
+    const stars = new THREE.Points(starsGeometry, material);
+    scene.add(stars);
 
-        let lastScroll = window.scrollY;
-        let scrollSpeed = 0;
-        let velocity = 0;
-        let targetSpeed = 0;
+    let lastScroll = window.scrollY;
+    let scrollSpeed = 0;
+    let velocity = 0;
+    let targetSpeed = 0;
 
-        window.addEventListener('scroll', () => {
-            const newScroll = window.scrollY;
-            velocity = newScroll - lastScroll;
-            lastScroll = newScroll;
-            scrollSpeed += velocity * 0.05;
-        });
+    window.addEventListener("scroll", () => {
+      const newScroll = window.scrollY;
+      velocity = newScroll - lastScroll;
+      lastScroll = newScroll;
+      scrollSpeed += velocity * 0.05;
+    });
 
-        // ... existing mouse listener ...
-        const mouse = { x: 0, y: 0 };
-        document.addEventListener('mousemove', e => {
-            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-        });
+    // ... existing mouse listener ...
+    const mouse = { x: 0, y: 0 };
+    document.addEventListener("mousemove", (e) => {
+      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    });
 
     const animate = () => {
       material.uniforms.uTime.value = performance.now() / 1000;
 
-            // Smoothly interpolate to target speed for fluid motion
-            scrollSpeed += (targetSpeed - scrollSpeed) * 0.1;
-            const morph = material.uniforms.uMorph.value;
+      // Smoothly interpolate to target speed for fluid motion
+      scrollSpeed += (targetSpeed - scrollSpeed) * 0.1;
+      const morph = material.uniforms.uMorph.value;
 
       // Always move forward with baseSpeed, add scroll speed for reverse effect
       const currentSpeed = baseSpeed + scrollSpeed;
 
-            // 🌌 Move stars along direction vector
-            const dir = material.uniforms.uDirection.value;
+      // 🌌 Move stars along direction vector
+      const dir = material.uniforms.uDirection.value;
 
-            // Only move the container if we are NOT fully morphed
-            if (morph < 0.99) {
-                stars.position.addScaledVector(dir, currentSpeed);
-            }
+      // Only move the container if we are NOT fully morphed
+      if (morph < 0.99) {
+        stars.position.addScaledVector(dir, currentSpeed);
+      }
 
-            // Update the uniform so the shader knows where the container is
-            material.uniforms.uMeshPosition.value.copy(stars.position);
+      // Update the uniform so the shader knows where the container is
+      material.uniforms.uMeshPosition.value.copy(stars.position);
 
       // 🌠 Axis-agnostic wrapping
       const total = window.starfieldTotalDepth || totalDepth;
@@ -563,53 +584,52 @@ varying float vShapeIndex;
         if (stars.position.x < -half) stars.position.x += total;
       }
 
-            raycaster.setFromCamera(mouse, camera);
-            raycaster.ray.intersectPlane(plane, planeIntersectPoint);
+      raycaster.setFromCamera(mouse, camera);
+      raycaster.ray.intersectPlane(plane, planeIntersectPoint);
 
-            // Send this 3D point to the shader
-            material.uniforms.uMousePos.value.copy(planeIntersectPoint);
+      // Send this 3D point to the shader
+      material.uniforms.uMousePos.value.copy(planeIntersectPoint);
 
-            // Update the uniform
+      // Update the uniform
 
-            // Decay scroll speed - returns to 0, leaving only baseSpeed
-            targetSpeed *= 0.85;
+      // Decay scroll speed - returns to 0, leaving only baseSpeed
+      targetSpeed *= 0.85;
 
-            renderer.render(scene, camera);
-        };
-        renderer.setAnimationLoop(animate);
+      renderer.render(scene, camera);
+    };
+    renderer.setAnimationLoop(animate);
 
     // Resize
     const onResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
-      composer.setSize(window.innerWidth, window.innerHeight);
     };
     window.addEventListener("resize", onResize);
 
-        return () => {
-            renderer.setAnimationLoop(null);
-            window.removeEventListener('scroll', () => {});
-            window.removeEventListener('resize', onResize);
-            renderer.dispose();
-            starTexture.dispose();
-            material.dispose();
-            starsGeometry.dispose();
-        };
-    }, [controls, starData, isMobile]); // added isMobile to dependency
-    // 💡 NEW EFFECT: Updates the shader color instantly when activeIndex changes
-    useEffect(() => {
-        // Check if the uniforms have been created and assigned to window
-        if (window.starfieldUniforms) {
-            window.starfieldUniforms.uActiveIndex.value = activeIndex;
-        }
-    }, [activeIndex]);
-    return (
-        <>
-            <Leva hidden />
-            <div className=" pointer-events-none ">
-                <canvas ref={canvasRef} className="w-full h-full pointer-events-none" />
-            </div>
-        </>
-    );
+    return () => {
+      renderer.setAnimationLoop(null);
+      window.removeEventListener("scroll", () => {});
+      window.removeEventListener("resize", onResize);
+      renderer.dispose();
+      starTexture.dispose();
+      material.dispose();
+      starsGeometry.dispose();
+    };
+  }, [controls, starData, isMobile]); // added isMobile to dependency
+  // 💡 NEW EFFECT: Updates the shader color instantly when activeIndex changes
+  useEffect(() => {
+    // Check if the uniforms have been created and assigned to window
+    if (window.starfieldUniforms) {
+      window.starfieldUniforms.uActiveIndex.value = activeIndex;
+    }
+  }, [activeIndex]);
+  return (
+    <>
+      <Leva hidden />
+      <div className=" pointer-events-none ">
+        <canvas ref={canvasRef} className="w-full h-full pointer-events-none" />
+      </div>
+    </>
+  );
 }

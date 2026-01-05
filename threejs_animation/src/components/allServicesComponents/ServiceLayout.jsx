@@ -338,15 +338,7 @@ const ServiceLayout = ({ data, caseStudies }) => {
                             playsInline
                             className="w-full h-full object-cover  "
                         />
-                        {/* <div className="w-full flex items-center justify-center "> */}
-                        {/* <Image
-                                src={'/images/socialMedia/image 3.png'}
-                                alt={'dummy image'}
-                                width={400}
-                                height={400}
-                                className="object-contain w-full mx-0 md:mx-4"
-                            ></Image> */}
-                        {/* </div> */}
+                        
                     </div>
                 </div>
             </section>
