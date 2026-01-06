@@ -25,7 +25,7 @@ export default function SmoothScroller() {
             smoothWheel: true,
             smoothTouch: true,
             touchMultiplier: 0.9,
-            wheelMultiplier: 0.4,
+            wheelMultiplier: 0.6,
         });
 
         let frameId;

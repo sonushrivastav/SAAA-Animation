@@ -119,8 +119,9 @@ export default function ThreeGlass({
 }) {
     return (
         <div className="w-full h-full">
-            {/* 4. Canvas Optimization: powerPreference and dpr */}
             <Canvas
+                shadows={false}
+                frameloop="demand"
                 gl={{
                     alpha: true,
                     antialias: true,

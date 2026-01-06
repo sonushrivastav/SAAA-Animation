@@ -353,12 +353,12 @@ const ServiceLayout = ({ data, caseStudies }) => {
                 </h2>
 
                 {/* Stats Grid Section */}
-                <div className=" relative mt-12 md:mt-14  grid grid-cols-1 md:grid-cols-3 bg-[#0f0f0f] rounded-2xl ">
+                <div className=" relative mt-12 md:mt-14  grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-0 bg-[#0f0f0f] rounded-2xl ">
                     <StatCard
                         stat={data.stats[0].stat}
                         label={data.stats[0].label}
                         hasContent={true}
-                        roundedClass="rounded-t-2xl sm:rounded-tr-none"
+                        roundedClass="rounded-2xl sm:rounded-tr-none sm:rounded-b-none"
                         isMobile={isMobile}
                         isTablet={isTablet}
                     />
@@ -370,7 +370,7 @@ const ServiceLayout = ({ data, caseStudies }) => {
                         hasContent={true}
                         isMobile={isMobile}
                         isTablet={isTablet}
-                        roundedClass=""
+                        roundedClass="rounded-2xl sm:rounded-none"
                     />
 
                     {/* Card 3 */}
@@ -384,7 +384,7 @@ const ServiceLayout = ({ data, caseStudies }) => {
                         stat={data.stats[2].stat}
                         label={data.stats[2].label}
                         hasContent={true}
-                        roundedClass=""
+                        roundedClass="rounded-2xl sm:rounded-none"
                         isMobile={isMobile}
                         isTablet={isTablet}
                     />
@@ -394,7 +394,7 @@ const ServiceLayout = ({ data, caseStudies }) => {
                         stat={data.stats[3].stat}
                         label={data.stats[3].label}
                         hasContent={true}
-                        roundedClass="rounded-b-2xl sm:rounded-bl-none"
+                        roundedClass="rounded-2xl sm:rounded-bl-none sm:rounded-t-none"
                         isMobile={isMobile}
                         isTablet={isTablet}
                     />
@@ -406,21 +406,16 @@ const ServiceLayout = ({ data, caseStudies }) => {
                     <h1 className="text-3xl md:text-4xl xl:text-5xl   font-semibold  lg:leading-[65px] text-center">
                         Platforms we manage
                     </h1>
-                    <div className="grid grid-cols-3  md:grid-cols-6 justify-center gap-6">
+                    <div className="flex flex-wrap justify-center items-center gap-x-2 gap-y-6 max-w-[90%] mx-auto">
                         {data.platformImages.map((src, index) => (
-                            // <div
-                            //     key={index}
-                            //     className="w-12 h-12 md:w-20 md:h-20 flex items-center justify-center "
-                            // >
                             <Image
                                 key={index}
                                 src={src}
                                 alt={`Platform ${index + 1}`}
                                 width={50}
                                 height={20}
-                                className="mx-4"
+                                className="mx-3" // Optional: You might not need this with gap-6
                             />
-                            // </div>
                         ))}
                     </div>
                 </div>

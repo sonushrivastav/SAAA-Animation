@@ -114,7 +114,6 @@ const TeamCard = ({
                 src={bgImage}
                 alt={name}
                 fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="hover-img object-cover absolute inset-0"
             />
             {/* Info */}
@@ -141,9 +140,9 @@ const StatCard = ({
     const textHighlightClass = showEffects ? 'text-[#fafafa]' : 'text-[#9C9C9C]';
     return (
         <div
-            className={`relative p-4 md:p-6 lg:p-10 ${roundedClass} bg-transparent transition-colors duration-300 w-full xl:h-[350px]   ${
+            className={`relative p-4 md:p-6 lg:p-10 ${roundedClass} bg-[#55555520] md:bg-transparent transition-colors duration-300 w-full  xl:h-[350px]   ${
                 hasContent
-                    ? `border ${isHovered ? 'border-[#fafafa]' : 'border-[#555555]'}`
+                    ? `border-2 md:border ${isHovered ? 'border-[#fafafa]' : 'border-[#555555]'}`
                     : isHovered
                     ? 'border border-[#555555]'
                     : 'border border-[#555555]'
@@ -170,9 +169,9 @@ const StatCard = ({
 
             {/* Content */}
             {hasContent && (
-                <div className="relative z-10 flex flex-col lg:gap-10  md:gap-6  gap-4 justify-between h-full">
+                <div className="relative z-10 flex flex-col lg:gap-10  md:gap-6  gap-15 justify-between h-full">
                     <h2
-                        className={`text-2xl md:text-2xl xl:text-4xl font-bold transition-colors duration-300 ${textHighlightClass}`}
+                        className={`text-3xl md:text-2xl xl:text-4xl font-bold transition-colors duration-300 ${textHighlightClass}`}
                     >
                         {title}
                     </h2>
@@ -369,12 +368,12 @@ const About = () => {
                     experiences.
                 </h2>
 
-                <div className=" relative mt-12 md:mt-14  grid grid-cols-1 md:grid-cols-3 bg-[#0f0f0f] rounded-2xl overflow-hidden">
+                <div className=" relative mt-12 md:mt-14  grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-0 bg-[#0f0f0f] rounded-2xl overflow-hidden">
                     <StatCard
                         title="Innovative Customization"
                         description="Our strategy centers on a research-focused approach, delving deep to gather insights. By understanding your business and market trends, we craft a customized strategy for relentless growth and long-term brand success."
                         hasContent={true}
-                        roundedClass="rounded-t-2xl sm:rounded-r-none"
+                        roundedClass="rounded-2xl sm:rounded-r-none sm:rounded-b-none"
                         isMobile={isMobile}
                         isTablet={isTablet}
                     />
@@ -390,7 +389,7 @@ const About = () => {
                         title="Pinnacle Performance"
                         description="Committed to excellence, our team has satisfied over 100 clients with relentless dedication. We strive for perfection, consistently exceeding expectations."
                         hasContent={true}
-                        roundedClass="sm:rounded-tr-2xl"
+                        roundedClass="rounded-2xl sm:rounded-tr-2xl sm:rounded-b-none"
                         isMobile={isMobile}
                         isTablet={isTablet}
                     />
@@ -403,7 +402,7 @@ const About = () => {
                         title="Insightful Strategy"
                         description="Thriving on creativity, our innovative process sets us apart. We craft customized strategies for a personalized experience tailored to your unique requirements."
                         hasContent={true}
-                        roundedClass="rounded-b-2xl sm:rounded-b-none"
+                        roundedClass="rounded-2xl sm:rounded-b-none sm:rounded-t-none"
                         isMobile={isMobile}
                         isTablet={isTablet}
                     />

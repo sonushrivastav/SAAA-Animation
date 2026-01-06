@@ -1,3 +1,4 @@
+'use client';
 import React from 'react';
 import ThreeGlass from '../servicePage/FloatingGlass';
 
@@ -5,7 +6,7 @@ const Card = React.forwardRef(({ title, items, description, modelUrl, isVisible 
     return (
         <div
             ref={ref}
-            className="absolute left-1/2 top-1/2 w-full lg:h-[420px] xl:h-[540px] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-[#555555]/10 backdrop-blur-xl border border-[#9C9C9C] px-8 py-8 md:py-2 xl:py-8 flex md:flex-row flex-col gap-8"
+            className="absolute left-1/2 top-1/2 w-full lg:h-[420px] xl:h-[560px] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-[#555555]/10 backdrop-blur-xl border border-[#9C9C9C] px-8 py-8 md:py-2 xl:py-8 flex md:flex-row flex-col gap-8"
             style={{ willChange: 'transform' }}
         >
             {/* Left content */}
@@ -33,7 +34,8 @@ const Card = React.forwardRef(({ title, items, description, modelUrl, isVisible 
             </div>
 
             {/* Right side – 3D */}
-            <div className="flex md:w-2/5 items-center justify-center">
+
+            <div className="flex h-[200px] md:h-auto md:w-2/5 items-center justify-center overflow-hidden">
                 <ThreeGlass
                     motionVariant={0}
                     speed={1.2}

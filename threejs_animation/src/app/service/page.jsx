@@ -91,17 +91,15 @@ const Service = () => {
     if (!rootRef.current) return;
     cardRefs.current = cardRefs.current.slice(0, cards.length);
 
-    const ctx = gsap.context(() => {
-      const stackOffset = window.innerHeight * 0.03;
-      const topDistance = isMobile
-        ? window.innerHeight * 0.05
-        : -window.innerHeight * 0.05;
-      // The first card starts at its final "resting" position
-      gsap.set(cardRefs.current[0], {
-        y: isMobile ? window.innerHeight * 0.08 : -window.innerHeight * 0.05,
-        scale: 1,
-        zIndex: 1,
-      });
+        const ctx = gsap.context(() => {
+            const stackOffset = window.innerHeight * 0.03;
+            const topDistance = isMobile ? window.innerHeight * 0.07 : -window.innerHeight * 0.05;
+            // The first card starts at its final "resting" position
+            gsap.set(cardRefs.current[0], {
+                y: isMobile ? window.innerHeight * 0.08 : -window.innerHeight * 0.05,
+                scale: 1,
+                zIndex: 1,
+            });
 
       // The rest of the cards start below the viewport
       cardRefs.current.slice(1).forEach((card, idx) => {
@@ -112,27 +110,29 @@ const Service = () => {
         });
       });
 
-      // 2. TIMELINE
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: rootRef.current,
-          start: "top top",
-          end: () => `+=${window.innerHeight * cards.length + 1}`,
-          pin: true,
-          scrub: 1,
+            // 2. TIMELINE
+            const tl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: rootRef.current,
+                    start: 'top top',
+                    end: () => `+=${window.innerHeight * cards.length + 1}`,
+                    pin: true,
+                    scrub: 0.6,
+                    // onUpdate: self => {
+                    //     // Determine active index based on scroll progress
+                    //     const progress = self.progress * (cards.length - 1);
+                    //     setActiveIndex(Math.round(progress));
+                    //     console.log('active ', activeIndex);
+                    // },
+                    pinSpacing: true,
+                    anticipatePin: 1,
+                },
+            });
 
-          pinSpacing: true,
-          anticipatePin: 1,
-        },
-      });
-
-      // Title animation
-      tl.to(titleRef.current, {
-        y: isMobile ? 0 : -20,
-        opacity: 1,
-        ease: "power2.out",
-        duration: 0.5,
-      });
+            // 3. ANIMATE ONLY CARDS 2 AND 3
+            cards.slice(1).forEach((_, i) => {
+                const cardIndex = i + 1;
+                const cardElement = cardRefs.current[cardIndex];
 
       // 3. ANIMATE ONLY CARDS 2 AND 3
       cards.slice(1).forEach((_, i) => {
@@ -247,104 +247,156 @@ const Service = () => {
     <>
       <HeroSerivce />
 
-      {/*
-        COMBINED HERO + DOTGRID WRAPPER
-        This wrapper spans both sections so the gradient can extend across them
-      */}
-      <div
-        ref={rootRef}
-        className="relative w-full bg-[#0f0f0f] overflow-hidden "
-      >
-        <div
-          ref={dotGridContainerRef}
-          className="relative h-[100vh]  w-full bg-[#0f0f0f] overflow-hidden"
-        >
-          <div className="absolute inset-0 h-screen w-full z-0">
-            <DotGrid
-              dotSize={2}
-              gap={8}
-              baseColor="#323234"
-              activeColor="#5227FF"
-              proximity={120}
-              shockRadius={250}
-              shockStrength={5}
-              resistance={750}
-              returnDuration={1.5}
-              className="h-full w-full"
-            />
-          </div>
-          <div className="absolute inset-0 z-10 flex flex-col items-center  px-8 py-24 md:px-14 lg:px-28 md:py-16 lg:py-20">
-            {/* Title / Header */}
-            <div ref={titleRef} className="relative z-10 w-full ">
-              <h2 className="text-3xl md:text-4xl lg:text-4xl xl:text-5xl text-left font-semibold text-[#fafafa] tracking-tight  md:mb-20 ">
-                What we do
-              </h2>
+            gsap.set(gradientRef1.current, {
+                background: createGradientStyle(colors1, 10),
+            });
+
+            const tl1 = gsap.timeline({
+                scrollTrigger: {
+                    trigger: gradientRef1.current,
+                    scrub: 0.6,
+                    start: 'top bottom',
+                    end: 'center top',
+                },
+            });
+
+            tl1.to(gradientRef1.current, {
+                background: createGradientStyle(colors1, 100),
+                ease: 'power1.inOut',
+            }).to(gradientRef1.current, {
+                background: createGradientStyle(colors1, 10),
+                ease: 'power1.inOut',
+            });
+        }
+
+        // ===== Second Gradient Animation (after OtherSolutions) =====
+        if (gradientRef2.current) {
+            // Color pattern based on uploaded image (light top → blue mid → dark bottom)
+            const colors2 = [
+                'rgba(250,250,250,1) 0%',
+                'rgba(250,250,250,1) 20%', // starts pure white to match previous background
+                'rgba(250,250,250,1) 35%',
+                '#DCEBFA  40%', // white top
+                '#7fb8f9 50%', // sky blue
+                '#0094ff 60%', // bright blue center
+                '#003a6e 75%', // deep navy
+                '#0f0f0f 100%',
+            ];
+
+            gsap.set(gradientRef2.current, {
+                background: createGradientStyle(colors2, 10),
+            });
+
+            const tl2 = gsap.timeline({
+                scrollTrigger: {
+                    trigger: gradientRef2.current,
+                    scrub: 0.6,
+                    start: 'top bottom',
+                    end: 'center top',
+                },
+            });
+
+            tl2.to(gradientRef2.current, {
+                background: createGradientStyle(colors2, 100),
+                ease: 'power1.inOut',
+            }).to(gradientRef2.current, {
+                background: createGradientStyle(colors2, 10),
+                ease: 'power1.inOut',
+            });
+        }
+        return () => {
+            ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+        };
+    }, []);
+
+    return (
+        <div className="relative w-full">
+            {/* hero section  */}
+            <HeroSerivce />
+
+            {/* sticky cards */}
+            <div ref={rootRef} className="relative w-full z-20 bg-[#0f0f0f]  ">
+                <div ref={dotGridContainerRef} className="relative h-[100vh]  w-full bg-[#0f0f0f] ">
+                    <div className="absolute inset-0 h-[110vh] w-full z-10 dotgrid-mask">
+                        <DotGrid
+                            dotSize={2}
+                            gap={8}
+                            baseColor="#555555"
+                            activeColor="#5227FF"
+                            proximity={120}
+                            shockRadius={250}
+                            shockStrength={5}
+                            resistance={750}
+                            returnDuration={1.5}
+                            className="h-full w-full"
+                        />
+                    </div>
+                    <div className="absolute inset-0 z-10 flex flex-col items-center  px-8 py-24 md:px-14 lg:px-28 md:py-16 lg:py-10">
+                        {/* Title / Header */}
+                        <div ref={titleRef} className="relative z-10 w-full ">
+                            <h2 className="text-3xl md:text-4xl lg:text-4xl xl:text-5xl text-left font-semibold text-[#fafafa] tracking-tight  md:mb-20 ">
+                                What we do
+                            </h2>
+                        </div>
+
+                        {/* The Actual Cards */}
+                        <div className="relative w-full  flex-1 flex items-stretch justify-center">
+                            {cards.map((c, i) => (
+                                <Card
+                                    key={i}
+                                    ref={el => (cardRefs.current[i] = el)}
+                                    title={c.title}
+                                    description={c.description}
+                                    items={c.items}
+                                    modelUrl={c.modelUrl}
+                                    // isVisible={Math.abs(i - activeIndex) <= 1}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            {/* The Actual Cards */}
-            <div className="relative w-full  flex-1 flex items-stretch justify-center">
-              {cards.map((c, i) => (
-                <Card
-                  key={i}
-                  ref={(el) => (cardRefs.current[i] = el)}
-                  title={c.title}
-                  description={c.description}
-                  items={c.items}
-                  modelUrl={c.modelUrl}
-                  // isVisible={Math.abs(i - activeIndex) <= 1}
-                />
-              ))}
+            {/* First Gradient Section */}
+            <div
+                ref={gradientRef1}
+                className="relative w-full h-[65vh] overflow-hidden"
+                style={{
+                    backgroundColor: '#0f0f0f',
+                    marginTop: '-1px', // Prevents any gap
+                    zIndex: 1,
+                }}
+            >
+                <div className="absolute inset-0" />
             </div>
-          </div>
+            <section className="flex flex-col  bg-[#fafafa]  px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
+                <h2 className="text-3xl  md:text-4xl xl:text-5xl text-[#0f0f0f]   font-semibold  lg:leading-[60px] ">
+                    Other Related{' '}
+                    <span className="bg-[#844de9] inline px-2  rounded-md text-[#fafafa]">
+                        Services
+                    </span>
+                </h2>
+                <div className="mt-10 md:mt-14">
+                    <OtherServices services={servicesArray} />
+                </div>
+            </section>
+            {/* Second Gradient Section (based on uploaded image colors) */}
+            <div ref={gradientRef2} className="relative w-full h-[80vh] overflow-hidden">
+                <div className="absolute inset-0" />
+            </div>
+            <div className="w-full   self-center bg-[#0f0f0f]">
+                <Suspense fallback={<p>Loading video...</p>}>
+                    <video
+                        src="/videos/Big_Buck_Bunny_1080_10s_5MB.mp4"
+                        autoPlay
+                        preload="none"
+                        loop
+                        muted
+                        playsInline
+                    ></video>
+                </Suspense>
+            </div>
         </div>
-      </div>
-
-      {/* First Gradient Section */}
-      <div
-        ref={gradientRef1}
-        className="relative w-full h-[65vh] overflow-hidden"
-        style={{
-          backgroundColor: "#0f0f0f",
-          marginTop: "-1px", // Prevents any gap
-          zIndex: 1,
-        }}
-      >
-        <div className="absolute inset-0" />
-      </div>
-
-      <section className="flex flex-col  bg-[#fafafa]  px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
-        <h2 className="text-3xl  md:text-4xl xl:text-5xl text-[#0f0f0f]   font-semibold  lg:leading-[60px] ">
-          Other Related{" "}
-          <span className="bg-[#844de9] inline px-2  rounded-md text-[#fafafa]">
-            Services
-          </span>
-        </h2>
-        <div className="mt-10 md:mt-14">
-          <OtherServices services={servicesArray} />
-        </div>
-      </section>
-
-      {/* Second Gradient Section (based on uploaded image colors) */}
-      <div
-        ref={gradientRef2}
-        className="relative w-full h-[80vh] overflow-hidden"
-      >
-        <div className="absolute inset-0" />
-      </div>
-
-      <div className="w-full   self-center bg-[#0f0f0f]">
-        <Suspense fallback={<p>Loading video...</p>}>
-          <video
-            src="/videos/Big_Buck_Bunny_1080_10s_5MB.mp4"
-            autoPlay
-            loop
-            muted
-            playsInline
-          ></video>
-        </Suspense>
-      </div>
-    </>
-  );
+    );
 };
 
 export default Service;
