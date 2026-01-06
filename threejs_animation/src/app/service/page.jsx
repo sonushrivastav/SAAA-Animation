@@ -38,12 +38,18 @@ const cards = [
         description:
             'We build brands that speak before they’re introduced. From identity to visuals, we craft every detail to make your presence unforgettable. Because every great impression starts with a design that feels alive.',
         items: [
-            'UI / UX',
-            'BRANDING',
-            '3D MODELING',
-            'MOTION GRAPHICS / EDITING',
-            'PRINT MEDIA',
-            'CREATIVE / MARKETING COLLATERALS',
+            { label: 'UI / UX', href: '/ui-ux' },
+            { label: 'Branding', href: '/branding' },
+            { label: '3D Modeling', href: '/3d-modeling' },
+            {
+                label: 'Motion Graphics / Editing',
+                href: '/motion-graphics-editing',
+            },
+            { label: 'Print Media', href: '/print-media' },
+            {
+                label: 'Creative Marketing Collaterals',
+                href: '/creative-marketing-collaterals',
+            },
         ],
         modelUrl: '/models/design.glb',
     },
@@ -52,12 +58,18 @@ const cards = [
         description:
             'Our developers are part artists, part architects. They code, craft, and fine-tune every pixel until your site feels alive. Built to perform beautifully, no matter the screen or scale. ',
         items: [
-            'BASIC WEBSITE',
-            'E-COMMERCE WEBSITE',
-            'CUSTOM CMS',
-            'LANDING PAGES',
-            'WEB / MOBILE APPLICATIONS',
-            'AMC',
+            { label: 'Basic Website', href: '/basic-website' },
+            { label: 'E-Commerce Website', href: '/ecommerce-website' },
+            { label: 'Custom CMS', href: '/custom-cms' },
+            { label: 'Landing Pages', href: '/landing-pages' },
+            {
+                label: 'Web / Mobile Applications',
+                href: '/web-mobile-applications',
+            },
+            {
+                label: 'AMC',
+                href: '/amc',
+            },
         ],
         modelUrl: '/models/build.glb',
     },
@@ -66,10 +78,16 @@ const cards = [
         description:
             'We build brands that speak before they’re introduced. From identity to visuals, we craft every detail to make your presence unforgettable. Because every great impression starts with a design that feels alive.',
         items: [
-            'SOCIAL MEDIA MARKETING',
-            'PAID ADS / PERFORMANCE MARKETING',
-            'SEO',
-            'EMAIL & WHATSAPP MARKETING',
+            { label: 'Social Media Marketing', href: '/socialmedia-marketing' },
+            {
+                label: 'Paid Ads / Performance Marketing',
+                href: '/paid-ads-performance-marketing',
+            },
+            { label: 'SEO', href: '/seo' },
+            {
+                label: 'Email & WhatsApp Marketing',
+                href: '/email-whatsapp-marketing',
+            },
         ],
         modelUrl: '/models/grow.glb',
     },

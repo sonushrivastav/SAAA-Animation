@@ -125,8 +125,6 @@ const TeamCard = ({
     );
 };
 
-
-
 const StatCard = ({
     title,
     description,
@@ -389,7 +387,7 @@ const About = () => {
                         title="Pinnacle Performance"
                         description="Committed to excellence, our team has satisfied over 100 clients with relentless dedication. We strive for perfection, consistently exceeding expectations."
                         hasContent={true}
-                        roundedClass="rounded-2xl sm:rounded-tr-2xl sm:rounded-b-none"
+                        roundedClass="rounded-2xl sm:rounded-tr-2xl sm:rounded-tl-none sm:rounded-b-none"
                         isMobile={isMobile}
                         isTablet={isTablet}
                     />

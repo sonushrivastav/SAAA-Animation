@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import React from 'react';
 import ThreeGlass from '../servicePage/FloatingGlass';
 
@@ -27,7 +28,9 @@ const Card = React.forwardRef(({ title, items, description, modelUrl, isVisible 
                             className="text-[#fafafa] border-t border-dashed border-[#555555]
                 py-2 md:py-3 xl:py-4 uppercase text-base xl:text-xl "
                         >
-                            {item}
+                            <Link href={item.href} className="hover-underline-animation">
+                                {item.label}
+                            </Link>
                         </li>
                     ))}
                 </ul>
@@ -43,7 +46,6 @@ const Card = React.forwardRef(({ title, items, description, modelUrl, isVisible 
                     mouseInfluence
                     modelUrl={modelUrl}
                 />
-              
             </div>
         </div>
     );

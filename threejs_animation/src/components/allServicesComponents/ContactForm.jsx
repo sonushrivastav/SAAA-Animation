@@ -37,20 +37,24 @@ export default function ContactForm({ btnPosition = 'right' }) {
     };
 
     const handleSubmit = async e => {
+
         e.preventDefault();
 
         if (validate()) {
             setLoading(true);
 
             try {
-                const response = await fetch(`http://localhost:1337/api/contact-forms`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    // Strapi expects the payload to be wrapped in a "data" object
-                    body: JSON.stringify({ data: formData }),
-                });
+                const response = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL}/api/contact-forms`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        // Strapi expects the payload to be wrapped in a "data" object
+                        body: JSON.stringify({ data: formData }),
+                    }
+                );
 
                 const data = await response.json();
                 console.log('form data', data);

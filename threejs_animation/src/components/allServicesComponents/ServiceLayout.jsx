@@ -16,79 +16,6 @@ import DotGrid from './DotGrid';
 import StatCard from './StatCard';
 gsap.registerPlugin(ScrollTrigger);
 
-const platformImages = [
-    '/images/socialMedia/Instagram.svg',
-    '/images/socialMedia/LinkedIn.svg',
-    '/images/socialMedia/Facebook.svg',
-    '/images/socialMedia/twitter.svg',
-    '/images/socialMedia/pinterest.svg',
-    '/images/socialMedia/tiktok.svg',
-];
-const caseStudies = [
-    {
-        title: 'Creative Newtech',
-        tag: 'SMM',
-        img: '/images/socialMedia/CNL.webp',
-        href: '/services/seo',
-    },
-    {
-        title: 'Ruark Audio',
-        tag: 'SMM',
-        img: '/images/socialMedia/iPhone 15 Mockup Poster 1.webp',
-        href: '/services/seo',
-    },
-    {
-        title: 'Share India',
-        tag: 'SMM',
-        img: '/images/socialMedia/Device 14PM.webp',
-        href: '/services/seo',
-    },
-];
-
-const faqData = [
-    {
-        question: 'What does your SMM service include?',
-        answer: 'We build brands that speak before they’re introduced. From identity to visuals, we craft every detail to make your presence unforgettable. Because every great impression starts with a design that feels alive.',
-    },
-    {
-        question: 'Which platforms do you manage?',
-        answer: 'We manage major platforms like Instagram, Facebook, LinkedIn, Twitter, and YouTube to ensure consistent branding and engagement.',
-    },
-    {
-        question: 'How do you measure success?',
-        answer: 'We track engagement, conversions, reach, and audience growth metrics to measure and continuously optimize campaign performance.',
-    },
-    {
-        question: 'Do you create content too?',
-        answer: 'Yes, our creative team designs captivating posts, videos, and stories aligned with your brand voice and strategy.',
-    },
-    {
-        question: 'When will I start seeing results?',
-        answer: 'You’ll typically start seeing meaningful engagement and traction within 4–8 weeks of consistent activity and optimization.',
-    },
-];
-
-const servicesArray = [
-    {
-        title: 'Search Engine OptimizationS',
-        description:
-            'We help you climb search results without breaking stride. Smart keywords, clean strategy, and content that pulls you to the top.',
-        href: '/services/seo',
-    },
-    {
-        title: 'Paid Ads / Performance Marketing',
-        description:
-            'We make algorithms your allies. Every click is tracked, every rupee earns its keep, every ad works harder than the last.',
-        href: '/services/seo',
-    },
-    {
-        title: 'EMail & Whatsapp Marketing',
-        description:
-            'We write messages people actually want to open. Less spam, more spark, and conversations that feel real.',
-        href: '/services/seo',
-    },
-];
-
 function initSpiralAnimation(slicesRef, isMobile, isTablet) {
     const canvas = document.getElementById('spiralCanvas');
     if (!canvas) return;
@@ -109,13 +36,17 @@ function initSpiralAnimation(slicesRef, isMobile, isTablet) {
     });
     const container = canvas.parentElement;
     renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const DPR = isMobile ? 1 : Math.min(window.devicePixelRatio, 2);
+    renderer.setPixelRatio(DPR);
+    renderer.antialias = !isMobile;
 
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
+    const handleResize = () => {
+        const container = canvas.parentElement;
+        camera.aspect = container.clientWidth / container.clientHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(container.clientWidth, container.clientHeight);
-    });
+    };
+    window.addEventListener('resize', handleResize);
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
@@ -267,14 +198,6 @@ function initSpiralAnimation(slicesRef, isMobile, isTablet) {
         });
     });
 
-    // Handle resize
-    window.addEventListener('resize', () => {
-        const container = canvas.parentElement;
-        camera.aspect = container.clientWidth / container.clientHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(container.clientWidth, container.clientHeight);
-    });
-
     // Render Loop
     function animate() {
         requestAnimationFrame(animate);
@@ -289,7 +212,8 @@ const ServiceLayout = ({ data, caseStudies }) => {
     const { isMobile, isTablet } = useDeviceType();
 
     useEffect(() => {
-        initSpiralAnimation(slicesRef, isMobile, isTablet);
+        const cleanup = initSpiralAnimation(slicesRef, isMobile, isTablet);
+        return cleanup;
     }, [isMobile, isTablet]);
 
     return (
@@ -338,7 +262,6 @@ const ServiceLayout = ({ data, caseStudies }) => {
                             playsInline
                             className="w-full h-full object-cover  "
                         />
-                        
                     </div>
                 </div>
             </section>
@@ -366,7 +289,7 @@ const ServiceLayout = ({ data, caseStudies }) => {
                     {/* Card 2 */}
                     <StatCard
                         stat={data.stats[1].stat}
-                        label={data.stats[2].label}
+                        label={data.stats[1].label}
                         hasContent={true}
                         isMobile={isMobile}
                         isTablet={isTablet}
@@ -414,7 +337,7 @@ const ServiceLayout = ({ data, caseStudies }) => {
                                 alt={`Platform ${index + 1}`}
                                 width={50}
                                 height={20}
-                                className="mx-3" // Optional: You might not need this with gap-6
+                                className="mx-2" // Optional: You might not need this with gap-6
                             />
                         ))}
                     </div>

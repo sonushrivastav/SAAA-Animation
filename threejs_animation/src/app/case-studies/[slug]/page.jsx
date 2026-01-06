@@ -81,7 +81,7 @@ export default function CaseStudyDetails() {
         const fetchCaseStudies = async () => {
             try {
                 const res = await fetch(
-                    `${process.env.NEXT_PUBLIC_PORT_URL}/api/case-studies?` +
+                    `${process.env.NEXT_PUBLIC_API_URL}/api/case-studies?` +
                         `populate[sections][populate]=*&` +
                         `populate[logo][fields][0]=url&populate[logo][fields][1]=alternativeText&` +
                         `populate[coverImage][fields][0]=url&populate[coverImage][fields][1]=alternativeText`
@@ -270,7 +270,7 @@ export default function CaseStudyDetails() {
                             <Image
                                 src={
                                     filteredCaseStudy?.logo?.url
-                                        ? `http://localhost:1337${filteredCaseStudy.logo.url}`
+                                        ? `${process.env.NEXT_PUBLIC_API_URL}${filteredCaseStudy.logo.url}`
                                         : '/images/dummy-image.jpg'
                                 }
                                 alt="Case Study Logo"
@@ -342,7 +342,7 @@ export default function CaseStudyDetails() {
                                                 </div>
                                                 <div className="relative w-full lg:w-[65%] h-[200px] lg:h-auto">
                                                     <Image
-                                                        src={`http://localhost:1337${beforeImg}`}
+                                                        src={`${process.env.NEXT_PUBLIC_API_URL}${beforeImg}`}
                                                         alt="Reach out"
                                                         fill
                                                         sizes="(max-width: 1024px) 100vw, 50vw"
@@ -358,7 +358,7 @@ export default function CaseStudyDetails() {
                                                 </div>
                                                 <div className="relative w-full lg:w-[65%] h-[200px] lg:h-auto border">
                                                     <Image
-                                                        src={`http://localhost:1337${afterImg}`}
+                                                        src={`${process.env.NEXT_PUBLIC_API_URL}${afterImg}`}
                                                         alt="Reach out"
                                                         fill
                                                         sizes="(max-width: 1024px) 100vw, 50vw"

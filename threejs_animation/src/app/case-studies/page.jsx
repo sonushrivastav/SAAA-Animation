@@ -93,13 +93,12 @@ const tabs = [
   "Social Media Marketing",
   "Website Development",
   "UI / UX",
-  "Graphic Design", 
+  "Graphic Design",
 ];
 
 const CaseStudies = () => {
   const [activeTab, setActiveTab] = useState("Social Media Marketing");
   const [caseStudies, setCaseStudies] = useState([]);
-  console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
 
   useEffect(() => {
     const fetchCaseStudies = async () => {
