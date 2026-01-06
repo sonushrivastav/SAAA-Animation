@@ -99,24 +99,24 @@ const tabs = [
 const CaseStudies = () => {
   const [activeTab, setActiveTab] = useState("Social Media Marketing");
   const [caseStudies, setCaseStudies] = useState([]);
-  console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
+  // console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
 
-  useEffect(() => {
-     if (!process.env.NEXT_PUBLIC_API_URL) return;
-    const fetchCaseStudies = async () => {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/case-studies?populate=*`
-        );
-        const data = await res.json();
+  // useEffect(() => {
+  //    if (!process.env.NEXT_PUBLIC_API_URL) return;
+  //   const fetchCaseStudies = async () => {
+  //     try {
+  //       const res = await fetch(
+  //         `${process.env.NEXT_PUBLIC_API_URL}/api/case-studies?populate=*`
+  //       );
+  //       const data = await res.json();
 
-        setCaseStudies(data?.data || []);
-      } catch (error) {
-        console.log("Error fetching case studies:", error);
-      }
-    };
-    fetchCaseStudies();
-  }, []);
+  //       setCaseStudies(data?.data || []);
+  //     } catch (error) {
+  //       console.log("Error fetching case studies:", error);
+  //     }
+  //   };
+  //   fetchCaseStudies();
+  // }, []);
   const filteredCaseStudies = useMemo(() => {
     return caseStudies.filter((item) => {
       const tag = item?.tag;
