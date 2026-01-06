@@ -202,7 +202,7 @@ export default function Navbar(props) {
             {isMobile ? (
               <>
                 <Link
-                  href="/animation"
+                  href="/"
                   onClick={() => {
                     setShowMega(false);
                     setTimeout(() => setOpen(false), 200);
@@ -220,7 +220,7 @@ export default function Navbar(props) {
             ) : (
               <>
                 <Link
-                  href="/animation"
+                  href="/"
                   onClick={() => {
                     setShowMega(false);
                     setTimeout(() => setOpen(false), 200);

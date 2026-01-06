@@ -60,7 +60,7 @@ const CaseStudyCards = ({ caseStudies = [], className = "" }) => {
 
             <div className="w-full flex items-center justify-center rounded-b-2xl">
               <Image
-                src={`http://localhost:1337${item.coverImage.url}`}
+                src={`${process.env.NEXT_PUBLIC_API_URL}${item.coverImage.url}`}
                 alt={item.title || "case study image"}
                 width={200}
                 height={200}

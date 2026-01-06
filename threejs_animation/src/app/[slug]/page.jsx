@@ -13,7 +13,7 @@ export default function ServicePage() {
     const fetchCaseStudies = async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_PORT_URL}/api/case-studies?populate=*`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/case-studies?populate=*`
         );
         const data = await res.json();
         console.log(data.data);

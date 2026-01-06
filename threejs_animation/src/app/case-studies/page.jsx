@@ -93,7 +93,7 @@ const tabs = [
   "Social Media Marketing",
   "Website Development",
   "UI / UX",
-  "Graphic Design", 
+  "Graphic Design",
 ];
 
 const CaseStudies = () => {

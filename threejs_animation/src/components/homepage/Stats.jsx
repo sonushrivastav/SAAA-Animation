@@ -1,24 +1,23 @@
 import Link from "next/link";
 
+const stats = [
+  {
+    title: "Fast 01",
+    value: "90'",
+    desc: "Plug-and-play installed and running in 90 minutes.",
+  },
+  {
+    title: "Fast 02",
+    value: "200",
+    desc: "preloaded configurations — and counting.",
+  },
+  {
+    title: "Fast 03",
+    value: "95%",
+    desc: "of common data requests handled out-of-the-box.",
+  },
+];
 export default function StatsSection() {
-  const stats = [
-    {
-      title: "Fast 01",
-      value: "90'",
-      desc: "Plug-and-play installed and running in 90 minutes.",
-    },
-    {
-      title: "Fast 02",
-      value: "200",
-      desc: "preloaded configurations — and counting.",
-    },
-    {
-      title: "Fast 03",
-      value: "95%",
-      desc: "of common data requests handled out-of-the-box.",
-    },
-  ];
-
   return (
     <section className="bg-[#0f0f0f] text-white py-24 flex flex-col items-center justify-center text-center z-99 px-4">
       {/* Stats Container */}
@@ -26,7 +25,7 @@ export default function StatsSection() {
         <div className="grid  grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
           {stats.map((stat, i) => (
             <div
-              key={i}
+              key={stat.title}
               className="border border-[#55555533] rounded-lg p-6 flex flex-col "
             >
               <h4 className="w-full text-sm text-left font-semibold mb-2">
@@ -49,10 +48,16 @@ export default function StatsSection() {
 
         {/* CTA Buttons */}
         <div className="flex flex-wrap gap-2 justify-center">
-          <button className="bg-[#844de9] hover:bg-[#7c3aed] text-white text-xs font-thin px-4  py-1 rounded-full transition-all">
+          <button
+            type="button"
+            className="bg-[#844de9] hover:bg-[#7c3aed] text-white text-xs font-thin px-4  py-1 rounded-full transition-all"
+          >
             Live REST Call
           </button>
-          <button className="border border[#0f0f0f] text-sm px-4 py-1 rounded-full hover:bg-gray-100 transition-all">
+          <button
+            type="button"
+            className="border border[#0f0f0f] text-sm px-4 py-1 rounded-full hover:bg-gray-100 transition-all"
+          >
             Check out a config
           </button>
         </div>

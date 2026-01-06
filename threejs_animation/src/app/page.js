@@ -1,4 +1,6 @@
-// 'use client';
+"use client";
+
+import Home from "../components/home/Home";
 
 // import { Canvas } from '@react-three/fiber';
 // import { gsap } from 'gsap';
@@ -147,6 +149,10 @@
 //     );
 // }
 
-export default function Page(){
-    return <div>Home</div>
+export default function Page() {
+  return (
+    <div>
+      <Home />
+    </div>
+  );
 }
