@@ -125,16 +125,7 @@ const TeamCard = ({
     );
 };
 
-// const waitForTeamImages = async () => {
-//     const images = Array.from(document.querySelectorAll('.team-card img'));
 
-//     await Promise.all(
-//         images.map(img => {
-//             if (img.complete) return;
-//             return img.decode().catch(() => {});
-//         })
-//     );
-// };
 
 const StatCard = ({
     title,

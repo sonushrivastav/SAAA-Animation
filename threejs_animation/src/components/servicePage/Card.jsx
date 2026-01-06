@@ -43,15 +43,7 @@ const Card = React.forwardRef(({ title, items, description, modelUrl, isVisible 
                     mouseInfluence
                     modelUrl={modelUrl}
                 />
-                {/* {isVisible && (
-                    <ThreeGlass
-                        motionVariant={0}
-                        speed={1.2}
-                        amplitude={0.06}
-                        mouseInfluence
-                        modelUrl={modelUrl}
-                    />
-                )} */}
+              
             </div>
         </div>
     );

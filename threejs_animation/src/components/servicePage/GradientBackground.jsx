@@ -1,5 +1,5 @@
-import { Color, Mesh, Program, Renderer, Triangle } from 'ogl';
-import { useEffect, useRef } from 'react';
+import { Color, Mesh, Program, Renderer, Triangle } from "ogl";
+import { useEffect, useRef } from "react";
 
 const VERT = `#version 300 es
 in vec2 position;
@@ -174,151 +174,155 @@ void main() {
 `;
 
 export default function GradientBackground(props) {
-    const {
-        colorStops = ['#5A00FF', '#5A00FF', '#000000'],
-        amplitude = 1.0,
-        blend = 0.98,
-        mouseInfluence = 1.0,
-    } = props;
-    const propsRef = useRef(props);
-    propsRef.current = props;
+  const {
+    colorStops = ["#5A00FF", "#5A00FF", "#000000"],
+    amplitude = 1.0,
+    blend = 0.98,
+    mouseInfluence = 1.0,
+  } = props;
+  const propsRef = useRef(props);
+  propsRef.current = props;
 
-    const ctnDom = useRef(null);
-    const mouseRef = useRef({
-        x: 0.5,
-        y: 0.5,
-        targetX: 0.5,
-        targetY: 0.5,
-        prevX: 0.5,
-        prevY: 0.5,
-        velocityX: 0,
-        velocityY: 0,
+  const ctnDom = useRef(null);
+  const mouseRef = useRef({
+    x: 0.5,
+    y: 0.5,
+    targetX: 0.5,
+    targetY: 0.5,
+    prevX: 0.5,
+    prevY: 0.5,
+    velocityX: 0,
+    velocityY: 0,
+  });
+
+  useEffect(() => {
+    const ctn = ctnDom.current;
+    if (!ctn) return;
+
+    const renderer = new Renderer({
+      alpha: true,
+      premultipliedAlpha: true,
+      antialias: true,
+    });
+    const gl = renderer.gl;
+    gl.clearColor(0, 0, 0, 0);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    gl.canvas.style.backgroundColor = "transparent";
+    gl.canvas.style.width = "100%";
+    gl.canvas.style.height = "100%";
+
+    let program;
+
+    function resize() {
+      if (!ctn) return;
+      const width = ctn.offsetWidth;
+      const height = ctn.offsetHeight;
+      renderer.setSize(width, height);
+      if (program) {
+        program.uniforms.uResolution.value = [width, height];
+      }
+    }
+    window.addEventListener("resize", resize);
+
+    // Mouse move handler
+    const handleMouseMove = (e) => {
+      const rect = gl.canvas.getBoundingClientRect();
+      mouseRef.current.targetX = (e.clientX - rect.left) / rect.width;
+      mouseRef.current.targetY = 1.0 - (e.clientY - rect.top) / rect.height;
+    };
+
+    gl.canvas.addEventListener("mousemove", handleMouseMove);
+
+    const geometry = new Triangle(gl);
+    if (geometry.attributes.uv) {
+      delete geometry.attributes.uv;
+    }
+
+    const colorStopsArray = (propsRef.current.colorStops || colorStops).map(
+      (hex) => {
+        const c = new Color(hex);
+        return [c.r, c.g, c.b];
+      }
+    );
+
+    program = new Program(gl, {
+      vertex: VERT,
+      fragment: FRAG,
+      uniforms: {
+        uTime: { value: 0 },
+        uAmplitude: { value: amplitude },
+        uColorStops: { value: colorStopsArray },
+        uResolution: { value: [ctn.offsetWidth, ctn.offsetHeight] },
+        uBlend: { value: blend },
+        uMouse: { value: [0.5, 0.5] },
+        uMouseVelocity: { value: [0.0, 0.0] },
+        uMouseInfluence: { value: mouseInfluence },
+      },
     });
 
-    useEffect(() => {
-        const ctn = ctnDom.current;
-        if (!ctn) return;
+    const mesh = new Mesh(gl, { geometry, program });
+    ctn.appendChild(gl.canvas);
+    if (props?.onReady) {
+      props.onReady(gl.canvas); // 🚀 send DOM canvas back as texture source
+    }
 
-        const renderer = new Renderer({
-            alpha: true,
-            premultipliedAlpha: true,
-            antialias: true,
-        });
-        const gl = renderer.gl;
-        gl.clearColor(0, 0, 0, 0);
-        gl.enable(gl.BLEND);
-        gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-        gl.canvas.style.backgroundColor = 'transparent';
-        gl.canvas.style.width = '100%';
-        gl.canvas.style.height = '100%';
+    let animateId = 0;
+    const update = (t) => {
+      animateId = requestAnimationFrame(update);
+      const { time = t * 0.01, speed = 1.0 } = propsRef.current;
+      program.uniforms.uTime.value = time * speed * 0.1;
+      program.uniforms.uAmplitude.value = propsRef.current.amplitude ?? 1.0;
+      program.uniforms.uBlend.value = propsRef.current.blend ?? blend;
+      program.uniforms.uMouseInfluence.value =
+        propsRef.current.mouseInfluence ?? mouseInfluence;
+      const stops = propsRef.current.colorStops ?? colorStops;
+      program.uniforms.uColorStops.value = stops.map((hex) => {
+        const c = new Color(hex);
+        return [c.r, c.g, c.b];
+      });
 
-        let program;
+      // Smooth mouse position interpolation for fluid blob motion (like the TypeScript code)
+      const lerpFactor = 0.05; // Slower lerp = smoother blob following (20 in original = 1/20 = 0.05)
+      mouseRef.current.x +=
+        (mouseRef.current.targetX - mouseRef.current.x) * lerpFactor;
+      mouseRef.current.y +=
+        (mouseRef.current.targetY - mouseRef.current.y) * lerpFactor;
 
-        function resize() {
-            if (!ctn) return;
-            const width = ctn.offsetWidth;
-            const height = ctn.offsetHeight;
-            renderer.setSize(width, height);
-            if (program) {
-                program.uniforms.uResolution.value = [width, height];
-            }
-        }
-        window.addEventListener('resize', resize);
+      // Calculate velocity for trailing effect
+      mouseRef.current.velocityX = mouseRef.current.x - mouseRef.current.prevX;
+      mouseRef.current.velocityY = mouseRef.current.y - mouseRef.current.prevY;
 
-        // Mouse move handler
-        const handleMouseMove = e => {
-            const rect = gl.canvas.getBoundingClientRect();
-            mouseRef.current.targetX = (e.clientX - rect.left) / rect.width;
-            mouseRef.current.targetY = 1.0 - (e.clientY - rect.top) / rect.height;
-        };
+      // Store previous position
+      mouseRef.current.prevX = mouseRef.current.x;
+      mouseRef.current.prevY = mouseRef.current.y;
 
-        gl.canvas.addEventListener('mousemove', handleMouseMove);
+      program.uniforms.uMouse.value = [mouseRef.current.x, mouseRef.current.y];
+      program.uniforms.uMouseVelocity.value = [
+        mouseRef.current.velocityX * 20.0, // Amplify for visible effect
+        mouseRef.current.velocityY * 20.0,
+      ];
 
-        const geometry = new Triangle(gl);
-        if (geometry.attributes.uv) {
-            delete geometry.attributes.uv;
-        }
+      renderer.render({ scene: mesh });
+    };
+    animateId = requestAnimationFrame(update);
 
-        const colorStopsArray = (propsRef.current.colorStops || colorStops).map(hex => {
-            const c = new Color(hex);
-            return [c.r, c.g, c.b];
-        });
+    resize();
 
-        program = new Program(gl, {
-            vertex: VERT,
-            fragment: FRAG,
-            uniforms: {
-                uTime: { value: 0 },
-                uAmplitude: { value: amplitude },
-                uColorStops: { value: colorStopsArray },
-                uResolution: { value: [ctn.offsetWidth, ctn.offsetHeight] },
-                uBlend: { value: blend },
-                uMouse: { value: [0.5, 0.5] },
-                uMouseVelocity: { value: [0.0, 0.0] },
-                uMouseInfluence: { value: mouseInfluence },
-            },
-        });
+    return () => {
+      cancelAnimationFrame(animateId);
+      window.removeEventListener("resize", resize);
+      gl.canvas.removeEventListener("mousemove", handleMouseMove);
+      if (ctn && gl.canvas.parentNode === ctn) {
+        ctn.removeChild(gl.canvas);
+      }
+      gl.getExtension("WEBGL_lose_context")?.loseContext();
+    };
+  }, [amplitude, blend, colorStops, mouseInfluence]);
 
-        const mesh = new Mesh(gl, { geometry, program });
-        ctn.appendChild(gl.canvas);
-        if (props?.onReady) {
-            props.onReady(gl.canvas); // 🚀 send DOM canvas back as texture source
-        }
-
-        let animateId = 0;
-        const update = t => {
-            animateId = requestAnimationFrame(update);
-            const { time = t * 0.01, speed = 1.0 } = propsRef.current;
-            program.uniforms.uTime.value = time * speed * 0.1;
-            program.uniforms.uAmplitude.value = propsRef.current.amplitude ?? 1.0;
-            program.uniforms.uBlend.value = propsRef.current.blend ?? blend;
-            program.uniforms.uMouseInfluence.value =
-                propsRef.current.mouseInfluence ?? mouseInfluence;
-            const stops = propsRef.current.colorStops ?? colorStops;
-            program.uniforms.uColorStops.value = stops.map(hex => {
-                const c = new Color(hex);
-                return [c.r, c.g, c.b];
-            });
-
-            // Smooth mouse position interpolation for fluid blob motion (like the TypeScript code)
-            const lerpFactor = 0.05; // Slower lerp = smoother blob following (20 in original = 1/20 = 0.05)
-            mouseRef.current.x += (mouseRef.current.targetX - mouseRef.current.x) * lerpFactor;
-            mouseRef.current.y += (mouseRef.current.targetY - mouseRef.current.y) * lerpFactor;
-
-            // Calculate velocity for trailing effect
-            mouseRef.current.velocityX = mouseRef.current.x - mouseRef.current.prevX;
-            mouseRef.current.velocityY = mouseRef.current.y - mouseRef.current.prevY;
-
-            // Store previous position
-            mouseRef.current.prevX = mouseRef.current.x;
-            mouseRef.current.prevY = mouseRef.current.y;
-
-            program.uniforms.uMouse.value = [mouseRef.current.x, mouseRef.current.y];
-            program.uniforms.uMouseVelocity.value = [
-                mouseRef.current.velocityX * 20.0, // Amplify for visible effect
-                mouseRef.current.velocityY * 20.0,
-            ];
-
-            renderer.render({ scene: mesh });
-        };
-        animateId = requestAnimationFrame(update);
-
-        resize();
-
-        return () => {
-            cancelAnimationFrame(animateId);
-            window.removeEventListener('resize', resize);
-            gl.canvas.removeEventListener('mousemove', handleMouseMove);
-            if (ctn && gl.canvas.parentNode === ctn) {
-                ctn.removeChild(gl.canvas);
-            }
-            gl.getExtension('WEBGL_lose_context')?.loseContext();
-        };
-    }, [amplitude, blend, colorStops, mouseInfluence]);
-
-    return (
-        <div className="w-full h-full ">
-            <div ref={ctnDom} className="w-full h-full" />
-        </div>
-    );
+  return (
+    <div className="w-full h-full ">
+      <div ref={ctnDom} className="w-full h-full" />
+    </div>
+  );
 }
