@@ -39,6 +39,7 @@ export default function ContactForm({ btnPosition = "right" }) {
   };
 
   const handleSubmit = async (e) => {
+     if (!process.env.NEXT_PUBLIC_API_URL) return;
     e.preventDefault();
 
     if (validate()) {

@@ -102,6 +102,7 @@ const CaseStudies = () => {
   console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
 
   useEffect(() => {
+     if (!process.env.NEXT_PUBLIC_API_URL) return;
     const fetchCaseStudies = async () => {
       try {
         const res = await fetch(
