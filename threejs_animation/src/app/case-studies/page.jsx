@@ -101,26 +101,28 @@ const CaseStudies = () => {
   const [caseStudies, setCaseStudies] = useState([]);
   // console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
 
-  // useEffect(() => {
-  //    if (!process.env.NEXT_PUBLIC_API_URL) return;
-  //   const fetchCaseStudies = async () => {
-  //     try {
-  //       const res = await fetch(
-  //         `${process.env.NEXT_PUBLIC_API_URL}/api/case-studies?populate=*`
-  //       );
-  //       const data = await res.json();
+  useEffect(() => {
+    const fetchCaseStudies = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/case-studies?populate=*`
+        );
+        const data = await res.json();
 
-  //       setCaseStudies(data?.data || []);
-  //     } catch (error) {
-  //       console.log("Error fetching case studies:", error);
-  //     }
-  //   };
-  //   fetchCaseStudies();
-  // }, []);
+        setCaseStudies(data?.data || []);
+      } catch (error) {
+        console.log("Error fetching case studies:", error);
+      }
+    };
+    fetchCaseStudies();
+  }, []);
+
+  console.log(caseStudies,"caseStudies>>>>>>120 line");
+  
   const filteredCaseStudies = useMemo(() => {
     return caseStudies.filter((item) => {
-      const tag = item?.tag;
-      return tag === activeTab;
+      const tags = item?.tags;
+      return tags === activeTab;
     });
   }, [caseStudies, activeTab]);
 

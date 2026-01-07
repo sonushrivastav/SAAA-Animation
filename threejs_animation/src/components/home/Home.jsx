@@ -2060,7 +2060,7 @@ const Home = () => {
   }, []);
 
   return (
-    <main className="bg-[#fafafa] font-sans text-black">
+    <main className="bg-[#fafafa]  text-black">
       <div
         id="scroll-spacer"
         className="w-full scroll-spacer h-[1050vh] bg-[#0f0f0f]"

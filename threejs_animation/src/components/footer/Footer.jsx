@@ -1,9 +1,10 @@
+"use client";
 import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="w-full relative bg-[#0F0F0F] text-[#FAFAFA] px-6 md:px-16 py-12 z-[55]">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
+    <footer className="w-full relative bg-[#0F0F0F] text-[#FAFAFA] px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20  z-[55]">
+      <div className=" mx-auto grid grid-cols-1 md:grid-cols-3 gap-10 ">
         {/* Logo Section */}
         <div className="flex flex-col gap-4">
           <img
@@ -14,24 +15,36 @@ export default function Footer() {
         </div>
 
         {/* Navigation */}
-        <div className="flex items-start flex-col gap-3 text-lg">
-          <Link href="/" className="hover:text-[#844de9] transition ">
+        <div className="flex flex-col items-start gap-3 text-lg  text-left">
+          <Link
+            href="/"
+            className="uppercase transition  hover-underline-animation"
+          >
             Home
           </Link>
-          <Link href="/about" className="hover:text-[#844de9] transition ">
+          <Link
+            href="/about"
+            className="uppercase transition  hover-underline-animation"
+          >
             About
           </Link>
-          <Link href="/service" className="hover:text-[#844de9] transition ">
+          <Link
+            href="/service"
+            className="uppercase transition  hover-underline-animation"
+          >
             Services
-          </Link>
-          <Link href="/contact" className="hover:text-[#844de9] transition ">
-            Contact
           </Link>
           <Link
             href="/case-studies"
-            className="hover:text-[#844de9] transition "
+            className="uppercase transition  hover-underline-animation"
           >
-            Case Studies
+            Work
+          </Link>
+          <Link
+            href="/contact"
+            className="uppercase transition  hover-underline-animation"
+          >
+            Contact
           </Link>
         </div>
 

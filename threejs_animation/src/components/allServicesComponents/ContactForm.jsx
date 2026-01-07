@@ -38,52 +38,51 @@ export default function ContactForm({ btnPosition = "right" }) {
     return Object.keys(temp).length === 0;
   };
 
-  // const handleSubmit = async (e) => {
-    
-  //   e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  //   if (validate()) {
-  //     setLoading(true);
+    if (validate()) {
+      setLoading(true);
 
-  //     try {
-  //       const response = await fetch(
-  //         `${process.env.NEXT_PUBLIC_API_URL}/api/contact-forms`,
-  //         {
-  //           method: "POST",
-  //           headers: {
-  //             "Content-Type": "application/json",
-  //           },
-  //           // Strapi expects the payload to be wrapped in a "data" object
-  //           body: JSON.stringify({ data: formData }),
-  //         }
-  //       );
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/contact-forms`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            // Strapi expects the payload to be wrapped in a "data" object
+            body: JSON.stringify({ data: formData }),
+          }
+        );
 
-  //       const data = await response.json();
-  //       console.log("form data", data);
+        const data = await response.json();
+        console.log("form data", data);
 
-  //       if (!response.ok) {
-  //         throw new Error(data.error?.message || "Something went wrong");
-  //       }
+        if (!response.ok) {
+          throw new Error(data.error?.message || "Something went wrong");
+        }
 
-  //       // Success logic
-  //       setSubmitted(true);
-  //       setFormData({
-  //         firstName: "",
-  //         lastName: "",
-  //         email: "",
-  //         number: "",
-  //         interest: "",
-  //         message: "",
-  //       });
-  //       console.log("Saved to Strapi:", data);
-  //     } catch (error) {
-  //       console.error("Submission error:", error);
-  //       alert(`Error: ${error.message}`);
-  //     } finally {
-  //       setLoading(false); // Stop loading
-  //     }
-  //   }
-  // };
+        // Success logic
+        setSubmitted(true);
+        setFormData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          number: "",
+          interest: "",
+          message: "",
+        });
+        console.log("Saved to Strapi:", data);
+      } catch (error) {
+        console.error("Submission error:", error);
+        alert(`Error: ${error.message}`);
+      } finally {
+        setLoading(false); // Stop loading
+      }
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

@@ -705,8 +705,8 @@ export default function ThreeScene({
             scrollTrigger: {
               trigger: ".statSection",
               start: "top bottom",
-              end: "top top",
-              scrub: 1.2,
+              end: "top 65%",
+              scrub: 1,
             },
           })
           .to(".statSection", { opacity: 1, ease: "none" }, 0)

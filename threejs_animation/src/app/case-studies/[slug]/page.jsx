@@ -79,48 +79,48 @@ export default function CaseStudyDetails() {
   const sidebarRef = useRef(null);
   const footerRef = useRef(null);
 
-//   useEffect(() => {
-//      if (!process.env.NEXT_PUBLIC_API_URL) return;
-//     const fetchCaseStudies = async () => {
-//       try {
-//         const res = await fetch(
-//           `${process.env.NEXT_PUBLIC_API_URL}/api/case-studies?` +
-//             `populate[sections][populate]=*&` +
-//             `populate[logo][fields][0]=url&populate[logo][fields][1]=alternativeText&` +
-//             `populate[coverImage][fields][0]=url&populate[coverImage][fields][1]=alternativeText`
-//         );
+  useEffect(() => {
+     if (!process.env.NEXT_PUBLIC_API_URL) return;
+    const fetchCaseStudies = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/case-studies?` +
+            `populate[sections][populate]=*&` +
+            `populate[logo][fields][0]=url&populate[logo][fields][1]=alternativeText&` +
+            `populate[coverImage][fields][0]=url&populate[coverImage][fields][1]=alternativeText`
+        );
 
-//         const data = await res.json();
+        const data = await res.json();
 
-//         const selected = data.data.find(
-//           (item) => `${slugify(item.title)}-${slugify(item.tag)}` === slug
-//         );
+        const selected = data.data.find(
+          (item) => `${slugify(item.title)}-${slugify(item.tag)}` === slug
+        );
 
-//         // const selected = data.data[0];
-//         setFilteredCaseStudy(selected);
+        // const selected = data.data[0];
+        setFilteredCaseStudy(selected);
 
-//         setCaseStudies(Array.isArray(data.data) ? data.data : []);
+        setCaseStudies(Array.isArray(data.data) ? data.data : []);
 
-//         const mapped = selected.sections.map((section) => ({
-//           id: section.__component.split(".").pop(),
-//           type: section.__component,
-//           label: section.title,
-//           description: section.description || null,
-//           beforeDescription: section.before_description || null,
-//           afterDescription: section.after_description || null,
-//           beforeImage: section.result_before_image || null,
-//           afterImage: section.result_after_image || null,
-//         }));
+        const mapped = selected.sections.map((section) => ({
+          id: section.__component.split(".").pop(),
+          type: section.__component,
+          label: section.title,
+          description: section.description || null,
+          beforeDescription: section.before_description || null,
+          afterDescription: section.after_description || null,
+          beforeImage: section.result_before_image || null,
+          afterImage: section.result_after_image || null,
+        }));
 
-//         setSections(mapped);
-//         setActive(mapped[0]?.id);
-//       } catch (err) {
-//         console.error(err);
-//       }
-//     };
+        setSections(mapped);
+        setActive(mapped[0]?.id);
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-//     fetchCaseStudies();
-//   }, [slug]);
+    fetchCaseStudies();
+  }, [slug]);
 
   // Add 'sections' and 'filteredCaseStudy' to dependencies so this reruns when data loads
   useEffect(() => {
@@ -280,6 +280,7 @@ export default function CaseStudyDetails() {
                 width={600}
                 height={600}
                 className="object-contain w-full"
+                unoptimized
               />
             </div>
           </div>
@@ -350,6 +351,7 @@ export default function CaseStudyDetails() {
                             fill
                             sizes="(max-width: 1024px) 100vw, 50vw"
                             className="object-contain"
+                            unoptimized
                           />
                         </div>
                       </div>
@@ -359,13 +361,14 @@ export default function CaseStudyDetails() {
                             {section.afterDescription}
                           </MarkdownRenderer>
                         </div>
-                        <div className="relative w-full lg:w-[65%] h-[200px] lg:h-auto border">
+                        <div className="relative w-full lg:w-[65%] h-[200px] lg:h-auto ">
                           <Image
                             src={`${process.env.NEXT_PUBLIC_API_URL}${afterImg}`}
                             alt="Reach out"
                             fill
                             sizes="(max-width: 1024px) 100vw, 50vw"
                             className="object-contain"
+                            unoptimized
                           />
                         </div>
                       </div>
