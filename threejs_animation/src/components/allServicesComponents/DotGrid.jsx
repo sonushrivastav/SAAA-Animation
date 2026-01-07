@@ -16,20 +16,32 @@ const throttle = (func, limit) => {
     };
 };
 
-function hexToRgb(hex) {
-    const m = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
-    if (!m) return { r: 0, g: 0, b: 0 };
-    return {
-        r: parseInt(m[1], 16),
-        g: parseInt(m[2], 16),
-        b: parseInt(m[3], 16),
-    };
+/**
+ * Parses any CSS color string (hex, rgb, rgba, named) into {r,g,b,a}
+ * 'a' is normalized to 0-1 range.
+ */
+function parseColor(colorString) {
+    if (typeof window === 'undefined') return { r: 0, g: 0, b: 0, a: 1 };
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 1;
+    canvas.height = 1;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return { r: 0, g: 0, b: 0, a: 1 };
+
+    ctx.fillStyle = colorString;
+    ctx.fillRect(0, 0, 1, 1);
+
+    const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
+
+    // Canvas returns alpha as 0-255, we need 0-1 for CSS rgba()
+    return { r, g, b, a: a / 255 };
 }
 
 const DotGrid = ({
     dotSize = 16,
     gap = 32,
-    baseColor = '#5227FF',
+    baseColor = '#d1d5db',
     activeColor = '#5227FF',
     proximity = 150,
     speedTrigger = 100,
@@ -57,12 +69,12 @@ const DotGrid = ({
     const isVisibleRef = useRef(false);
     const isScrollingRef = useRef(false);
 
-    const baseRgb = useMemo(() => hexToRgb(baseColor), [baseColor]);
-    const activeRgb = useMemo(() => hexToRgb(activeColor), [activeColor]);
+    // Extract RGBA including Alpha
+    const baseColorData = useMemo(() => parseColor(baseColor), [baseColor]);
+    const activeColorData = useMemo(() => parseColor(activeColor), [activeColor]);
 
     const circlePath = useMemo(() => {
         if (typeof window === 'undefined' || !window.Path2D) return null;
-
         const p = new Path2D();
         p.arc(0, 0, dotSize / 2, 0, Math.PI * 2);
         return p;
@@ -89,10 +101,8 @@ const DotGrid = ({
 
         const gridW = cell * cols - gap;
         const gridH = cell * rows - gap;
-
         const extraX = width - gridW;
         const extraY = height - gridH;
-
         const startX = extraX / 2 + dotSize / 2;
         const startY = extraY / 2 + dotSize / 2;
 
@@ -106,6 +116,7 @@ const DotGrid = ({
         }
         dotsRef.current = dots;
     }, [dotSize, gap]);
+
     useEffect(() => {
         const observer = new IntersectionObserver(
             ([entry]) => {
@@ -113,11 +124,10 @@ const DotGrid = ({
             },
             { threshold: 0.15 }
         );
-
         if (wrapperRef.current) observer.observe(wrapperRef.current);
-
         return () => observer.disconnect();
     }, []);
+
     useEffect(() => {
         let t;
         const onScroll = () => {
@@ -127,7 +137,6 @@ const DotGrid = ({
                 isScrollingRef.current = false;
             }, 120);
         };
-
         window.addEventListener('scroll', onScroll, { passive: true });
         return () => window.removeEventListener('scroll', onScroll);
     }, []);
@@ -150,6 +159,8 @@ const DotGrid = ({
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             const { x: px, y: py } = pointerRef.current;
+            const { r: br, g: bg, b: bb, a: ba } = baseColorData;
+            const { r: ar, g: ag, b: ab, a: aa } = activeColorData;
 
             for (const dot of dotsRef.current) {
                 const ox = dot.cx + dot.xOffset;
@@ -158,29 +169,42 @@ const DotGrid = ({
                 const dy = dot.cy - py;
                 const dsq = dx * dx + dy * dy;
 
-                let style = baseColor;
-                if (dsq <= proxSq) {
-                    const dist = Math.sqrt(dsq);
-                    const t = 1 - dist / proximity;
-                    const r = Math.round(baseRgb.r + (activeRgb.r - baseRgb.r) * t);
-                    const g = Math.round(baseRgb.g + (activeRgb.g - baseRgb.g) * t);
-                    const b = Math.round(baseRgb.b + (activeRgb.b - baseRgb.b) * t);
-                    style = `rgb(${r},${g},${b})`;
+                if (dsq > proxSq) {
+                    ctx.save();
+                    ctx.translate(ox, oy);
+                    ctx.fillStyle = `rgba(${br},${bg},${bb},${ba})`;
+                    ctx.fill(circlePath);
+                    ctx.restore();
+                    continue;
                 }
+
+                const dist = Math.sqrt(dsq);
+                let t = 1 - dist / proximity;
+
+                /** * ADJUST INTENSITY HERE:
+                 * Math.pow(t, 1.5) makes the purple area larger and punchier.
+                 * Math.pow(t, 3.0) makes it a tiny, sharp point.
+                 */
+                const intensity = Math.pow(t, 1.5);
+
+                // Interpolate RGBA using the new intensity
+                const r = Math.round(br + (ar - br) * intensity);
+                const g = Math.round(bg + (ag - bg) * intensity);
+                const b = Math.round(br + (ab - bb) * intensity);
+                const a = ba + (aa - ba) * intensity;
 
                 ctx.save();
                 ctx.translate(ox, oy);
-                ctx.fillStyle = style;
+                ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
                 ctx.fill(circlePath);
                 ctx.restore();
             }
-
             rafId = requestAnimationFrame(draw);
         };
 
         draw();
         return () => cancelAnimationFrame(rafId);
-    }, [proximity, baseColor, activeRgb, baseRgb, circlePath]);
+    }, [proximity, baseColorData, activeColorData, circlePath]);
 
     useEffect(() => {
         buildGrid();
@@ -200,7 +224,6 @@ const DotGrid = ({
     useEffect(() => {
         const onMove = e => {
             if (isScrollingRef.current) return;
-
             if (!canvasRef.current) return;
             const now = performance.now();
             const pr = pointerRef.current;
@@ -222,7 +245,6 @@ const DotGrid = ({
             pr.vx = vx;
             pr.vy = vy;
             pr.speed = speed;
-
             const rect = canvasRef.current.getBoundingClientRect();
             pr.x = e.clientX - rect.left;
             pr.y = e.clientY - rect.top;

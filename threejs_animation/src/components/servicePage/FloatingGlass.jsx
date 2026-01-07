@@ -1,4 +1,3 @@
-
 'use client';
 import { Environment, PerspectiveCamera, useGLTF } from '@react-three/drei';
 import { Canvas, useFrame } from '@react-three/fiber';
@@ -17,6 +16,7 @@ function GlassModel({
     amplitude = 0.05,
     motionVariant = 0,
     mouseInfluence = true,
+    rotateY = false,
 }) {
     // Dynamic Preloader
     useEffect(() => {
@@ -58,11 +58,20 @@ function GlassModel({
         return () => window.removeEventListener('mousemove', handleMouseMove);
     }, [mouseInfluence]);
 
-    useFrame(({ clock }) => {
+    useFrame(({ clock, invalidate }) => {
         if (!ref.current) return;
+        invalidate();
 
         const t = clock.getElapsedTime() * speed;
         const mesh = ref.current;
+
+        if (rotateY) {
+            mesh.rotation.y += 0.01;
+        } else {
+            mesh.rotation.x += 0.01;
+
+            mesh.rotation.y += 0.01;
+        }
 
         // Base floating logic
         switch (motionVariant) {
@@ -95,7 +104,7 @@ function GlassModel({
     });
 
     return (
-        <group ref={ref} position={[0, 0, 0]} scale={[5.5, 5.5, 5.5]}>
+        <group ref={ref} position={[0, 0, 0]} scale={[4.5, 4.5, 4.5]}>
             <primitive position={[0.08, -0.4, 0]} object={scene} />
         </group>
     );
@@ -116,9 +125,10 @@ export default function ThreeGlass({
     amplitude = 0.05,
     motionVariant = 0,
     mouseInfluence = false,
+    rotateY = false,
 }) {
     return (
-        <div className="w-full h-full">
+        <div className="w-full h-full ">
             <Canvas
                 shadows={false}
                 frameloop="demand"
@@ -143,6 +153,7 @@ export default function ThreeGlass({
                         amplitude={amplitude}
                         motionVariant={motionVariant}
                         mouseInfluence={mouseInfluence}
+                        rotateY={rotateY}
                     />
                 </Suspense>
             </Canvas>

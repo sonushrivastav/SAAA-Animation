@@ -106,7 +106,7 @@ const TeamCard = ({
                 alt={name}
                 width={200}
                 height={200}
-                className="front-image object-cover"
+                className="w-full front-image object-cover"
             />
 
             {/* Hover Reveal Image */}
@@ -138,7 +138,7 @@ const StatCard = ({
     const textHighlightClass = showEffects ? 'text-[#fafafa]' : 'text-[#9C9C9C]';
     return (
         <div
-            className={`relative p-4 md:p-6 lg:p-10 ${roundedClass} bg-[#55555520] md:bg-transparent transition-colors duration-300 w-full  xl:h-[350px]   ${
+            className={`relative p-4 md:p-6 lg:p-10 ${roundedClass} bg-[#55555520] md:bg-transparent transition-colors duration-300 w-full  xl:h-[420px]   ${
                 hasContent
                     ? `border-2 md:border ${isHovered ? 'border-[#fafafa]' : 'border-[#555555]'}`
                     : isHovered

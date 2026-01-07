@@ -53,18 +53,18 @@ const CaseStudyCards = ({ caseStudies = [], className = '' }) => {
 
                             <div className="px-6 py-2">
                                 <span className="px-2 py-1 text-xs xl:text-sm rounded-lg bg-[#ededed] text-[#555555]   self-start">
-                                    {item.tag}
+                                    {item.tags}
                                 </span>
                             </div>
                         </div>
 
-                        <div className="w-full flex items-center justify-center rounded-b-2xl">
+                        <div className="w-full h-[400px] xl:h-[450px] 3xl:h-[600px] flex  items-center justify-center rounded-b-xl">
                             <Image
                                 src={`${process.env.NEXT_PUBLIC_API_URL}${item.coverImage.url}`}
                                 alt={item.title || 'case study image'}
                                 width={200}
-                                height={200}
-                                className="h-full w-full object-cover rounded-b-2xl"
+                                height={1000}
+                                className="h-full w-full object-cover  rounded-b-2xl"
                             />
                         </div>
                     </Link>

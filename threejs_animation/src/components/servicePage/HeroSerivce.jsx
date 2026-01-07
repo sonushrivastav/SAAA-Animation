@@ -24,7 +24,7 @@ const GlassInstance = memo(function GlassInstance({
     if (!isLoaded) return null;
 
     return (
-        <div className={`absolute ${position} w-52 h-52  flex  items-center justify-center`}>
+        <div className={`absolute ${position} w-52 h-52  flex  items-center justify-center pointer-events-auto`}>
             <ThreeGlass
                 modelUrl={modelUrl}
                 motionVariant={motionVariant}
@@ -117,8 +117,19 @@ const HeroSerivce = memo(function HeroService() {
             {/* <div className="absolute  inset-0 bg-[radial-gradient(150%_90%_at_50%_65%,_rgba(88,28,135,0.9)_0%,_rgba(0,0,0,1)_55%)] " /> */}
             {/* <div className="absolute inset-0 bg-[radial-gradient(130%_70%_at_50%_75%,_rgba(90,0,255,0.9)_0%,_rgba(132,77,233,0.9)_45%,_rgba(0,0,0,1)_85%)]" /> */}
 
-            {isVisible && !isMobile && <GradientBackground heightFactor={2.3} />}
-
+            <div className="flex lg:hidden h-full w-full ">
+                <video
+                    className="w-full h-full object-cover"
+                    src="/videos/serviceBg.mp4"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                ></video>
+            </div>
+            <div className="hidden lg:flex h-full w-full ">
+                {isVisible && <GradientBackground heightFactor={2.3} />}
+            </div>
             <div className="absolute inset-0 pointer-events-none z-10">
                 {isVisible &&
                     glassConfigs.map((config, index) => (
@@ -136,7 +147,7 @@ const HeroSerivce = memo(function HeroService() {
             </div>
 
             {/* Text Content */}
-            <div className="absolute  text-center text-[#fafafa] px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20 w-[full] lg:w-[75%]">
+            <div className="absolute  text-center text-[#fafafa] px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20 w-[full] lg:w-[75%] pointer-events-none">
                 <h2 className="text-2xl md:text-3xl lg:text-3xl xl:text-4xl font-semibold leading-normal md:leading-[50px] lg:leading-[63px] ">
                     Every brand deserves more than service providers. You get thinkers, creators,
                     and partners who are dedicated to your growth. Each solution is shaped around

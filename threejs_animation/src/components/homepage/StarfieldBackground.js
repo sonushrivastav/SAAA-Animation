@@ -226,6 +226,17 @@ export default function StarfieldBackground({ activeIndex = 0 }) {
         starsGeometry.setAttribute('aSize', new THREE.Float32BufferAttribute(sizes, 1));
         starsGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
 
+        // 🔀 Per-particle random direction
+        const randoms = new Float32Array(total * 3);
+
+        for (let i = 0; i < total; i++) {
+            randoms[i * 3 + 0] = Math.random() * 2 - 1;
+            randoms[i * 3 + 1] = Math.random() * 2 - 1;
+            randoms[i * 3 + 2] = Math.random() * 2 - 1;
+        }
+
+        starsGeometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 3));
+
         const starTexture = createCircleTexture();
         const gltfLoader = new GLTFLoader();
         const meshes = [];
@@ -341,8 +352,9 @@ export default function StarfieldBackground({ activeIndex = 0 }) {
                 uSpeed: { value: controls.baseSpeed },
                 uMorph: { value: 0 },
                 uMeshPosition: { value: new THREE.Vector3(0, 0, 0) },
-                uActiveIndex: { value: { activeIndex } }, // Passed from prop
+                uActiveIndex: { value: activeIndex }, // Passed from prop
                 uHighlightColor: { value: new THREE.Color('#ab76e2') },
+                uInactiveColor: { value: new THREE.Color('#777777') }, // example muted color
                 uMinOpacity: { value: controls.minOpacity },
                 uMaxOpacity: { value: controls.maxOpacity },
                 uOpacityFalloff: { value: controls.opacityFalloff },
@@ -350,6 +362,10 @@ export default function StarfieldBackground({ activeIndex = 0 }) {
                 uMousePos: { value: new THREE.Vector3(0, 0, 0) },
                 uRepulseRadius: { value: 0.8 },
                 uRepulseStrength: { value: new THREE.Vector2(0, 0) },
+                uLiveIntensity: { value: 5 },
+                uMouseEnergy: { value: 0 },
+                uGlobalMotion: { value: 1.0 },
+
                 vertexColors: true,
             },
             vertexShader: `
@@ -368,6 +384,13 @@ export default function StarfieldBackground({ activeIndex = 0 }) {
         uniform float uMergeProgress;
         uniform float uMorph;
         uniform vec3 uMeshPosition;
+        uniform float uGlobalMotion;
+
+
+          attribute vec3 aRandom;
+uniform float uMouseEnergy;
+
+
 
 
         // 👇 NEW UNIFORMS
@@ -393,6 +416,8 @@ export default function StarfieldBackground({ activeIndex = 0 }) {
           pos = mix(pos, localTarget, uMorph);
 
 
+
+
                   // 🧲 INDIVIDUAL PARTICLE MAGNETISM
         if (uMorph > 0.90) {
             float dist = distance(aTarget.xy, uMousePos.xy);
@@ -412,7 +437,41 @@ export default function StarfieldBackground({ activeIndex = 0 }) {
                 pos.z += repulseDir.z * force * ((uRepulseStrength.x + uRepulseStrength.y) / 2.0);
             }
         }
-                  // -----------------------------------------------------------
+
+    // 🌬️ IDLE PER-PARTICLE MOTION (AFTER MORPH)
+    if (uMorph > 0.99) {
+
+    float t = uTime;
+
+
+    // Unique phase per particle
+    float phaseX = aRandom.x * 50.2831;
+    float phaseY = aRandom.y * 50.2831;
+    float phaseZ = aRandom.z * 1.2831;
+
+    // Very small oscillations
+    vec3 idleOffset;
+    idleOffset.x = sin(t * 1.2 + phaseX) * 0.08;
+    idleOffset.y = cos(t * 1.4 + phaseY) * 0.08;
+    idleOffset.z = sin(t * 1.1 + phaseZ) * 0.08;
+
+    float edgeBias = clamp(length(aTarget.xy) * 0.05, 0.3, 1.0);
+    pos += idleOffset * edgeBias;
+    }
+
+    // whole model motion after morphing
+    if (uMorph > 0.95) {
+
+    float t = uTime * 0.4;
+
+    vec3 globalOffset;
+    globalOffset.x = sin(t) * 0.095;
+    globalOffset.y = cos(t * 0.9) * 0.095;
+    globalOffset.z = sin(t * 0.7) * 0.095;
+
+    pos += globalOffset * uGlobalMotion;
+    }
+
 
           vec4 mvPos = modelViewMatrix * vec4(pos, 1.0);
           float depth = -mvPos.z;
@@ -459,9 +518,17 @@ varying float vShapeIndex;
 
         uniform float uActiveIndex;
                 uniform vec3 uHighlightColor;
+                uniform vec3 uInactiveColor;
+
 
         void main() {
+
           vec2 uv = gl_PointCoord - 0.5;
+          vec3 finalColor = vColor;
+
+
+          float colorStrength = smoothstep(0.95, 1.0, vMorphFactor);
+
 
           // elongate vertically and shrink horizontally
           uv.x *= uStretchX;
@@ -483,11 +550,21 @@ varying float vShapeIndex;
 
           // Optional: Boost opacity slightly when formed to make it crisp
           finalOpacity = mix(finalOpacity, 1.0, vMorphFactor * 0.5);
-          vec3 finalColor = vColor;
-          if (abs(vShapeIndex - uActiveIndex) < 0.1) {
-                        // Mix based on morph factor so it only highlights when formed
-                        finalColor = mix(vColor, uHighlightColor, vMorphFactor);
-                    }
+         if (colorStrength > 0.0) {
+
+    // ACTIVE slice
+    if (abs(vShapeIndex - uActiveIndex) < 0.1) {
+
+        finalColor = mix(vColor, uHighlightColor, colorStrength);
+
+    }
+    // INACTIVE slices
+    else {
+
+        finalColor = mix(vColor, uInactiveColor, colorStrength);
+
+    }
+}
 finalColor *= 1.5;
           gl_FragColor = tex * vec4(finalColor, finalOpacity);
         }
@@ -514,12 +591,25 @@ finalColor *= 1.5;
             lastScroll = newScroll;
             scrollSpeed += velocity * 0.05;
         });
-
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+        let mouseVelocity = 0;
         // ... existing mouse listener ...
         const mouse = { x: 0, y: 0 };
         document.addEventListener('mousemove', e => {
             mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+
+            const dx = x - lastMouseX;
+            const dy = y - lastMouseY;
+
+            mouseVelocity = Math.min(Math.sqrt(dx * dx + dy * dy) * 10.0, 1.0);
+
+            lastMouseX = x;
+            lastMouseY = y;
         });
         // ... inside animate() ...
 
@@ -559,6 +649,10 @@ finalColor *= 1.5;
 
             // Update the uniform so the shader knows where the container is
             material.uniforms.uMeshPosition.value.copy(stars.position);
+
+            material.uniforms.uMouseEnergy.value +=
+                (mouseVelocity - material.uniforms.uMouseEnergy.value) * 0.15;
+            mouseVelocity *= 0.9; // decay
 
             // 🌠 Axis-agnostic wrapping
             const total = window.starfieldTotalDepth || totalDepth;

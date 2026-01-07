@@ -252,7 +252,7 @@ export default function CaseStudyDetails() {
                     <div className="z-10 relative w-full md:w-[50%] self-stretch flex items-center    text-[#0f0f0f] ">
                         <div className="px-8 pt-35 md:pl-14 md:pr-0 lg:pl-28 lg:pr-0 md:py-0 lg:py-0 ">
                             <h1 className="text-4xl lg:text-6xl xl:text-7xl  text-[#0f0f0f] font-semibold lg:leading-[85px] ">
-                                {filteredCaseStudy?.heading} <br /> for{' '}
+                                {filteredCaseStudy?.heading} <br />
                                 <span className="bg-[#844de9] inline text-[#fafafa] px-2  rounded-md">
                                     {filteredCaseStudy?.color_heading}
                                 </span>

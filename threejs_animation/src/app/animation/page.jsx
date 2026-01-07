@@ -12,7 +12,6 @@ import FlowingParticles from '../../components/homepage/ParticleBackground';
 import StarfieldBackground from '../../components/homepage/StarfieldBackground';
 import StatsSection from '../../components/homepage/Stats';
 import useDeviceType from '../../components/hooks/useDeviceType';
-import ParticleBg from '../../components/homepage/ParticlesBg'
 // ✅ It's good practice to register the plugin once
 gsap.registerPlugin(ScrollTrigger);
 
@@ -33,7 +32,7 @@ const Animation = () => {
     const flyingTextRef = useRef(null);
     const texts = [
         'You’re visible everywhere, but remembered nowhere?',
-        'Your website and UI/UX look great in reviews, not in results.',
+        'Your website and UI/UX look great in reviews, not in results?',
         'Investors are interested, but not invested?',
     ];
     const SERVICE_DATA = [
@@ -712,12 +711,10 @@ const Animation = () => {
                 {
                     opacity: 0,
                     y: -100,
-                    filter: 'blur(12px)',
                 },
                 {
                     opacity: 1,
                     y: 0,
-                    filter: 'blur(0px)',
                     duration: 1.4,
                     ease: 'power3.out',
                     ease: 'power1.inOut',
@@ -737,7 +734,6 @@ const Animation = () => {
                     {
                         opacity: 0,
                         y: -100,
-                        filter: 'blur(10px)',
                         duration: 1.2,
                         ease: 'power2.inOut',
                     },
@@ -750,12 +746,10 @@ const Animation = () => {
                     {
                         opacity: 0,
                         y: -100,
-                        filter: 'blur(12px)',
                     },
                     {
                         opacity: 1,
                         y: 0,
-                        filter: 'blur(0px)',
                         duration: 1.4,
                         ease: 'power3.out',
                         onStart: () => setActiveServiceIndex(i),
@@ -942,7 +936,7 @@ const Animation = () => {
                         ))}
                     </div>
                     {/* Service Texts beside logo */}
-                    <div className="absolute bottom-15 md:bottom-[29%] lg:bottom-[33%]  lg:right-[12%] md:right-[2%] w-full  h-[200px] md:w-[400px] md:h-[250px] flex items-center justify-center text-left   service-texts  ">
+                    <div className="absolute bottom-15 md:bottom-[29%] lg:bottom-[33%]  lg:right-[12%] md:right-[2%] w-full  h-[200px] md:w-[400px] md:h-[250px] flex items-center justify-center text-left text-[#fafafa]   service-texts  ">
                         {SERVICE_DATA.map((service, i) => (
                             <div
                                 key={i}

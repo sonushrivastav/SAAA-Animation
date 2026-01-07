@@ -117,8 +117,8 @@ const CaseStudies = () => {
   }, []);
   const filteredCaseStudies = useMemo(() => {
     return caseStudies.filter((item) => {
-      const tag = item?.tag;
-      return tag === activeTab;
+      const tags = item?.tags;
+      return tags === activeTab;
     });
   }, [caseStudies, activeTab]);
 

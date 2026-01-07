@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export default function Footer() {
     return (
-        <footer className="w-full relative bg-[#0F0F0F] text-[#FAFAFA] py-10 md:px-14 lg:px-28 md:py-16 lg:py-20  z-[55]">
+        <footer className="w-full relative bg-[#0F0F0F] text-[#FAFAFA] px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20  z-[55]">
             <div className=" mx-auto grid grid-cols-1 md:grid-cols-3 gap-10 ">
                 {/* Logo Section */}
                 <div className="flex flex-col gap-4">
@@ -15,7 +15,7 @@ export default function Footer() {
                 </div>
 
                 {/* Navigation */}
-                <div className="flex flex-col items-start gap-3 text-lg  text-left">
+                <div className="flex flex-col items-start gap-3 text-base md:text-lg xl:text-xl font-semibold  text-left">
                     <Link
                         href="/animation"
                         className="uppercase transition  hover-underline-animation"
@@ -46,7 +46,7 @@ export default function Footer() {
                 </div>
 
                 {/* Contact Section */}
-                <div className="flex flex-col gap-3 text-lg">
+                <div className="flex flex-col gap-3 text-base md:text-lg xl:text-xl font-semibold">
                     <p>Kanakia Wall Street, Mumbai, India</p>
                     <p>+91 7977895134</p>
                     <p>info@saaaconsultants.com</p>
