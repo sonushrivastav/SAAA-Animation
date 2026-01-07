@@ -15,38 +15,34 @@ const StatCard = ({
   const showEffects = isHovered || isMobile || isTablet;
   const textHighlightClass = showEffects ? "text-[#fafafa]" : "text-[#9C9C9C]";
 
-  return (
-    <div
-      className={`relative p-4 md:p-6 lg:p-10 ${roundedClass} bg-[#55555520] md:bg-transparent transition-colors duration-300 w-full h-[250px] md:h-[300px] lg:h-[400px] ${
-        hasContent
-          ? `border-2 md:border ${
-              isHovered ? "border-[#fafafa]" : "border-[#555555]"
-            }`
-          : isHovered
-          ? "border border-[#555555]"
-          : "border border-[#555555]"
-      }`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Dot Grid - only show when conditions are met */}
-      <div className="absolute inset-0 overflow-hidden">
-        {(!hasContent || (hasContent && isHovered) || isMobile) && (
-          <DotGrid
-            dotSize={2}
-            gap={8}
-            baseColor={!hasContent ? "#271e37" : "#271e37"}
-            activeColor={
-              !hasContent ? "#fafafa" : isHovered ? "#844de9" : "#271e37"
-            }
-            proximity={120}
-            shockRadius={250}
-            shockStrength={5}
-            resistance={750}
-            returnDuration={1.5}
-          />
-        )}
-      </div>
+    return (
+        <div
+            className={`relative p-4 md:p-6 lg:p-10 ${roundedClass} bg-[#55555520]   md:bg-transparent transition-colors duration-300 w-full h-[250px] md:h-[300px] lg:h-[400px] ${
+                hasContent
+                    ? `border-2 md:border ${isHovered ? 'border-[#fafafa]' : 'border-[#555555]'}`
+                    : isHovered
+                    ? 'border border-[#555555]'
+                    : 'border border-[#555555]'
+            }`}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+            {/* Dot Grid - only show when conditions are met */}
+            <div className="absolute inset-0 overflow-hidden">
+                {(!hasContent || (hasContent && isHovered) || isMobile) && (
+                    <DotGrid
+                        dotSize={2}
+                        gap={8}
+                        baseColor={!hasContent ? '#271e37' : '#271e37'}
+                        activeColor={!hasContent ? '#fafafa' : isHovered ? '#844de9' : '#271e37'}
+                        proximity={120}
+                        shockRadius={250}
+                        shockStrength={5}
+                        resistance={750}
+                        returnDuration={1.5}
+                    />
+                )}
+            </div>
 
       {/* Content */}
       {hasContent && (
