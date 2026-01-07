@@ -40,6 +40,10 @@ export default function ContactForm({ btnPosition = "right" }) {
 
   const handleSubmit = async (e) => {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+    
+>>>>>>> Stashed changes
 =======
     
 >>>>>>> Stashed changes
