@@ -129,7 +129,6 @@ const TeamCard = memo(function TeamCard({
   image = "/images/about/ourVision_1.webp",
   bgImage = "/images/about/ourVision_3.webp",
 }) {
-
   return (
     <div
       className="team-card relative     will-change-transform overflow-hidden"
@@ -141,7 +140,7 @@ const TeamCard = memo(function TeamCard({
         alt={name}
         width={200}
         height={200}
-         loading="lazy"
+        loading="lazy"
         className="front-image object-cover w-full"
       />
 
@@ -150,7 +149,7 @@ const TeamCard = memo(function TeamCard({
         src={bgImage}
         alt={name}
         fill
-         loading="lazy"
+        loading="lazy"
         className="hover-img object-cover absolute inset-0"
       />
       {/* Info */}
@@ -169,12 +168,12 @@ const StatCard = memo(function StatCard({
   roundedClass,
   isMobile = false,
   isTablet = false,
-})  {
+}) {
   const [isHovered, setIsHovered] = useState(false);
   const [shouldLoadDotGrid, setShouldLoadDotGrid] = useState(false);
-  const cardRef = useRef(null)
+  const cardRef = useRef(null);
 
-   // Lazy load DotGrid only when card is in viewport
+  // Lazy load DotGrid only when card is in viewport
   useLayoutEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -194,8 +193,8 @@ const StatCard = memo(function StatCard({
   const textHighlightClass = showEffects ? "text-[#fafafa]" : "text-[#9C9C9C]";
   return (
     <div
-    ref={cardRef}
-      className={`relative p-4 md:p-6 lg:p-10 ${roundedClass} bg-[#55555520] md:bg-transparent transition-colors duration-300 w-full  xl:h-[350px]   ${
+      ref={cardRef}
+      className={`relative p-4 md:p-6 lg:p-10 ${roundedClass} bg-[#55555520] md:bg-transparent transition-colors duration-300 w-full  xl:h-105   ${
         hasContent
           ? `border-2 md:border ${
               isHovered ? "border-[#fafafa]" : "border-[#555555]"
@@ -209,7 +208,7 @@ const StatCard = memo(function StatCard({
     >
       {/* Dot Grid - only show when conditions are met */}
       <div className="absolute inset-0 overflow-hidden">
-        {(shouldLoadDotGrid && (!hasContent || (hasContent && showEffects))) && (
+        {shouldLoadDotGrid && (!hasContent || (hasContent && showEffects)) && (
           <DotGrid
             dotSize={2}
             gap={8}
@@ -367,7 +366,7 @@ const About = () => {
     <div>
       <section className=" w-full ">
         <Suspense fallback={<div className="w-full h-[300px] bg-[#0f0f0f]" />}>
-         <LazyVideo />
+          <LazyVideo />
         </Suspense>
       </section>
 

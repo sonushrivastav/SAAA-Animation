@@ -7,7 +7,7 @@ import "./globals.css";
 const grift = localFont({
   src: [
     {
-      path: "../assets/fonts/grift/Grift-Regular.woff2",
+      path: "../assets/fonts/grift/Grift-Regular.otf",
       weight: "400",
     },
   ],
