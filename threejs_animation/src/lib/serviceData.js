@@ -926,10 +926,10 @@ export const servicesData = {
             '/images/socialMedia/tiktok.svg',
         ],
         stats: [
-            { stat: '100+', label: 'accounts managed' },
-            { stat: '1 Cr+', label: 'total reach generated' },
-            { stat: '150%', label: 'follower growth achieved' },
-            { stat: '4.5%', label: 'average increase in engagement' },
+            { stat: '50+', label: 'Projects Delivered' },
+            { stat: '15+', label: 'Industries Served' },
+            { stat: '25+', label: 'Ongoing Maintenance Projects' },
+            { stat: '3-4 Weeks', label: 'Average Project Turnaround' },
         ],
         caseStudies: [
             {

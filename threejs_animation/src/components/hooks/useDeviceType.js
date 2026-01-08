@@ -20,7 +20,7 @@ export default function useDeviceType() {
     if (typeof window === "undefined")
       return { isMobile: false, isTablet: false, isDesktop: true };
 
-    const width = window.innerWidth;
+        const width = window.innerWidth;
 
     return {
       isMobile: width < 768,
@@ -40,5 +40,14 @@ export default function useDeviceType() {
     return () => window.removeEventListener("resize", handleResize);
   }, [getType]);
 
-  return device;
+    useEffect(() => {
+        const handleResize = () => {
+            setDevice(getType());
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    return device;
 }
