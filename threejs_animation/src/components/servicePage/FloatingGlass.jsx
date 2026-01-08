@@ -16,7 +16,9 @@ function GlassModel({
     amplitude = 0.05,
     motionVariant = 0,
     mouseInfluence = true,
-    rotateY = false,
+    rotateX = true,
+    rotationSpeed = 1,
+    rotationOffset = 0,
 }) {
     // Dynamic Preloader
     useEffect(() => {
@@ -34,10 +36,34 @@ function GlassModel({
     // 2. Memoize the cloned scene to prevent memory leaks on re-render
     const scene = useMemo(() => {
         const clone = originalScene.clone();
+        // console.log(clone);
+
         clone.traverse(child => {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.material.needsUpdate = true;
+
+                const originalColor = child.material.color;
+                const originalMap = child.material.map || null;
+                // child.material.color.set('#bebebe');
+
+                // child.material = new THREE.MeshPhysicalMaterial({
+                //     color: originalColor,
+                //     map: originalMap,
+                //     // metalness: 0,
+                //     // roughness: 0.1,
+                //     // transmission: 0.3,
+                //     // opacity: 0.6,
+                //     // transparent: true,
+                //     // thickness: 0.5,
+                //     // envMapIntensity: 1,
+                //     // clearcoat: 1,
+                //     // clearcoatRoughness: 0.1,
+                //     // ior: 1.5,
+                //     side: THREE.DoubleSide,
+                // });
+
                 // child.material.transparent = true;
                 // child.material.opacity = 0.9;
             }
@@ -47,7 +73,11 @@ function GlassModel({
 
     const ref = useRef();
     const mouse = useRef({ x: 0, y: 0 });
-
+    useEffect(() => {
+        if (ref.current) {
+            ref.current.rotation.y = rotationOffset;
+        }
+    }, [rotationOffset]);
     useEffect(() => {
         if (!mouseInfluence) return;
         const handleMouseMove = e => {
@@ -65,47 +95,25 @@ function GlassModel({
         const t = clock.getElapsedTime() * speed;
         const mesh = ref.current;
 
-        if (rotateY) {
-            mesh.rotation.y += 0.01;
-        } else {
-            mesh.rotation.x += 0.01;
+        const actualSpeed = 0.01 * rotationSpeed;
+        mesh.rotation.y += actualSpeed;
 
-            mesh.rotation.y += 0.01;
+        let targetX = 0;
+
+        if (rotateX) {
+            targetX += Math.sin(t * 1.5) * 0.1;
         }
 
-        // Base floating logic
-        switch (motionVariant) {
-            case 0:
-                mesh.position.x = Math.sin(t) * amplitude;
-                mesh.position.y = Math.cos(t * 0.8) * amplitude * 0.8;
-                break;
-
-            case 1:
-                mesh.position.x = Math.cos(t * 1.2) * amplitude * 1.2;
-                mesh.position.y = Math.sin(t * 0.7) * amplitude * 0.9;
-                break;
-
-            case 2:
-                mesh.position.x = Math.sin(t * 0.6) * amplitude;
-                mesh.position.y = Math.cos(t * 1.4) * amplitude;
-                break;
-
-            case 3:
-                mesh.position.x = Math.cos(t * 0.9) * amplitude * 0.7;
-                mesh.position.y = Math.sin(t * 1.1) * amplitude;
-                break;
-        }
-
-        // Mouse parallax
         if (mouseInfluence) {
-            mesh.position.x += mouse.current.x * 0.05;
-            mesh.position.y += mouse.current.y * 0.05;
+            targetX += mouse.current.y * 0.2;
         }
+
+        mesh.rotation.x += (targetX - mesh.rotation.x) * 0.05;
     });
 
     return (
-        <group ref={ref} position={[0, 0, 0]} scale={[4.5, 4.5, 4.5]}>
-            <primitive position={[0.08, -0.4, 0]} object={scene} />
+        <group position={[0, 0, 0]} scale={[5, 5, 5]}>
+            <primitive ref={ref} position={[0.01, -0.4, 0]} object={scene} />
         </group>
     );
 }
@@ -125,7 +133,9 @@ export default function ThreeGlass({
     amplitude = 0.05,
     motionVariant = 0,
     mouseInfluence = false,
-    rotateY = false,
+    rotateX = true,
+    rotationSpeed = 0.5,
+    rotationOffset = 0,
 }) {
     return (
         <div className="w-full h-full ">
@@ -139,13 +149,16 @@ export default function ThreeGlass({
                 }}
                 dpr={[1, 2]} // Limits resolution on high-density screens for speed
             >
-                <PerspectiveCamera makeDefault position={[0, 0, 5]} />
-                <ambientLight intensity={0.5} />
-                <pointLight position={[10, 10, 10]} intensity={1} />
-                <spotLight position={[-10, 10, 10]} angle={0.15} penumbra={1} />
+                <PerspectiveCamera makeDefault position={[0, 0, 6]} />
 
-                <Environment preset="sunset" />
+                <ambientLight intensity={1} />
+                <pointLight position={[10, 10, 10]} intensity={2} />
+                <pointLight position={[-10, -10, 10]} intensity={1.5} />
+                <directionalLight position={[5, 5, 5]} intensity={1.2} />
 
+                <directionalLight position={[-5, -5, 5]} intensity={0.6} />
+
+                <Environment preset="studio" />
                 <Suspense fallback={<Loader />}>
                     <GlassModel
                         url={modelUrl}
@@ -153,7 +166,9 @@ export default function ThreeGlass({
                         amplitude={amplitude}
                         motionVariant={motionVariant}
                         mouseInfluence={mouseInfluence}
-                        rotateY={rotateY}
+                        rotateX={rotateX}
+                        rotationOffset={rotationOffset}
+                        rotationSpeed={rotationSpeed}
                     />
                 </Suspense>
             </Canvas>

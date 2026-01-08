@@ -13,6 +13,8 @@ const GlassInstance = memo(function GlassInstance({
     mouseInfluence,
     delay = 0,
     modelUrl,
+    rotationSpeed,
+    rotationOffset,
 }) {
     const [isLoaded, setIsLoaded] = useState(false);
 
@@ -24,13 +26,17 @@ const GlassInstance = memo(function GlassInstance({
     if (!isLoaded) return null;
 
     return (
-        <div className={`absolute ${position} w-52 h-52  flex  items-center justify-center pointer-events-auto`}>
+        <div
+            className={`absolute ${position} w-52 h-52  flex  items-center justify-center pointer-events-auto`}
+        >
             <ThreeGlass
                 modelUrl={modelUrl}
                 motionVariant={motionVariant}
                 speed={speed}
                 amplitude={amplitude}
                 mouseInfluence={mouseInfluence}
+                rotationSpeed={rotationSpeed}
+                rotationOffset={rotationOffset}
             />
         </div>
     );
@@ -55,6 +61,8 @@ const HeroSerivce = memo(function HeroService() {
                 speed: 0.9,
                 amplitude: 0.08,
                 delay: 300,
+                rotationSpeed: 1.2,
+                rotationOffset: 0,
             },
             {
                 modelUrl: '/models/build.glb',
@@ -69,6 +77,8 @@ const HeroSerivce = memo(function HeroService() {
                 speed: 1.4,
                 amplitude: 0.07,
                 delay: 500,
+                rotationSpeed: 0.6,
+                rotationOffset: 0.5,
             },
             {
                 modelUrl: '/models/grow.glb',
@@ -84,6 +94,8 @@ const HeroSerivce = memo(function HeroService() {
                 speed: 0.8,
                 amplitude: 0.05,
                 delay: 700,
+                rotationSpeed: 0.9,
+                rotationOffset: 1.2,
             },
         ],
         []
@@ -142,6 +154,8 @@ const HeroSerivce = memo(function HeroService() {
                             amplitude={config.amplitude}
                             mouseInfluence={true}
                             delay={config.delay}
+                            rotationOffset={config.rotationOffset}
+                            rotationSpeed={config.rotationSpeed}
                         />
                     ))}
             </div>

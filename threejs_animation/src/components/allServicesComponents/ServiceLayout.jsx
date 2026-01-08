@@ -3,6 +3,7 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -329,15 +330,15 @@ const ServiceLayout = ({ data, caseStudies }) => {
                     <h1 className="text-3xl md:text-4xl xl:text-5xl   font-semibold  lg:leading-[65px] text-center">
                         Platforms we manage
                     </h1>
-                    <div className="flex flex-wrap justify-center items-center gap-x-2 gap-y-6 max-w-[90%] mx-auto">
+                    <div className="flex flex-wrap justify-center items-center gap-x-2 gap-y-6 max-w-[90%] mx-auto ">
                         {data.platformImages.map((src, index) => (
                             <Image
                                 key={index}
                                 src={src}
                                 alt={`Platform ${index + 1}`}
-                                width={50}
-                                height={20}
-                                className="mx-2" // Optional: You might not need this with gap-6
+                                width={60}
+                                height={60}
+                                className="mx-3 h-8 w-auto " // Optional: You might not need this with gap-6
                             />
                         ))}
                     </div>
@@ -360,9 +361,12 @@ const ServiceLayout = ({ data, caseStudies }) => {
                 </div>
 
                 <div className="w-full flex items-center justify-center mt-12 ">
-                    <button className="bg-[#0f0f0f] text-[#fafafa] rounded-full px-6 py-2 text-base md:text-lg xl:text-xl">
+                    <Link
+                        href={'/case-studies'}
+                        className="bg-[#0f0f0f] text-[#fafafa] rounded-full px-6 py-2 text-base md:text-lg xl:text-xl"
+                    >
                         View More
-                    </button>
+                    </Link>
                 </div>
 
                 {/* Ready to level */}

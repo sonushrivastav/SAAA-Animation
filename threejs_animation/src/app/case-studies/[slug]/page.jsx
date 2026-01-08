@@ -7,6 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import CaseStudyCards from '../../../components/allServicesComponents/CaseStudyCards';
 import DotGrid from '../../../components/allServicesComponents/DotGrid';
 import useDeviceType from '../../../components/hooks/useDeviceType';
+import Link from 'next/link';
 
 // const caseStudies = [
 //     {
@@ -394,9 +395,12 @@ export default function CaseStudyDetails() {
                 </div>
 
                 <div className="w-full flex items-center justify-center mt-12">
-                    <button className="bg-neutral-900 text-white rounded-full px-6 py-2 hover:bg-neutral-800 transition-colors">
+                    <Link
+                        href={'/case-studies'}
+                        className="bg-[#0f0f0f] text-[#fafafa] rounded-full px-6 py-2 text-base md:text-lg xl:text-xl"
+                    >
                         View More
-                    </button>
+                    </Link>
                 </div>
             </section>
         </main>

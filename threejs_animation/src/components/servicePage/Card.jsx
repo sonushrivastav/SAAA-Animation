@@ -45,7 +45,7 @@ const Card = React.forwardRef(({ title, items, description, modelUrl, isVisible 
                     amplitude={0.06}
                     mouseInfluence
                     modelUrl={modelUrl}
-                    rotateY={true}
+                    rotateX={false}
                 />
             </div>
         </div>

@@ -83,3 +83,32 @@
 .dotgrid-mask {
     mask-image: linear-gradient(to bottom, #0f0f0f 70%, transparent 100%);
 }
+
+@keyframes marquee {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(calc(-100% - var(--gap)));
+    }
+}
+
+@keyframes marquee-vertical {
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(calc(-100% - var(--gap)));
+    }
+}
+
+/* ------------------ UTILITIES (IMPORTANT) ------------------ */
+@layer utilities {
+    .animate-marquee {
+        animation: marquee var(--duration, 40s) linear infinite;
+    }
+
+    .animate-marquee-vertical {
+        animation: marquee-vertical var(--duration, 40s) linear infinite;
+    }
+}
