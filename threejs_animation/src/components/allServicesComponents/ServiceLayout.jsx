@@ -318,7 +318,7 @@
 //             <div className="px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20 ">
 //               <h1 className="text-5xl lg:text-7xl  text-[#0f0f0f] font-semibold lg:leading-[75px] ">
 //                 {data.title}
-                
+
 //               </h1>
 
 //               <p className="text-[#555555] mt-6 max-w-lg mx-auto md:mx-0 text-lg md:text-xl lg:text-2xl">
@@ -560,19 +560,13 @@
 
 // export default ServiceLayout;
 
-
-
-
-
-
-
-
 "use client";
 
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import useDeviceType from "../hooks/useDeviceType";
+import Link from "next/link";
 
 // Dynamic imports for heavy components
 const DotGrid = dynamic(() => import("./DotGrid"), {
@@ -585,7 +579,7 @@ const CaseStudyCards = dynamic(() => import("./CaseStudyCards"), {
   loading: () => (
     <div className="grid gap-12 md:gap-6 lg:gap-10 md:grid-cols-3">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="h-[450px] bg-gray-200 animate-pulse rounded-xl" />
+        <div key={i} className="h-112.5 bg-gray-200 animate-pulse rounded-xl" />
       ))}
     </div>
   ),
@@ -593,41 +587,164 @@ const CaseStudyCards = dynamic(() => import("./CaseStudyCards"), {
 
 const ContactForm = dynamic(() => import("./ContactForm"), {
   ssr: false,
-  loading: () => <div className="h-[300px] bg-gray-100 animate-pulse rounded-xl" />,
+  loading: () => <div className="h-75 bg-gray-100 animate-pulse rounded-xl" />,
 });
 
 const FaqAccordion = dynamic(() => import("./FaqAccordion"), {
   ssr: false,
-  loading: () => <div className="h-[200px] bg-[#1a1a1a] animate-pulse rounded-xl" />,
+  loading: () => <div className="h-50 bg-[#1a1a1a] animate-pulse rounded-xl" />,
 });
 
 const OtherServices = dynamic(() => import("./OtherServices"), {
   ssr: false,
-  loading: () => <div className="h-[150px] bg-gray-100 animate-pulse rounded-xl" />,
+  loading: () => (
+    <div className="h-37.5 bg-gray-100 animate-pulse rounded-xl" />
+  ),
 });
 
 const StatCard = dynamic(() => import("./StatCard"), {
   ssr: false,
-  loading: () => <div className="h-[200px] bg-[#1a1a1a] animate-pulse rounded-xl" />,
+  loading: () => <div className="h-50 bg-[#1a1a1a] animate-pulse rounded-xl" />,
 });
 
 // Memoized Platform Images component
-const PlatformImages = memo(function PlatformImages({ images }) {
+
+const PlatformImagesMarquee = memo(function PlatformImagesMarquee({
+  images,
+  speed = 50,
+}) {
   if (!images || images.length === 0) return null;
 
+  const [isHovered, setIsHovered] = useState(false);
+  const marqueeRef = useRef(null);
+  const animationRef = useRef(null);
+  const [offset, setOffset] = useState(0);
+  const requestRef = useRef();
+  const lastTimeRef = useRef(0);
+  const [isAnimatedVisible, setIsAnimatedVisible] = useState(false);
+
+  // Calculate repetitions needed to ensure no empty space
+  const [displayImages, setDisplayImages] = useState([
+    ...images,
+  ]);
+
+  useEffect(() => {
+    if (marqueeRef.current && animationRef.current) {
+      const containerWidth = marqueeRef.current.offsetWidth;
+      const contentWidth = animationRef.current.scrollWidth / 3; // Width of one set
+
+      // Calculate how many full sets we need to fill the container + buffer
+      const setsNeeded = Math.ceil(containerWidth / contentWidth) + 2;
+
+      const repeatedImages = [];
+      for (let i = 0; i < setsNeeded; i++) {
+        repeatedImages.push(...images);
+      }
+      setDisplayImages(repeatedImages);
+    }
+  }, [images, isAnimatedVisible]);
+
+  const animate = useCallback(
+    (currentTime) => {
+      if (!lastTimeRef.current) {
+        lastTimeRef.current = currentTime;
+      }
+
+      const deltaTime = currentTime - lastTimeRef.current;
+
+      // Only update if enough time has passed (60fps = ~16.67ms)
+      if (deltaTime >= 16.67) {
+        if (marqueeRef.current && animationRef.current && !isHovered) {
+          setOffset((prevOffset) => {
+            const pixelsPerFrame = speed / 60;
+            const newOffset = prevOffset - pixelsPerFrame;
+            const marqueeWidth = marqueeRef.current.scrollWidth / 2;
+
+            return newOffset <= -marqueeWidth ? 0 : newOffset;
+          });
+        }
+        lastTimeRef.current = currentTime;
+      }
+
+      requestRef.current = requestAnimationFrame(animate);
+    },
+    [isHovered, speed]
+  );
+
+  const handleMouseEnter = useCallback(() => {
+    setIsHovered(true);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsHovered(false);
+  }, []);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setIsAnimatedVisible(true);
+      requestRef.current = requestAnimationFrame(animate);
+    }, 500);
+
+    return () => {
+      clearTimeout(timeout);
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+    };
+  }, [animate]);
+
+  const transformStyle = {
+    transform: `translate3d(${offset}px, 0, 0)`,
+    willChange: isHovered ? "auto" : "transform",
+    opacity: isAnimatedVisible ? 1 : 0,
+    transition: "opacity 0.4s ease-in",
+  };
+
   return (
-    <div className="flex flex-wrap justify-center items-center gap-x-2 gap-y-6 max-w-[90%] mx-auto">
-      {images.map((src, index) => (
-        <Image
-          key={index}
-          src={src}
-          alt={`Platform ${index + 1}`}
-          width={50}
-          height={20}
-          className="mx-3"
-          loading="lazy"
-        />
-      ))}
+    <div
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className="w-full 3xl:w-[50%] lg:w-[50%] md:w-[60%]"
+    >
+      {/* Static LCP fallback */}
+      {!isAnimatedVisible && (
+        <div className="flex items-center justify-center gap-x-2 gap-y-6  mx-auto">
+          {images.slice(0, 5).map((src, index) => (
+            <Image
+              key={index}
+              src={src}
+              alt={`Platform ${index + 1}`}
+              width={50}
+              height={20}
+              className="mx-3 h-8 w-auto"
+              loading="lazy"
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Marquee animation */}
+      <div
+        ref={marqueeRef}
+        className="flex overflow-hidden"
+        aria-hidden={!isAnimatedVisible}
+      >
+        <div
+          ref={animationRef}
+          className="flex items-center gap-x-2 gap-y-6"
+          style={transformStyle}
+        >
+          {displayImages.map((src, index) => (
+            <Image
+              key={`${src}-${index}`}
+              src={src}
+              alt={`Platform ${index + 1}`}
+              width={50}
+              height={20}
+              className="mx-3"
+              loading="lazy"
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 });
@@ -987,7 +1104,7 @@ const HeroSection = memo(function HeroSection({ data }) {
 
         <div className="z-10 relative w-full md:w-[65%] self-stretch flex items-center text-[#0f0f0f]">
           <div className="px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
-            <h1 className="text-5xl lg:text-7xl text-[#0f0f0f] font-semibold lg:leading-[75px]">
+            <h1 className="text-5xl lg:text-7xl text-[#0f0f0f] font-semibold lg:leading-18.75">
               {data.title}
             </h1>
             <p className="text-[#555555] mt-6 max-w-lg mx-auto md:mx-0 text-lg md:text-xl lg:text-2xl">
@@ -1010,7 +1127,7 @@ const StatsSection = memo(function StatsSection({ data, isMobile, isTablet }) {
 
   return (
     <section className="w-full bg-[#0f0f0f] text-[#fafafa] px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
-      <h2 className="text-3xl md:text-4xl xl:text-5xl font-semibold lg:leading-[60px]">
+      <h2 className="text-3xl md:text-4xl xl:text-5xl font-semibold lg:leading-15">
         Here are some{" "}
         <span className="bg-[#844de9] px-2 rounded-md">key figures</span> that
         illustrate our growth and commitment to our clients.
@@ -1033,8 +1150,14 @@ const StatsSection = memo(function StatsSection({ data, isMobile, isTablet }) {
           isTablet={isTablet}
           roundedClass="rounded-2xl sm:rounded-none"
         />
-        <StatCard hasContent={false} roundedClass="sm:rounded-tr-2xl hidden sm:flex" />
-        <StatCard hasContent={false} roundedClass="sm:rounded-bl-2xl hidden sm:flex" />
+        <StatCard
+          hasContent={false}
+          roundedClass="sm:rounded-tr-2xl hidden sm:flex"
+        />
+        <StatCard
+          hasContent={false}
+          roundedClass="sm:rounded-bl-2xl hidden sm:flex"
+        />
         <StatCard
           stat={data.stats[2].stat}
           label={data.stats[2].label}
@@ -1054,20 +1177,24 @@ const StatsSection = memo(function StatsSection({ data, isMobile, isTablet }) {
       </div>
 
       <div className="mt-12 md:mt-14 flex flex-col items-center gap-8 md:gap-12">
-        <h1 className="text-3xl md:text-4xl xl:text-5xl font-semibold lg:leading-[65px] text-center">
+        <h1 className="text-3xl md:text-4xl xl:text-5xl font-semibold lg:leading-16.25 text-center">
           Platforms we manage
         </h1>
-        <PlatformImages images={data.platformImages} />
+        <PlatformImagesMarquee images={data.platformImages} />
       </div>
     </section>
   );
 });
 
 // Case Studies Section
-const CaseStudiesSection = memo(function CaseStudiesSection({ caseStudies, isMobile, isTablet }) {
+const CaseStudiesSection = memo(function CaseStudiesSection({
+  caseStudies,
+  isMobile,
+  isTablet,
+}) {
   return (
     <section className="w-full bg-[#fafafa] px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
-      <h2 className="text-3xl md:text-4xl xl:text-5xl font-semibold lg:leading-[60px]">
+      <h2 className="text-3xl md:text-4xl xl:text-5xl font-semibold lg:leading-15">
         Case{" "}
         <span className="bg-[#844de9] inline px-2 rounded-md text-[#fafafa]">
           Studies
@@ -1079,15 +1206,18 @@ const CaseStudiesSection = memo(function CaseStudiesSection({ caseStudies, isMob
       </div>
 
       <div className="w-full flex items-center justify-center mt-12">
-        <button className="bg-[#0f0f0f] text-[#fafafa] rounded-full px-6 py-2 text-base md:text-lg xl:text-xl">
+        <Link
+          href={"/case-studies"}
+          className="bg-[#0f0f0f] text-[#fafafa] rounded-full px-6 py-2 text-base md:text-lg xl:text-xl"
+        >
           View More
-        </button>
+        </Link>
       </div>
 
       {/* Ready to level up */}
       <div className="mt-12 md:mt-14 flex flex-col md:flex-row items-center text-[#0f0f0f]">
         <div className="flex flex-col w-full md:w-[50%] lg:w-[40%]">
-          <h1 className="text-3xl md:text-4xl xl:text-5xl font-semibold lg:leading-[60px]">
+          <h1 className="text-3xl md:text-4xl xl:text-5xl font-semibold lg:leading-15">
             Ready to{" "}
             <div className="bg-[#844de9] inline px-2 rounded-md text-[#fafafa]">
               level
@@ -1102,7 +1232,7 @@ const CaseStudiesSection = memo(function CaseStudiesSection({ caseStudies, isMob
             Schedule A Call
           </button>
         </div>
-        <div className="w-full md:w-[50%] lg:w-[60%] relative flex items-center justify-center h-[400px] scroll-container">
+        <div className="w-full md:w-[50%] lg:w-[60%] relative flex items-center justify-center h-100 scroll-container">
           <SpiralCanvas isMobile={isMobile} isTablet={isTablet} />
         </div>
       </div>
@@ -1129,7 +1259,7 @@ const FAQSection = memo(function FAQSection({ faqData }) {
       </div>
 
       <div className="z-10 flex flex-col w-full">
-        <h2 className="text-3xl md:text-4xl xl:text-5xl text-[#fafafa] font-semibold lg:leading-[60px]">
+        <h2 className="text-3xl md:text-4xl xl:text-5xl text-[#fafafa] font-semibold lg:leading-15">
           <span className="bg-[#844de9] inline px-2 rounded-md text-[#fafafa]">
             Questions?
           </span>{" "}
@@ -1147,7 +1277,7 @@ const FAQSection = memo(function FAQSection({ faqData }) {
 const ContactSection = memo(function ContactSection({ servicesArray }) {
   return (
     <section className="flex flex-col bg-[#fafafa] px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
-      <h2 className="text-3xl md:text-4xl xl:text-5xl text-[#0f0f0f] font-semibold xl:leading-[60px]">
+      <h2 className="text-3xl md:text-4xl xl:text-5xl text-[#0f0f0f] font-semibold xl:leading-15">
         Other Related{" "}
         <span className="bg-[#844de9] inline px-2 rounded-md text-[#fafafa]">
           Services
@@ -1158,7 +1288,7 @@ const ContactSection = memo(function ContactSection({ servicesArray }) {
       </div>
 
       <div className="mt-12 md:mt-14 flex flex-col items-center justify-center">
-        <h2 className="text-3xl md:text-4xl xl:text-5xl text-[#0f0f0f] font-semibold lg:leading-[60px]">
+        <h2 className="text-3xl md:text-4xl xl:text-5xl text-[#0f0f0f] font-semibold lg:leading-15">
           <span className="bg-[#844de9] inline px-2 rounded-md text-[#fafafa]">
             Reach
           </span>{" "}
@@ -1182,7 +1312,7 @@ const ContactSection = memo(function ContactSection({ servicesArray }) {
             <ContactForm btnPosition="left" />
           </div>
 
-          <div className="relative w-full lg:w-[50%] h-[350px] lg:h-auto rounded-b-2xl lg:rounded-l-none lg:rounded-r-2xl overflow-hidden">
+          <div className="relative w-full lg:w-[50%] h-87.5 lg:h-auto rounded-b-2xl lg:rounded-l-none lg:rounded-r-2xl overflow-hidden">
             <Image
               src="/images/socialMedia/reach_out.webp"
               alt="Reach out"
@@ -1208,7 +1338,11 @@ const ServiceLayout = ({ data, caseStudies }) => {
     <div>
       <HeroSection data={data} />
       <StatsSection data={data} isMobile={isMobile} isTablet={isTablet} />
-      <CaseStudiesSection caseStudies={caseStudies} isMobile={isMobile} isTablet={isTablet} />
+      <CaseStudiesSection
+        caseStudies={caseStudies}
+        isMobile={isMobile}
+        isTablet={isTablet}
+      />
       <FAQSection faqData={data.faqData} />
       <ContactSection servicesArray={data.servicesArray} />
     </div>

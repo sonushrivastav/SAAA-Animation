@@ -59,13 +59,13 @@ const ServiceLayout = dynamic(
     loading: () => (
       <div className="min-h-screen bg-[#fafafa]">
         {/* Hero skeleton */}
-        <div className="h-screen bg-gradient-to-r from-gray-100 to-gray-200 animate-pulse" />
+        <div className="h-screen bg-linear-to-r from-gray-100 to-gray-200 animate-pulse" />
         {/* Stats skeleton */}
         <div className="bg-[#0f0f0f] px-8 py-20">
           <div className="h-12 bg-gray-800 rounded w-3/4 mb-8 animate-pulse" />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="h-[200px] bg-gray-800 rounded-2xl animate-pulse" />
+              <div key={i} className="h-50 bg-gray-800 rounded-2xl animate-pulse" />
             ))}
           </div>
         </div>

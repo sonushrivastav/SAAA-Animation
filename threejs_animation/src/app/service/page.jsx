@@ -265,7 +265,7 @@ const Service = () => {
       <div ref={rootRef} className="relative w-full z-20 bg-[#0f0f0f]  ">
         <div
           ref={dotGridContainerRef}
-          className="relative h-[100vh]  w-full bg-[#0f0f0f] "
+          className="relative h-screen  w-full bg-[#0f0f0f] "
         >
           <div className="absolute inset-0 h-[110vh] w-full z-10 dotgrid-mask">
             <DotGrid
@@ -319,7 +319,7 @@ const Service = () => {
         <div className="absolute inset-0" />
       </div>
       <section className="flex flex-col  bg-[#fafafa]  px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
-        <h2 className="text-3xl  md:text-4xl xl:text-5xl text-[#0f0f0f]   font-semibold  lg:leading-[60px] ">
+        <h2 className="text-3xl  md:text-4xl xl:text-5xl text-[#0f0f0f]   font-semibold  lg:leading-15">
           Other Related{" "}
           <span className="bg-[#844de9] inline px-2  rounded-md text-[#fafafa]">
             Services

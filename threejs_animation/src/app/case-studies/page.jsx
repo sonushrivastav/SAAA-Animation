@@ -117,15 +117,15 @@ const CaseStudies = () => {
     fetchCaseStudies();
   }, []);
 
-  console.log(caseStudies,"caseStudies>>>>>>120 line");
   
   const filteredCaseStudies = useMemo(() => {
     return caseStudies.filter((item) => {
-      const tags = item?.tags;
-      return tags === activeTab;
+      const tag = item?.tag;
+      return tag === activeTab;
     });
   }, [caseStudies, activeTab]);
-
+  
+  console.log(filteredCaseStudies,"filteredCaseStudies>>>>>>120 line");
   return (
     <div>
       {/* video */}
@@ -144,7 +144,7 @@ const CaseStudies = () => {
 
       {/* Case studies */}
       <section className="w-full bg-[#fafafa] text-[#0f0f0f] px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
-        <h2 className="text-3xl md:text-4xl xl:text-5xl font-semibold lg:leading-[60px]">
+        <h2 className="text-3xl md:text-4xl xl:text-5xl font-semibold lg:leading-15">
           Case{" "}
           <span className="bg-[#844de9] inline px-2 rounded-md text-[#fafafa]">
             Studies

@@ -8,6 +8,11 @@ const nextConfig = {
         port: "1337",
         pathname: "/uploads/**",
       },
+      {
+        protocol: "https",
+        hostname: "admin.saaaconsultants.com",
+        pathname: "/uploads/**",
+      }
     ],
     // Enable modern image formats
     formats: ["image/avif", "image/webp"],

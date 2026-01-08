@@ -650,7 +650,7 @@ function Navbar(props) {
                 animate={{ opacity: 1, height: isMobile ? "85vh" : "auto" }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.35 }}
-                className="border-t lg:border-t-0 pointer-events-auto border-white/10 md:px-8 px-4 overflow-y-auto h-[100vh] md:max-h-[90vh]"
+                className="border-t lg:border-t-0 pointer-events-auto border-white/10 md:px-8 px-4 overflow-y-auto h-screen md:max-h-[90vh]"
               >
                 <div className="flex flex-col h-full md:flex-row md:justify-between py-6 gap-8">
                   <div className="w-full md:w-[20%] flex flex-col rounded-xl bg-[#55555550] border border-[#555555] px-10 py-2">

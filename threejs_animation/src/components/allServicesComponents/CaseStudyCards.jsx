@@ -151,7 +151,7 @@ const CaseStudyCard = memo(function CaseStudyCard({ item, index }) {
           </div>
         </div>
 
-        <div className="w-full h-[400px] xl:h-[450px] 3xl:h-[600px] flex items-center justify-center rounded-b-xl overflow-hidden">
+        <div className="w-full h-100 xl:h-112.5 3xl:h-150 flex items-center justify-center rounded-b-xl overflow-hidden">
           <Image
             src={imageUrl}
             alt={item.title || "case study image"}
@@ -160,7 +160,6 @@ const CaseStudyCard = memo(function CaseStudyCard({ item, index }) {
             className="h-full w-full object-cover rounded-b-2xl"
             loading={index < 3 ? "eager" : "lazy"}
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            unoptimized
           />
         </div>
       </Link>

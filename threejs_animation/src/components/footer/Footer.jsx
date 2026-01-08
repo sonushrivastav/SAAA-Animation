@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="w-full relative bg-[#0F0F0F] text-[#FAFAFA] px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20  z-[55]">
+    <footer className="w-full relative bg-[#0F0F0F] text-[#FAFAFA] px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20  z-55">
       <div className=" mx-auto grid grid-cols-1 md:grid-cols-3 gap-10 ">
         {/* Logo Section */}
         <div className="flex flex-col gap-4">
@@ -55,7 +55,7 @@ export default function Footer() {
           <p>info@saaaconsultants.com</p>
 
           <div className="flex gap-4 mt-3">
-            <a className="w-10 h-10  bg-[#55555599] border-t-1 border-b-1 border-white rounded-full flex items-center justify-center hover:bg-purple-600 transition">
+            <a className="w-10 h-10  bg-[#55555599] border-t border-b border-white rounded-full flex items-center justify-center hover:bg-purple-600 transition">
               <svg
                 width="70"
                 height="70"
@@ -75,7 +75,7 @@ export default function Footer() {
                 />
               </svg>
             </a>
-            <a className="w-10 h-10  bg-[#55555599] border-t-1 border-b-1 border-white rounded-full flex items-center justify-center hover:bg-purple-600 transition">
+            <a className="w-10 h-10  bg-[#55555599] border-t border-b border-white rounded-full flex items-center justify-center hover:bg-purple-600 transition">
               <svg
                 width="70"
                 height="70"
@@ -101,7 +101,7 @@ export default function Footer() {
                 <circle cx="25" cy="15" r="1.3" fill="white" />
               </svg>
             </a>
-            <a className="w-10 h-10  bg-[#55555599] border-t-1 border-b-1 border-white rounded-full flex items-center justify-center hover:bg-purple-600 transition">
+            <a className="w-10 h-10  bg-[#55555599] border-t border-b border-white rounded-full flex items-center justify-center hover:bg-purple-600 transition">
               <svg
                 width="70"
                 height="70"

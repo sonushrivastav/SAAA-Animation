@@ -250,7 +250,7 @@ const VisionCard = memo(function VisionCard({ item, index }) {
         className="absolute w-full h-full rounded-xl transform translate-x-3 translate-y-3 pointer-events-none"
         style={{ border: "2px dashed #844DE9" }}
       />
-      <div className="relative bg-white rounded-xl border-1 border-[#0f0f0f] flex flex-col items-start justify-between h-full">
+      <div className="relative bg-white rounded-xl border border-[#0f0f0f] flex flex-col items-start justify-between h-full">
         <div className="flex flex-col w-full gap-8 p-2">
           <div className="w-full flex items-center justify-center">
             <Image
@@ -307,7 +307,7 @@ const LazyVideo = memo(function LazyVideo() {
           preload="metadata"
         />
       ) : (
-        <div className="w-full h-[300px] bg-[#0f0f0f] animate-pulse" />
+        <div className="w-full h-75 bg-[#0f0f0f] animate-pulse" />
       )}
     </div>
   );
@@ -365,14 +365,14 @@ const About = () => {
   return (
     <div>
       <section className=" w-full ">
-        <Suspense fallback={<div className="w-full h-[300px] bg-[#0f0f0f]" />}>
+        <Suspense fallback={<div className="w-full h-75 bg-[#0f0f0f]" />}>
           <LazyVideo />
         </Suspense>
       </section>
 
       {/* bit about us */}
       <section className="w-full  bg-[#0f0f0f] text-[#fafafa] px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
-        <h2 className="text-3xl md:text-4xl xl:text-5xl   font-semibold  lg:leading-[60px]">
+        <h2 className="text-3xl md:text-4xl xl:text-5xl   font-semibold  lg:leading-15">
           A Bit{" "}
           <span className="bg-[#844de9] inline px-2  rounded-md">About Us</span>{" "}
           that
@@ -400,7 +400,7 @@ const About = () => {
           </p>
 
           <Image
-            className="w-full h-[300px] md:h-[450px] py-6"
+            className="w-full h-75 md:h-112.5 py-6"
             src={"/Image.png"}
             width={200}
             height={200}
@@ -418,7 +418,7 @@ const About = () => {
 
       {/* our vision */}
       <section className=" bg-[#fafafa] w-full  px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
-        <h2 className="text-3xl md:text-4xl xl:text-5xl   font-semibold  lg:leading-[60px]">
+        <h2 className="text-3xl md:text-4xl xl:text-5xl   font-semibold  lg:leading-15">
           Quotes That Gave Us{" "}
           <span className="bg-[#844de9] text-[#fafafa] inline px-2  rounded-md">
             Our Vision
@@ -434,7 +434,7 @@ const About = () => {
 
       {/* collective */}
       <section className="bg-[#0f0f0f]  text-[#fafafa] w-full  px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
-        <h2 className="text-3xl md:text-4xl xl:text-5xl   font-semibold  lg:leading-[60px]">
+        <h2 className="text-3xl md:text-4xl xl:text-5xl   font-semibold  lg:leading-15">
           We are a{" "}
           <span className="bg-[#844de9] inline px-2  rounded-md">
             collective
@@ -495,7 +495,7 @@ const About = () => {
 
       {/* Team */}
       <section className="bg-[#fafafa]  text-[#0f0f0f] w-full min-h-screen   py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
-        <h2 className="text-3xl md:text-4xl xl:text-5xl   font-semibold  lg:leading-[60px] px-8">
+        <h2 className="text-3xl md:text-4xl xl:text-5xl   font-semibold  lg:leading-15 px-8">
           Meet The Team That Turns Work Into{" "}
           <span className="bg-[#844de9] text-[#fafafa] inline px-2  rounded-md">
             Wow

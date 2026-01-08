@@ -21,7 +21,7 @@ const OtherServices = ({
               {item.title}
             </h3>
 
-            <p className="text-base md:text-lg xl:text-xl text-[#555555] flex-grow">
+            <p className="text-base md:text-lg xl:text-xl text-[#555555] grow">
               {item.description}
             </p>
 

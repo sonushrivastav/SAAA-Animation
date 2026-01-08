@@ -411,15 +411,22 @@
 //   );
 // }
 
-
 "use client";
 
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import ReactMarkdown from "react-markdown";
 import useDeviceType from "../../../components/hooks/useDeviceType";
+import Link from "next/link";
 
 // Dynamic imports for heavy components
 const DotGrid = dynamic(
@@ -437,7 +444,7 @@ const CaseStudyCards = dynamic(
     loading: () => (
       <div className="grid gap-12 md:gap-6 lg:gap-10 md:grid-cols-3">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-[500px] bg-gray-200 animate-pulse rounded-xl" />
+          <div key={i} className="h-125 bg-gray-200 animate-pulse rounded-xl" />
         ))}
       </div>
     ),
@@ -447,7 +454,7 @@ const CaseStudyCards = dynamic(
 // Memoized Markdown components - defined outside to prevent recreation
 const markdownComponents = {
   h2: ({ children }) => (
-    <h2 className="text-2xl md:text-3xl xl:text-4xl text-[#fafafa] font-[500] mb-6">
+    <h2 className="text-2xl md:text-3xl xl:text-4xl text-[#fafafa] font-medium mb-6">
       {children}
     </h2>
   ),
@@ -455,7 +462,7 @@ const markdownComponents = {
     <p className="text-[#9c9c9c] text-lg leading-relaxed py-3">{children}</p>
   ),
   ul: ({ children }) => (
-    <ul className="list-disc ml-8 space-y-4 text-[#9c9c9c] font-[500] py-2 text-lg xl:text-xl">
+    <ul className="list-disc ml-8 space-y-4 text-[#9c9c9c] font-medium py-2 text-lg xl:text-xl">
       {children}
     </ul>
   ),
@@ -470,7 +477,9 @@ const markdownComponents = {
 // Memoized Markdown Renderer
 const MarkdownRenderer = memo(function MarkdownRenderer({ children }) {
   if (!children) return null;
-  return <ReactMarkdown components={markdownComponents}>{children}</ReactMarkdown>;
+  return (
+    <ReactMarkdown components={markdownComponents}>{children}</ReactMarkdown>
+  );
 });
 
 // Slugify utility - memoized outside component
@@ -489,7 +498,7 @@ const NavItem = memo(function NavItem({ section, isActive, onClick }) {
       <button
         onClick={() => onClick(section.id)}
         className={`text-center lg:text-left text-lg md:text-xl xl:text-xl w-full transition-all duration-150 px-4 py-1 rounded-md block hover:text-[#fafafa] focus:outline-none whitespace-nowrap ${
-          isActive ? "text-[#fafafa] font-[500]" : "text-[#555555]"
+          isActive ? "text-[#fafafa] font-medium" : "text-[#555555]"
         }`}
       >
         {section.label}
@@ -507,12 +516,8 @@ const SectionContent = memo(function SectionContent({ section, headingRef }) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   return (
-    <section
-      id={section.id}
-      ref={headingRef}
-      className="my-6"
-    >
-      <h2 className="text-2xl md:text-3xl xl:text-4xl text-[#fafafa] font-[500] mb-6">
+    <section id={section.id} ref={headingRef} className="my-6">
+      <h2 className="text-2xl md:text-3xl xl:text-4xl text-[#fafafa] font-medium mb-6">
         {section.label}
       </h2>
 
@@ -523,7 +528,7 @@ const SectionContent = memo(function SectionContent({ section, headingRef }) {
               <MarkdownRenderer>{section.beforeDescription}</MarkdownRenderer>
             </div>
             {beforeImg && (
-              <div className="relative w-full lg:w-[65%] h-[200px] lg:h-auto">
+              <div className="relative w-full lg:w-[65%] h-50 lg:h-auto">
                 <Image
                   src={`${apiUrl}${beforeImg}`}
                   alt="Before results"
@@ -541,7 +546,7 @@ const SectionContent = memo(function SectionContent({ section, headingRef }) {
               <MarkdownRenderer>{section.afterDescription}</MarkdownRenderer>
             </div>
             {afterImg && (
-              <div className="relative w-full lg:w-[65%] h-[200px] lg:h-auto">
+              <div className="relative w-full lg:w-[65%] h-50 lg:h-auto">
                 <Image
                   src={`${apiUrl}${afterImg}`}
                   alt="After results"
@@ -590,7 +595,7 @@ const HeroSection = memo(function HeroSection({ filteredCaseStudy }) {
         {/* Left section */}
         <div className="z-10 relative w-full md:w-[50%] self-stretch flex items-center text-[#0f0f0f]">
           <div className="px-8 pt-35 md:pl-14 md:pr-0 lg:pl-28 lg:pr-0 md:py-0 lg:py-0">
-            <h1 className="text-4xl lg:text-6xl xl:text-7xl text-[#0f0f0f] font-semibold lg:leading-[85px]">
+            <h1 className="text-4xl lg:text-6xl xl:text-7xl text-[#0f0f0f] font-semibold lg:leading-21.25">
               {filteredCaseStudy?.heading} <br />
               <span className="bg-[#844de9] inline text-[#fafafa] px-2 rounded-md">
                 {filteredCaseStudy?.color_heading}
@@ -852,7 +857,7 @@ export default function CaseStudyDetails() {
         ref={footerRef}
         className="w-full bg-[#fafafa] px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20"
       >
-        <h2 className="text-3xl md:text-4xl xl:text-5xl font-semibold lg:leading-[60px]">
+        <h2 className="text-3xl md:text-4xl xl:text-5xl font-semibold lg:leading-15">
           Case{" "}
           <span className="bg-[#844de9] inline px-2 rounded-md text-[#fafafa]">
             Studies
@@ -860,13 +865,18 @@ export default function CaseStudyDetails() {
         </h2>
 
         <div className="mt-12 md:mt-14 grid gap-12 md:gap-6 lg:gap-10 md:grid-cols-3 items-stretch">
-          {caseStudies.length > 0 && <CaseStudyCards caseStudies={caseStudies} />}
+          {caseStudies.length > 0 && (
+            <CaseStudyCards caseStudies={caseStudies} />
+          )}
         </div>
 
         <div className="w-full flex items-center justify-center mt-12">
-          <button className="bg-neutral-900 text-white rounded-full px-6 py-2 hover:bg-neutral-800 transition-colors">
+          <Link
+            href={"/case-studies"}
+            className="bg-[#0f0f0f] text-[#fafafa] rounded-full px-6 py-2 text-base md:text-lg xl:text-xl"
+          >
             View More
-          </button>
+          </Link>
         </div>
       </section>
     </main>
