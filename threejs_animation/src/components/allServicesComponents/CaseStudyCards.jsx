@@ -26,7 +26,7 @@ const CaseStudyCards = ({ caseStudies = [], className = '' }) => {
                     {/* Main card */}
                     <Link
                         href={`/case-studies/${slugify(item.title)}-${slugify(item.tag)}`}
-                        className="relative bg-white pt-6 rounded-xl border border-[#0f0f0f] flex flex-col items-start justify-between h-full"
+                        className="relative bg-[#fafafa] pt-6 rounded-xl border border-[#0f0f0f] flex flex-col items-start justify-between h-full"
                     >
                         <div className="flex flex-col w-full">
                             <div className="w-full px-6 flex justify-between items-center">
@@ -53,7 +53,7 @@ const CaseStudyCards = ({ caseStudies = [], className = '' }) => {
 
                             <div className="px-6 py-2">
                                 <span className="px-2 py-1 text-xs xl:text-sm rounded-lg bg-[#ededed] text-[#555555]   self-start">
-                                    {item.tags}
+                                    {item.tag}
                                 </span>
                             </div>
                         </div>

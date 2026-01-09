@@ -12,6 +12,7 @@ import CaseStudyCards from '../../components/allServicesComponents/CaseStudyCard
 import ContactForm from '../../components/allServicesComponents/ContactForm';
 import FaqAccordion from '../../components/allServicesComponents/FaqAccordion';
 import OtherServices from '../../components/allServicesComponents/OtherServices';
+import PlatformImagesMarquee from '../allServicesComponents/PlatformImagesMarquee';
 import useDeviceType from '../hooks/useDeviceType';
 import DotGrid from './DotGrid';
 import StatCard from './StatCard';
@@ -65,8 +66,8 @@ function initSpiralAnimation(slicesRef, isMobile, isTablet) {
         if (isMobile) {
             return {
                 scale: [8, 8, 4.2],
-                position: [-1.2, -0.6, 0],
-                rotation: [0, 0.1, -Math.PI / 2],
+                position: [-1.15, -0.6, 0],
+                rotation: [0, 0.15, -Math.PI / 1.95],
             };
         }
 
@@ -74,15 +75,15 @@ function initSpiralAnimation(slicesRef, isMobile, isTablet) {
             return {
                 scale: [10, 10, 4.6],
                 position: [-1.35, -0.8, 0],
-                rotation: [0, 0.12, -Math.PI / 2],
+                rotation: [0, 0.12, -Math.PI / 1.95],
             };
         }
 
         // Desktop
         return {
-            scale: [16, 16, 5],
-            position: [-2.6, -1.25, 0],
-            rotation: [0, 0.15, -Math.PI / 2],
+            scale: [12, 16, 5],
+            position: [-1.8, -0.8, 0],
+            rotation: [0, 0.15, -Math.PI / 1.95],
         };
     };
 
@@ -210,12 +211,12 @@ function initSpiralAnimation(slicesRef, isMobile, isTablet) {
 const ServiceLayout = ({ data, caseStudies }) => {
     const [activeIndex, setActiveIndex] = useState(0);
     const slicesRef = useRef([]);
-    const { isMobile, isTablet } = useDeviceType();
+    const { isMobile, isTablet, isDesktop } = useDeviceType();
 
     useEffect(() => {
         const cleanup = initSpiralAnimation(slicesRef, isMobile, isTablet);
         return cleanup;
-    }, [isMobile, isTablet]);
+    }, [isMobile, isTablet, isDesktop]);
 
     return (
         <div>
@@ -330,7 +331,7 @@ const ServiceLayout = ({ data, caseStudies }) => {
                     <h1 className="text-3xl md:text-4xl xl:text-5xl   font-semibold  lg:leading-[65px] text-center">
                         Platforms we manage
                     </h1>
-                    <div className="flex flex-wrap justify-center items-center gap-x-2 gap-y-6 max-w-[90%] mx-auto ">
+                    {/* <div className="flex flex-wrap justify-center items-center gap-x-2 gap-y-6 max-w-[90%] mx-auto ">
                         {data.platformImages.map((src, index) => (
                             <Image
                                 key={index}
@@ -341,7 +342,8 @@ const ServiceLayout = ({ data, caseStudies }) => {
                                 className="mx-3 h-8 w-auto " // Optional: You might not need this with gap-6
                             />
                         ))}
-                    </div>
+                    </div> */}
+                    <PlatformImagesMarquee images={data.platformImages} />
                 </div>
             </section>
 
@@ -368,9 +370,11 @@ const ServiceLayout = ({ data, caseStudies }) => {
                         View More
                     </Link>
                 </div>
+            </section>
 
-                {/* Ready to level */}
-                <div className="mt-12 md:mt-14 flex flex-col md:flex-row items-center text-[#0f0f0f]  ">
+            {/* Ready to level */}
+            <section className="w-full  bg-[#fafafa] px-8  md:pl-14 md:pr-0 lg:pr-0 lg:pl-28   ">
+                <div className="flex flex-col md:flex-row items-center text-[#0f0f0f]  ">
                     <div className="flex flex-col w-full md:w-[50%] lg:w-[40%]">
                         <h1 className="text-3xl  md:text-4xl xl:text-5xl   font-semibold  lg:leading-[60px]">
                             Ready to{' '}
