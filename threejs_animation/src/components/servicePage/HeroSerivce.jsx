@@ -160,9 +160,6 @@
 
 // export default HeroSerivce;
 
-
-
-
 // src/components/servicePage/HeroSerivce.jsx
 "use client";
 
@@ -180,6 +177,8 @@ const GlassInstance = memo(function GlassInstance({
   amplitude,
   mouseInfluence,
   modelUrl,
+  rotationOffset,
+  rotationSpeed,
 }) {
   return (
     <div
@@ -191,6 +190,8 @@ const GlassInstance = memo(function GlassInstance({
         speed={speed}
         amplitude={amplitude}
         mouseInfluence={mouseInfluence}
+        rotationOffset={rotationOffset}
+        rotationSpeed={rotationSpeed}
       />
     </div>
   );
@@ -213,6 +214,9 @@ const HeroService = memo(function HeroService() {
         motionVariant: 1,
         speed: 0.9,
         amplitude: 0.08,
+        delay: 300,
+        rotationSpeed: 1.2,
+        rotationOffset: 0,
       },
       {
         modelUrl: "/models/build.glb",
@@ -224,6 +228,9 @@ const HeroService = memo(function HeroService() {
         motionVariant: 2,
         speed: 1.4,
         amplitude: 0.07,
+        delay: 500,
+        rotationSpeed: 0.6,
+        rotationOffset: 0.5,
       },
       {
         modelUrl: "/models/grow.glb",
@@ -235,6 +242,9 @@ const HeroService = memo(function HeroService() {
         motionVariant: 3,
         speed: 0.8,
         amplitude: 0.05,
+        delay: 700,
+        rotationSpeed: 0.9,
+        rotationOffset: 1.2,
       },
     ],
     [isMobile, isTablet]
@@ -293,6 +303,8 @@ const HeroService = memo(function HeroService() {
               speed={config.speed}
               amplitude={config.amplitude}
               mouseInfluence={true}
+              rotationOffset={config.rotationOffset}
+              rotationSpeed={config.rotationSpeed}
             />
           ))}
       </div>

@@ -170,6 +170,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader";
+import { useFrame } from "@react-three/fiber";
 
 // ✅ MODULE LEVEL: Cached loaders
 let gltfLoader = null;
@@ -225,7 +226,9 @@ export default function ThreeGlass({
   amplitude = 0.05,
   motionVariant = 0,
   mouseInfluence = false,
-  rotateY = false,
+  rotateX = true,
+  rotationSpeed = 1,
+  rotationOffset = 0,
 }) {
   const containerRef = useRef(null);
   const rendererRef = useRef(null);
@@ -300,17 +303,22 @@ export default function ThreeGlass({
     const group = new THREE.Group();
     group.position.set(0, 0, 0); // ✅ Original group position
     group.scale.set(4.5, 4.5, 4.5); // ✅ Original scale from your code
+
+    group.rotation.y = rotationOffset; // ✅ Apply initial rotation offset
     scene.add(group);
     groupRef.current = group;
+
+    
 
     // ✅ Load model from cache
     loadModel(modelUrl).then((gltf) => {
       const model = gltf.scene.clone();
       model.traverse((child) => {
         if (child.isMesh) {
-          child.castShadow = false;
-          child.receiveShadow = false;
+          child.castShadow = true;
+          child.receiveShadow = true;
           child.frustumCulled = true;
+          child.material.needsUpdate = true
         }
       });
       
@@ -367,8 +375,23 @@ export default function ThreeGlass({
       const t = clockRef.current.getElapsedTime() * speed;
       const mesh = groupRef.current;
 
+      if (!groupRef.current) return;
+        const actualSpeed = 0.01 * rotationSpeed;
+        mesh.rotation.y += actualSpeed;
+        let targetX = 0;
+
+        if (rotateX) {
+            targetX += Math.sin(t * 1.5) * 0.1;
+        }
+
+        if (mouseInfluence) {
+            targetX += mouseRef.current.y * 0.2;
+        }
+
+        mesh.rotation.x += (targetX - mesh.rotation.x) * 0.05;
+
       // ✅ Original rotation logic
-      if (rotateY) {
+      if (rotateX) {
         mesh.rotation.y += 0.01;
       } else {
         mesh.rotation.x += 0.01;
@@ -433,7 +456,8 @@ export default function ThreeGlass({
         container.removeChild(renderer.domElement);
       }
     };
-  }, [modelUrl, speed, amplitude, motionVariant, mouseInfluence, rotateY]);
+  }, [modelUrl, speed, amplitude, motionVariant, mouseInfluence, rotateX]);
 
+  
   return <div ref={containerRef} className="w-full h-full" />;
 }

@@ -802,13 +802,13 @@ const SpiralCanvas = memo(function SpiralCanvas({ isMobile, isTablet }) {
   const animationIdRef = useRef(null);
   const scrollTriggerRef = useRef(null);
   const isInitializedRef = useRef(false);
+  const isMountedRef = useRef(false);
 
   useEffect(() => {
     // Prevent double initialization in strict mode
     if (isInitializedRef.current) return;
     isInitializedRef.current = true;
-
-    let isMounted = true;
+     isMountedRef.current = true;
 
     const initSpiralAnimation = async () => {
       // Dynamic imports for Three.js - loaded in parallel
@@ -826,7 +826,7 @@ const SpiralCanvas = memo(function SpiralCanvas({ isMobile, isTablet }) {
         import("gsap/ScrollTrigger"),
       ]);
 
-      if (!isMounted) return;
+      if (!isMountedRef.current || !canvasRef.current) return;
 
       const gsap = gsapModule.default;
       gsap.registerPlugin(ScrollTrigger);
@@ -858,7 +858,7 @@ const SpiralCanvas = memo(function SpiralCanvas({ isMobile, isTablet }) {
 
       // Resize handler
       const handleResize = () => {
-        if (!container || !isMounted) return;
+        if (!container || !isMountedRef.current) return;
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(container.clientWidth, container.clientHeight);
@@ -876,7 +876,7 @@ const SpiralCanvas = memo(function SpiralCanvas({ isMobile, isTablet }) {
 
       // Load HDR environment
       new RGBELoader().load("/images/studio_small_03_1k.hdr", (hdrMap) => {
-        if (!isMounted) return;
+        if (!isMountedRef.current) return;
         hdrMap.mapping = THREE.EquirectangularReflectionMapping;
         scene.environment = hdrMap;
       });
@@ -908,12 +908,12 @@ const SpiralCanvas = memo(function SpiralCanvas({ isMobile, isTablet }) {
       // Load GLB model
       const loader = new GLTFLoader();
       loader.load("/models/model.glb", (gltf) => {
-        if (!isMounted) return;
+        if (!isMountedRef.current) return;
 
         const rawModel = gltf.scene;
         const { scale, position, rotation } = getModelTransform();
 
-        scene.add(rawModel);
+        scene.add(rawModel); 
         rawModel.scale.set(...scale);
         rawModel.position.set(...position);
         rawModel.rotation.set(...rotation);
@@ -1024,7 +1024,7 @@ const SpiralCanvas = memo(function SpiralCanvas({ isMobile, isTablet }) {
 
       // Render Loop - EXACT ORIGINAL
       function animate() {
-        if (!isMounted) return;
+        if (!isMountedRef.current) return;
         animationIdRef.current = requestAnimationFrame(animate);
         renderer.render(scene, camera);
       }
@@ -1039,7 +1039,7 @@ const SpiralCanvas = memo(function SpiralCanvas({ isMobile, isTablet }) {
     initSpiralAnimation();
 
     return () => {
-      isMounted = false;
+      isMountedRef.current = false;
       isInitializedRef.current = false;
 
       // Cancel animation frame
@@ -1050,12 +1050,13 @@ const SpiralCanvas = memo(function SpiralCanvas({ isMobile, isTablet }) {
       // Kill ScrollTrigger
       if (scrollTriggerRef.current) {
         scrollTriggerRef.current.kill();
+        scrollTriggerRef.current = null;
       }
 
       // Dispose renderer
       if (rendererRef.current) {
         rendererRef.current.dispose();
-        rendererRef.current.forceContextLoss();
+        rendererRef.current = null;
       }
 
       // Dispose scene objects
@@ -1070,6 +1071,7 @@ const SpiralCanvas = memo(function SpiralCanvas({ isMobile, isTablet }) {
             }
           }
         });
+        sceneRef.current = null;
       }
     };
   }, [isMobile, isTablet]);
@@ -1193,6 +1195,7 @@ const CaseStudiesSection = memo(function CaseStudiesSection({
   isTablet,
 }) {
   return (
+    <>
     <section className="w-full bg-[#fafafa] px-8 py-10 md:px-14 lg:px-28 md:py-16 lg:py-20">
       <h2 className="text-3xl md:text-4xl xl:text-5xl font-semibold lg:leading-15">
         Case{" "}
@@ -1214,8 +1217,11 @@ const CaseStudiesSection = memo(function CaseStudiesSection({
         </Link>
       </div>
 
+    </section>
+
       {/* Ready to level up */}
-      <div className="mt-12 md:mt-14 flex flex-col md:flex-row items-center text-[#0f0f0f]">
+      <div className="w-full  bg-[#fafafa] px-8  md:pl-14 md:pr-0 lg:pr-0 lg:pl-28">
+      <div className=" flex flex-col md:flex-row items-center text-[#0f0f0f]">
         <div className="flex flex-col w-full md:w-[50%] lg:w-[40%]">
           <h1 className="text-3xl md:text-4xl xl:text-5xl font-semibold lg:leading-15">
             Ready to{" "}
@@ -1236,7 +1242,9 @@ const CaseStudiesSection = memo(function CaseStudiesSection({
           <SpiralCanvas isMobile={isMobile} isTablet={isTablet} />
         </div>
       </div>
-    </section>
+      </div>
+
+    </>
   );
 });
 

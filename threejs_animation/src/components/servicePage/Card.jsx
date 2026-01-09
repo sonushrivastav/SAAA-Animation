@@ -138,7 +138,7 @@ const Card = memo(
               amplitude={0.06}
               mouseInfluence
               modelUrl={modelUrl}
-              rotateY={true}
+              rotateX={false}
             />
           )}
         </div>
