@@ -884,24 +884,24 @@ const SpiralCanvas = memo(function SpiralCanvas({ isMobile, isTablet }) {
       // EXACT ORIGINAL: Model transform based on device
       const getModelTransform = () => {
         if (isMobile) {
-          return {
-            scale: [8, 8, 4.2],
-            position: [-1.2, -0.6, 0],
-            rotation: [0, 0.1, -Math.PI / 2],
-          };
+            return {
+                scale: [8, 8, 4.2],
+                position: [-1.15, -0.6, 0],
+                rotation: [0, 0.15, -Math.PI / 1.95],
+            };
         }
         if (isTablet) {
-          return {
-            scale: [10, 10, 4.6],
-            position: [-1.35, -0.8, 0],
-            rotation: [0, 0.12, -Math.PI / 2],
-          };
+            return {
+                scale: [10, 10, 4.6],
+                position: [-1.35, -0.8, 0],
+                rotation: [0, 0.12, -Math.PI / 1.95],
+            };
         }
         // Desktop
         return {
-          scale: [16, 16, 5],
-          position: [-2.6, -1.25, 0],
-          rotation: [0, 0.15, -Math.PI / 2],
+            scale: [12, 16, 5],
+            position: [-1.8, -0.8, 0],
+            rotation: [0, 0.15, -Math.PI / 1.95],
         };
       };
 
